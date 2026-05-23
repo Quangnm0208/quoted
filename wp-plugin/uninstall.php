@@ -33,6 +33,7 @@ $options = array(
 	'quoted_onboarded',
 	'quoted_perplexity_api_key',
 	'quoted_tavily_api_key',
+	'quoted_bot_allowlist',
 	'quoted_hash_ips',
 	'quoted_disable_logging',
 	'quoted_show_badge',

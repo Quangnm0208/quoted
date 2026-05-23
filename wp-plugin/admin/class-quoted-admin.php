@@ -205,6 +205,24 @@ class Quoted_Admin {
 		update_option( 'quoted_disable_logging', isset( $_POST['quoted_disable_logging'] ) );
 		update_option( 'quoted_trust_proxy',     isset( $_POST['quoted_trust_proxy'] ) );
 
+		// AI Crawler Allowlist — only accept bot IDs we know about, and only
+		// 'allow' / 'block' as values. Anything else is silently ignored.
+		if ( isset( $_POST['quoted_bot_allowlist'] ) && is_array( $_POST['quoted_bot_allowlist'] ) ) {
+			$known   = array_keys( Quoted_Bot_Detector::bot_metadata() );
+			$cleaned = array();
+			foreach ( $_POST['quoted_bot_allowlist'] as $bot => $state ) {
+				if ( ! in_array( $bot, $known, true ) ) {
+					continue;
+				}
+				$state = sanitize_key( wp_unslash( $state ) );
+				if ( $state !== 'allow' && $state !== 'block' ) {
+					$state = 'allow';
+				}
+				$cleaned[ $bot ] = $state;
+			}
+			update_option( 'quoted_bot_allowlist', $cleaned );
+		}
+
 		// BYO API keys — only saved when the user has a paid plan that unlocks
 		// the fields. Stored as-is (no transforms). Empty string clears.
 		$is_paid = ( Quoted_License::current_plan() !== 'free' );

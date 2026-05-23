@@ -70,6 +70,9 @@ class Quoted_Activator {
 			// BYO API keys for Pro features.
 			'quoted_perplexity_api_key'   => '',
 			'quoted_tavily_api_key'       => '',
+			// AI Crawler Allowlist — empty means "all bots allowed", which is
+			// the only safe default. Operator opts into blocks explicitly.
+			'quoted_bot_allowlist'        => array(),
 			// Privacy / behaviour toggles.
 			'quoted_hash_ips'             => true,
 			'quoted_disable_logging'      => false,

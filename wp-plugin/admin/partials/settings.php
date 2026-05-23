@@ -25,6 +25,9 @@ $trust_proxy         = (bool) get_option( 'quoted_trust_proxy', false );
 
 $perplexity_api_key  = get_option( 'quoted_perplexity_api_key', '' );
 $tavily_api_key      = get_option( 'quoted_tavily_api_key', '' );
+$bot_allowlist       = get_option( 'quoted_bot_allowlist', array() );
+if ( ! is_array( $bot_allowlist ) ) { $bot_allowlist = array(); }
+$bot_meta            = Quoted_Bot_Detector::bot_metadata();
 
 settings_errors( 'quoted' );
 ?>
@@ -223,6 +226,35 @@ settings_errors( 'quoted' );
 					<p class="description"><?php esc_html_e( 'On a non-proxied install these headers are attacker-controlled. Leaving this off uses REMOTE_ADDR.', 'quoted' ); ?></p>
 				</td>
 			</tr>
+		</table>
+
+		<h2><?php esc_html_e( 'AI crawler allowlist', 'quoted' ); ?></h2>
+		<p class="description" style="margin-bottom:1em">
+			<?php esc_html_e( 'Decide which AI bots are allowed to use your content. Allowed = bot gets the full page. Blocked = bot gets HTTP 403 and a Disallow rule in /robots.txt. Bots that respect robots.txt will stop crawling on their own; the 403 covers the ones that don\'t.', 'quoted' ); ?>
+		</p>
+		<table class="form-table">
+			<?php foreach ( $bot_meta as $bot_id => $meta ) :
+				$label    = $meta[0];
+				$operator = $meta[1];
+				$state    = isset( $bot_allowlist[ $bot_id ] ) ? $bot_allowlist[ $bot_id ] : 'allow';
+			?>
+				<tr>
+					<th scope="row">
+						<strong><?php echo esc_html( $label ); ?></strong>
+						<br><small style="color:#8c8f94;font-weight:400"><?php echo esc_html( $operator ); ?></small>
+					</th>
+					<td>
+						<label style="margin-right:24px">
+							<input type="radio" name="quoted_bot_allowlist[<?php echo esc_attr( $bot_id ); ?>]" value="allow" <?php checked( $state, 'allow' ); ?> />
+							<?php esc_html_e( 'Allow', 'quoted' ); ?>
+						</label>
+						<label>
+							<input type="radio" name="quoted_bot_allowlist[<?php echo esc_attr( $bot_id ); ?>]" value="block" <?php checked( $state, 'block' ); ?> />
+							<span style="color:#d63638"><?php esc_html_e( 'Block', 'quoted' ); ?></span>
+						</label>
+					</td>
+				</tr>
+			<?php endforeach; ?>
 		</table>
 
 		<h2><?php esc_html_e( 'Display', 'quoted' ); ?></h2>

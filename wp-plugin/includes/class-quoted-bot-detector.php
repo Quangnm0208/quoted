@@ -17,29 +17,120 @@ class Quoted_Bot_Detector {
 	/**
 	 * Known AI bot user-agent fragments (case-insensitive substring match).
 	 *
-	 * Source: Each provider's public documentation as of 2026-05.
-	 * Update list when new bots appear.
+	 * Source: each provider's public documentation as of 2026-05.
+	 * Update this list when a new bot appears.
 	 *
-	 * Key = bot identifier sent to backend.
-	 * Value = list of substring patterns to match in User-Agent.
+	 *  Key   = our internal bot identifier (also used as the robots.txt label).
+	 *  Value = list of UA substrings to match. The first value is also used as
+	 *          the User-agent line in robots.txt when the bot is blocked.
 	 */
-	private static function bot_signatures() {
+	public static function bot_signatures() {
 		return array(
-			'ClaudeBot'        => array( 'claudebot', 'anthropic-ai' ),
-			'GPTBot'           => array( 'gptbot' ),
-			'ChatGPT-User'     => array( 'chatgpt-user' ),
-			'OAI-SearchBot'    => array( 'oai-searchbot' ),
-			'PerplexityBot'    => array( 'perplexitybot' ),
-			'Perplexity-User'  => array( 'perplexity-user' ),
-			'GoogleExtended'   => array( 'google-extended' ),
+			'ClaudeBot'         => array( 'claudebot', 'anthropic-ai' ),
+			'GPTBot'            => array( 'gptbot' ),
+			'ChatGPT-User'      => array( 'chatgpt-user' ),
+			'OAI-SearchBot'     => array( 'oai-searchbot' ),
+			'PerplexityBot'     => array( 'perplexitybot' ),
+			'Perplexity-User'   => array( 'perplexity-user' ),
+			'GoogleExtended'    => array( 'google-extended' ),
 			'Applebot-Extended' => array( 'applebot-extended' ),
-			'Bytespider'       => array( 'bytespider' ),
-			'FacebookBot'      => array( 'facebookbot', 'meta-externalagent', 'meta-externalfetcher' ),
-			'CCBot'            => array( 'ccbot' ),
-			'DiffBot'          => array( 'diffbot' ),
-			'Cohere'           => array( 'cohere-ai' ),
-			'YouBot'           => array( 'youbot' ),
+			'Bytespider'        => array( 'bytespider' ),
+			'FacebookBot'       => array( 'facebookbot', 'meta-externalagent', 'meta-externalfetcher' ),
+			'CCBot'             => array( 'ccbot' ),
+			'DiffBot'           => array( 'diffbot' ),
+			'Cohere'            => array( 'cohere-ai' ),
+			'YouBot'            => array( 'youbot' ),
 		);
+	}
+
+	/**
+	 * Friendly display name for a bot identifier, plus its operator.
+	 * Used in the Settings → AI Crawler Allowlist UI.
+	 */
+	public static function bot_metadata() {
+		return array(
+			'ClaudeBot'         => array( 'Claude',         'Anthropic' ),
+			'GPTBot'            => array( 'GPTBot',         'OpenAI (training)' ),
+			'ChatGPT-User'      => array( 'ChatGPT-User',   'OpenAI (user browses)' ),
+			'OAI-SearchBot'     => array( 'OAI-SearchBot',  'OpenAI (search)' ),
+			'PerplexityBot'     => array( 'PerplexityBot',  'Perplexity (training)' ),
+			'Perplexity-User'   => array( 'Perplexity-User','Perplexity (user query)' ),
+			'GoogleExtended'    => array( 'Google-Extended','Google (Gemini, AI Overviews)' ),
+			'Applebot-Extended' => array( 'Applebot-Extended', 'Apple Intelligence' ),
+			'Bytespider'        => array( 'Bytespider',     'ByteDance / TikTok' ),
+			'FacebookBot'       => array( 'Meta-ExternalAgent', 'Meta AI / LLaMA' ),
+			'CCBot'             => array( 'CCBot',          'Common Crawl' ),
+			'DiffBot'           => array( 'DiffBot',        'Diffbot' ),
+			'Cohere'            => array( 'cohere-ai',      'Cohere' ),
+			'YouBot'            => array( 'YouBot',         'You.com' ),
+		);
+	}
+
+	/**
+	 * Decide whether a given bot is allowed to access the site.
+	 *
+	 * Allowlist is stored as quoted_bot_allowlist option, an array keyed by
+	 * bot_name with values 'allow' | 'block'. Missing keys default to 'allow'.
+	 *
+	 * @param string $bot_name internal identifier from bot_signatures().
+	 * @return bool true if allowed, false if blocked.
+	 */
+	public static function is_allowed( $bot_name ) {
+		$allowlist = get_option( 'quoted_bot_allowlist', array() );
+		if ( ! is_array( $allowlist ) ) {
+			return true;
+		}
+		if ( ! isset( $allowlist[ $bot_name ] ) ) {
+			return true; // sensible default — don't block silently
+		}
+		return $allowlist[ $bot_name ] !== 'block';
+	}
+
+	/**
+	 * Bot identifiers currently set to 'block'. Used by robots.txt generation.
+	 *
+	 * @return string[]
+	 */
+	public static function blocked_bots() {
+		$allowlist = get_option( 'quoted_bot_allowlist', array() );
+		if ( ! is_array( $allowlist ) ) {
+			return array();
+		}
+		$blocked = array();
+		foreach ( $allowlist as $bot => $state ) {
+			if ( $state === 'block' ) {
+				$blocked[] = $bot;
+			}
+		}
+		return $blocked;
+	}
+
+	/**
+	 * Build the additional `User-agent: X\nDisallow: /` block for robots.txt
+	 * from the current allowlist.
+	 *
+	 * Emits one User-agent line per known signature pattern of each blocked bot
+	 * so that, e.g., blocking ClaudeBot covers both "claudebot" and "anthropic-ai"
+	 * as Anthropic publishes them in their docs.
+	 */
+	public static function robots_txt_block_rules() {
+		$signatures = self::bot_signatures();
+		$blocked    = self::blocked_bots();
+		if ( empty( $blocked ) ) {
+			return '';
+		}
+
+		$out = "\n# Quoted — AI crawler allowlist\n";
+		foreach ( $blocked as $bot ) {
+			if ( ! isset( $signatures[ $bot ] ) ) {
+				continue;
+			}
+			foreach ( $signatures[ $bot ] as $pattern ) {
+				$out .= 'User-agent: ' . $pattern . "\n";
+			}
+			$out .= "Disallow: /\n\n";
+		}
+		return $out;
 	}
 
 	/**

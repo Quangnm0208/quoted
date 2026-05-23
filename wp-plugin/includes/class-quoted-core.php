@@ -89,6 +89,11 @@ class Quoted_Core {
 		$this->loader->add_action( 'init', $public, 'add_rewrite_rules' );
 		$this->loader->add_filter( 'query_vars', $public, 'add_query_vars' );
 		$this->loader->add_action( 'template_redirect', $public, 'maybe_serve_llms_txt', 1 );
+
+		// Robots.txt — append Disallow rules for any bots the operator has
+		// blocked in the AI Crawler Allowlist. Two accepted_args because WP
+		// passes the existing body + the "is public" flag.
+		$this->loader->add_filter( 'robots_txt', $public, 'filter_robots_txt', 10, 2 );
 	}
 
 	/**
