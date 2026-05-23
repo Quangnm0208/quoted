@@ -22,16 +22,28 @@ class Quoted_Api_Client {
 	public function get_public( $path, $args = array() ) {
 		$url = $this->build_url( $path );
 
+		// Tenant identity is conveyed in the path / JWT, not via a forged
+		// Host header. Earlier versions set Host: <home_url host> which broke
+		// vhost routing on Cloudflare/Fly.io. Let WP set Host from the URL.
 		$response = wp_remote_get( $url, array(
 			'timeout' => self::DEFAULT_TIMEOUT,
 			'headers' => array(
-				'Host'         => parse_url( home_url(), PHP_URL_HOST ),
-				'User-Agent'   => 'Quoted-WP/' . QUOTED_VERSION,
-				'Accept'       => 'text/markdown, application/json',
+				'User-Agent'      => 'Quoted-WP/' . QUOTED_VERSION,
+				'Accept'          => 'text/markdown, application/json',
+				'X-Quoted-Domain' => $this->wp_host(),
 			),
 		) );
 
 		return $this->normalize( $response );
+	}
+
+	/**
+	 * Hostname of this WordPress site (no scheme, no www prefix).
+	 * Used by the backend to map the request to a tenant.
+	 */
+	private function wp_host() {
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		return strtolower( preg_replace( '/^www\./', '', (string) $host ) );
 	}
 
 	/**

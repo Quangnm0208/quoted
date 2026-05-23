@@ -10,12 +10,16 @@
 
 ### `GET /api/public/llm/sitemap.txt`
 
-Returns the llms.txt content for the tenant identified by `Host` header.
+Returns the llms.txt content for the tenant identified by the `X-Quoted-Domain`
+request header. (Earlier draft used `Host` for tenant lookup; this is
+incompatible with vhost-routing reverse proxies like Cloudflare and Fly.io,
+which require Host to match the backend hostname.)
 
 **Request:**
 ```http
 GET /api/public/llm/sitemap.txt HTTP/1.1
-Host: marcus-outdoor.com
+Host: api.quoted.io
+X-Quoted-Domain: marcus-outdoor.com
 User-Agent: ClaudeBot/1.0
 ```
 
@@ -38,7 +42,7 @@ X-Quoted-Version: 1
 ```
 
 **Errors:**
-- `404` — Host doesn't resolve to a known tenant
+- `404` — X-Quoted-Domain doesn't resolve to a known tenant
 - `503` — Backend not yet warm-cached this tenant; retry in 30s
 
 ### `GET /api/public/llm/posts/:slug.md`
@@ -48,7 +52,8 @@ Returns clean markdown for a single post.
 **Request:**
 ```http
 GET /api/public/llm/posts/best-running-shoes-2026.md HTTP/1.1
-Host: marcus-outdoor.com
+Host: api.quoted.io
+X-Quoted-Domain: marcus-outdoor.com
 ```
 
 **Response:**
