@@ -1,0 +1,94 @@
+QUOTED — PROPRIETARY LICENSE
+═════════════════════════════════════════════════════════════════════
+
+Copyright (c) 2026 Nguyễn Mạnh Quang <quangnm0208@gmail.com>
+All rights reserved.
+
+This software, including the WordPress plugin "Quoted" and the OmniPlug
+CMS Core extensions contained in this package, is the proprietary work of
+Nguyễn Mạnh Quang ("Author"). The software is licensed, not sold.
+
+═════════════════════════════════════════════════════════════════════
+1. GRANT OF LICENSE
+═════════════════════════════════════════════════════════════════════
+
+Subject to the terms below, the Author grants licensees who have a valid,
+non-revoked Quoted license key the right to:
+
+  (a) Install the WordPress plugin component on the WordPress site(s)
+      whose domain(s) appear on the license claim.
+
+  (b) Use the backend service hosted by the Author at the URL associated
+      with their license key.
+
+  (c) Use the software for its intended purpose: making WordPress content
+      AI-readable, tracking AI bot activity, and analyzing AI citations.
+
+═════════════════════════════════════════════════════════════════════
+2. RESTRICTIONS
+═════════════════════════════════════════════════════════════════════
+
+Licensees may NOT:
+
+  (a) Redistribute, sublicense, sell, lease, rent, or transfer the software
+      or any portion thereof to any third party.
+
+  (b) Reverse-engineer, decompile, disassemble, or otherwise attempt to
+      derive the source code of the backend service.
+
+  (c) Remove or alter copyright, trademark, or attribution notices.
+
+  (d) Use the software to host a competing AI citation tracking service.
+
+  (e) Use the software in violation of any applicable law.
+
+═════════════════════════════════════════════════════════════════════
+3. WORDPRESS PLUGIN COMPONENT
+═════════════════════════════════════════════════════════════════════
+
+The WordPress plugin component (`wp-plugin/` directory) may be freely
+downloaded from wordpress.org once submitted there, and may be installed
+on any WordPress site. However, full functionality requires a valid
+license key issued by the Author.
+
+The plugin source code is visible (PHP) but remains the intellectual
+property of the Author. Forking or distributing modified versions is
+prohibited.
+
+═════════════════════════════════════════════════════════════════════
+4. BACKEND COMPONENT
+═════════════════════════════════════════════════════════════════════
+
+The backend component (`backend/` directory) is intended only for the
+Author's own deployment. Licensees do not have rights to self-host the
+backend except under a separate written agreement with the Author.
+
+═════════════════════════════════════════════════════════════════════
+5. WARRANTY DISCLAIMER
+═════════════════════════════════════════════════════════════════════
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+═════════════════════════════════════════════════════════════════════
+6. TERMINATION
+═════════════════════════════════════════════════════════════════════
+
+This license terminates automatically if the licensee breaches any term.
+Upon termination, the licensee must cease all use of the software and
+destroy all copies in their possession.
+
+═════════════════════════════════════════════════════════════════════
+7. CONTACT
+═════════════════════════════════════════════════════════════════════
+
+For licensing inquiries, commercial use, or technical support:
+
+  Nguyễn Mạnh Quang
+  Email: quangnm0208@gmail.com
+
+═════════════════════════════════════════════════════════════════════

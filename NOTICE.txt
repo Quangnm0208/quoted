@@ -1,0 +1,25 @@
+Quoted — AI Citation Tracker for WordPress
+Copyright (c) 2026 Nguyễn Mạnh Quang
+All rights reserved.
+
+This product includes software developed by:
+
+  • Nguyễn Mạnh Quang (Author)
+    Email: quangnm0208@gmail.com
+
+This product extends OmniPlug CMS Core v1.4.4, also authored by
+Nguyễn Mạnh Quang.
+
+Third-party libraries used (subject to their own licenses):
+
+  • jsdom — MIT License — https://github.com/jsdom/jsdom
+  • better-sqlite3 — MIT License — https://github.com/WiseLibs/better-sqlite3
+  • express — MIT License — https://github.com/expressjs/express
+  • zod — MIT License — https://github.com/colinhacks/zod
+  • Chart.js — MIT License — https://github.com/chartjs/Chart.js (bundled
+    in wp-plugin/admin/js/chart.umd.min.js)
+
+All bundled third-party libraries retain their original licenses.
+
+For full proprietary license terms governing Quoted itself, see
+LICENSE.txt in this package.
