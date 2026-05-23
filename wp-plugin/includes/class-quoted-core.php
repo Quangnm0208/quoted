@@ -32,9 +32,14 @@ class Quoted_Core {
 
 	/**
 	 * Load translations.
+	 *
+	 * Hooked on `init` (not `plugins_loaded`). Quoted_Core itself is
+	 * instantiated *during* the `plugins_loaded` action at the same priority,
+	 * so a `plugins_loaded` registration could miss its own firing window.
+	 * WP 6.7+ also expects translations on `init`.
 	 */
 	private function set_locale() {
-		$this->loader->add_action( 'plugins_loaded', $this, 'load_plugin_textdomain' );
+		$this->loader->add_action( 'init', $this, 'load_plugin_textdomain' );
 	}
 
 	public function load_plugin_textdomain() {
