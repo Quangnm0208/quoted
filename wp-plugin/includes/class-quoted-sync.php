@@ -25,8 +25,9 @@ class Quoted_Sync {
 		global $wpdb;
 		$table = $wpdb->prefix . 'quoted_bot_log';
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- $table is built from $wpdb->prefix, not user input.
 		$rows = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM $table WHERE synced = 0 ORDER BY id ASC LIMIT %d",
+			"SELECT * FROM {$table} WHERE synced = 0 ORDER BY id ASC LIMIT %d",
 			self::BATCH_SIZE
 		) );
 
@@ -58,12 +59,22 @@ class Quoted_Sync {
 			return;
 		}
 
-		// Mark synced.
-		$ids_str = implode( ',', array_map( 'intval', $ids ) );
-		$wpdb->query( "UPDATE $table SET synced = 1 WHERE id IN ($ids_str)" );
+		// Mark synced — placeholders for each id keep prepare() happy.
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- $table from $wpdb->prefix, placeholders for ids.
+		$wpdb->query( $wpdb->prepare(
+			"UPDATE {$table} SET synced = 1 WHERE id IN ({$placeholders})",
+			$ids
+		) );
 
-		// Cleanup: delete synced rows older than 7 days.
-		$wpdb->query( "DELETE FROM $table WHERE synced = 1 AND created_at < (NOW() - INTERVAL 7 DAY)" );
+		// Cleanup: delete synced rows older than 7 days. Compare against
+		// crawled_at (UTC) instead of created_at (server-local) so retention
+		// is consistent regardless of MySQL timezone.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- $table from $wpdb->prefix.
+		$wpdb->query( $wpdb->prepare(
+			"DELETE FROM {$table} WHERE synced = 1 AND crawled_at < %s",
+			gmdate( 'Y-m-d H:i:s', time() - ( 7 * DAY_IN_SECONDS ) )
+		) );
 	}
 
 	/**

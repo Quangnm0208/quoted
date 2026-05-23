@@ -81,7 +81,8 @@ class Quoted_Bot_Detector {
 		$table = $wpdb->prefix . 'quoted_bot_log';
 
 		// Quick size check to avoid runaway growth if cron is broken.
-		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $table WHERE synced = 0" );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- $table from $wpdb->prefix.
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE synced = 0" );
 		if ( $count >= 10000 ) {
 			return false;
 		}
