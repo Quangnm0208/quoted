@@ -13,6 +13,7 @@ $backend_url     = get_option( 'quoted_backend_url', '' );
 $hash_ips        = (bool) get_option( 'quoted_hash_ips', true );
 $show_badge      = (bool) get_option( 'quoted_show_badge', true );
 $disable_logging = (bool) get_option( 'quoted_disable_logging', false );
+$trust_proxy     = (bool) get_option( 'quoted_trust_proxy', false );
 $tenant_id       = get_option( 'quoted_tenant_id', '' );
 $plan            = get_option( 'quoted_plan', 'free' );
 $niche           = get_option( 'quoted_niche', '' );
@@ -78,6 +79,16 @@ settings_errors( 'quoted' );
 						<?php esc_html_e( 'Stop logging bot visits entirely (kills dashboard data)', 'quoted' ); ?>
 					</label>
 					<p class="description"><?php esc_html_e( 'Use this if you need a hard kill switch. You can re-enable any time.', 'quoted' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Trust proxy headers', 'quoted' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="quoted_trust_proxy" value="1" <?php checked( $trust_proxy ); ?> />
+						<?php esc_html_e( 'Read client IP from CF-Connecting-IP / X-Forwarded-For (only enable if your site is behind Cloudflare or another trusted reverse proxy).', 'quoted' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'On a non-proxied install these headers are attacker-controlled. Leaving this off uses REMOTE_ADDR.', 'quoted' ); ?></p>
 				</td>
 			</tr>
 		</table>

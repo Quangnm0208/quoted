@@ -32,6 +32,7 @@ $options = array(
 	'quoted_hash_ips',
 	'quoted_disable_logging',
 	'quoted_show_badge',
+	'quoted_trust_proxy',
 );
 
 foreach ( $options as $opt ) {

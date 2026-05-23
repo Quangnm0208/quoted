@@ -62,6 +62,7 @@ class Quoted_Activator {
 			'quoted_hash_ips'        => true,
 			'quoted_disable_logging' => false,
 			'quoted_show_badge'      => true,
+			'quoted_trust_proxy'     => false,
 		);
 
 		foreach ( $defaults as $key => $value ) {

@@ -42,8 +42,21 @@ class Quoted_Markdown {
 
 		$out .= "\n---\n\n";
 
-		// Content body.
-		$content = apply_filters( 'the_content', $post->post_content );
+		// Content body. Avoid apply_filters('the_content', ...) — that fires
+		// every third-party content filter (Jetpack, Yoast, embed handlers,
+		// oEmbed remote fetches, arbitrary shortcodes hitting external APIs),
+		// any of which can be slow or output script tags that survive the
+		// DOMDocument parser. Expand Gutenberg blocks + paragraphs + entities
+		// directly, then strip shortcodes whose output we cannot vouch for.
+		$content = $post->post_content;
+		if ( function_exists( 'do_blocks' ) ) {
+			$content = do_blocks( $content );
+		}
+		$content = strip_shortcodes( $content );
+		$content = wptexturize( $content );
+		$content = convert_smilies( $content );
+		$content = wpautop( $content );
+
 		$out .= $this->html_to_markdown( $content );
 
 		return $out;

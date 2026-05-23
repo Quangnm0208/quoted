@@ -86,13 +86,23 @@ class Quoted_Admin {
 	}
 
 	public function maybe_redirect_to_onboarding() {
-		if ( get_transient( 'quoted_activation_redirect' ) ) {
-			delete_transient( 'quoted_activation_redirect' );
-			if ( ! isset( $_GET['activate-multi'] ) ) {
-				wp_safe_redirect( admin_url( 'admin.php?page=quoted' ) );
-				exit;
+		if ( ! get_transient( 'quoted_activation_redirect' ) ) {
+			return;
+		}
+		delete_transient( 'quoted_activation_redirect' );
+
+		// Skip the redirect on any kind of bulk activation — single-site
+		// ("activate-selected" from /plugins.php), network ("activate-multi"),
+		// or anything that produced an activation notice we'd interrupt.
+		$bulk_keys = array( 'activate-multi', 'activate-selected' );
+		foreach ( $bulk_keys as $k ) {
+			if ( isset( $_GET[ $k ] ) ) {
+				return;
 			}
 		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=quoted' ) );
+		exit;
 	}
 
 	public function render_dashboard_or_onboarding() {
@@ -130,10 +140,12 @@ class Quoted_Admin {
 		$hash_ips = isset( $_POST['quoted_hash_ips'] ) ? 1 : 0;
 		$show_badge = isset( $_POST['quoted_show_badge'] ) ? 1 : 0;
 		$disable_logging = isset( $_POST['quoted_disable_logging'] ) ? 1 : 0;
+		$trust_proxy = isset( $_POST['quoted_trust_proxy'] ) ? 1 : 0;
 
 		update_option( 'quoted_hash_ips', (bool) $hash_ips );
 		update_option( 'quoted_show_badge', (bool) $show_badge );
 		update_option( 'quoted_disable_logging', (bool) $disable_logging );
+		update_option( 'quoted_trust_proxy', (bool) $trust_proxy );
 
 		if ( isset( $_POST['quoted_backend_url'] ) ) {
 			$url = esc_url_raw( wp_unslash( $_POST['quoted_backend_url'] ) );
@@ -163,6 +175,7 @@ class Quoted_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
+			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
 		$license_key = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
@@ -177,6 +190,7 @@ class Quoted_Admin {
 				'message' => $result->get_error_message(),
 				'details' => $result->get_error_data(),
 			), 400 );
+			return;
 		}
 
 		wp_send_json_success( array(
@@ -191,12 +205,14 @@ class Quoted_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
+			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
 		$niche = isset( $_POST['niche'] ) ? sanitize_key( wp_unslash( $_POST['niche'] ) ) : '';
 
 		if ( empty( $niche ) ) {
 			wp_send_json_error( array( 'message' => __( 'Please select a niche.', 'quoted' ) ), 400 );
+			return;
 		}
 
 		update_option( 'quoted_niche', $niche );
@@ -209,6 +225,7 @@ class Quoted_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
+			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
 		$sync = new Quoted_Sync();
@@ -219,6 +236,7 @@ class Quoted_Admin {
 				'message' => __( 'Sync failed.', 'quoted' ),
 				'errors'  => $result['errors'],
 			), 500 );
+			return;
 		}
 
 		// Mark onboarded after first successful sync.
@@ -235,6 +253,7 @@ class Quoted_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
+			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
 		$api = new Quoted_Api_Client();
@@ -245,6 +264,7 @@ class Quoted_Admin {
 				'code'    => $result->get_error_code(),
 				'message' => $result->get_error_message(),
 			), 500 );
+			return;
 		}
 
 		wp_send_json_success( $result );
@@ -255,6 +275,7 @@ class Quoted_Admin {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
+			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
 		$license = new Quoted_License();

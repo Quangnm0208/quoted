@@ -163,9 +163,14 @@ class Quoted_Sync {
 			return;
 		}
 
-		if ( isset( $result['jwt'] ) ) {
-			update_option( 'quoted_jwt', $result['jwt'] );
-			update_option( 'quoted_jwt_expires_at', strtotime( $result['jwt_expires_at'] ) );
+		if ( ! empty( $result['jwt'] ) && ! empty( $result['jwt_expires_at'] ) ) {
+			$expires_at = strtotime( $result['jwt_expires_at'] );
+			if ( $expires_at !== false && $expires_at > time() ) {
+				update_option( 'quoted_jwt', $result['jwt'] );
+				update_option( 'quoted_jwt_expires_at', $expires_at );
+			} else {
+				error_log( 'Quoted token refresh got invalid jwt_expires_at; ignoring response' );
+			}
 		}
 	}
 

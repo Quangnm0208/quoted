@@ -199,12 +199,13 @@
 
 			// Next action
 			if (d.next_action) {
+				var actionUrl = safeUrl(d.next_action.action_url);
 				$('#quoted-next-action').html(
 					'<div class="quoted-next-action-item">' +
 						'<h3>' + escapeHtml(d.next_action.title) + '</h3>' +
 						'<p>' + escapeHtml(d.next_action.description) + '</p>' +
-						(d.next_action.action_url ?
-							'<a href="' + escapeHtml(d.next_action.action_url) + '" class="button button-primary">Take action</a>'
+						(actionUrl ?
+							'<a href="' + escapeHtml(actionUrl) + '" class="button button-primary">Take action</a>'
 							: '') +
 					'</div>'
 				);
@@ -333,6 +334,19 @@
 				.replace(/>/g, '&gt;')
 				.replace(/"/g, '&quot;')
 				.replace(/'/g, '&#039;');
+		}
+
+		// Only allow http(s) URLs. Backend-sourced URLs are trusted, but a
+		// javascript: scheme would slip past escapeHtml() and execute on
+		// click, so we hard-validate here.
+		function safeUrl(u) {
+			if (!u) return '';
+			try {
+				var p = new URL(u, window.location.origin);
+				return /^https?:$/.test(p.protocol) ? p.href : '';
+			} catch (e) {
+				return '';
+			}
 		}
 	});
 })(jQuery);

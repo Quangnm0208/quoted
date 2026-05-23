@@ -59,10 +59,16 @@ class Quoted_License {
 			return new WP_Error( 'invalid_response', __( 'Backend returned an unexpected response.', 'quoted' ) );
 		}
 
+		// Parse expiry, fall back to 24h if backend omits it or returns garbage.
+		$expires_at = isset( $result['jwt_expires_at'] ) ? strtotime( $result['jwt_expires_at'] ) : false;
+		if ( $expires_at === false || $expires_at <= time() ) {
+			$expires_at = time() + DAY_IN_SECONDS;
+		}
+
 		// Persist state.
 		update_option( 'quoted_license_key', $license_key );
 		update_option( 'quoted_jwt', $result['jwt'] );
-		update_option( 'quoted_jwt_expires_at', isset( $result['jwt_expires_at'] ) ? strtotime( $result['jwt_expires_at'] ) : ( time() + 86400 ) );
+		update_option( 'quoted_jwt_expires_at', $expires_at );
 		update_option( 'quoted_tenant_id', $result['tenant_id'] );
 		update_option( 'quoted_plan', isset( $result['plan'] ) ? $result['plan'] : 'free' );
 

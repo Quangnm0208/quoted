@@ -113,13 +113,20 @@ class Quoted_Api_Client {
 	private function refresh_token() {
 		$result = $this->request_unauthenticated_with_existing_jwt( 'POST', '/api/v1/wp-sites/refresh-token' );
 
-		if ( ! is_wp_error( $result ) && isset( $result['jwt'] ) ) {
-			update_option( 'quoted_jwt', $result['jwt'] );
-			update_option( 'quoted_jwt_expires_at', strtotime( $result['jwt_expires_at'] ) );
-			return true;
+		if ( is_wp_error( $result ) || empty( $result['jwt'] ) ) {
+			return false;
 		}
 
-		return false;
+		$expires_at = isset( $result['jwt_expires_at'] ) ? strtotime( $result['jwt_expires_at'] ) : false;
+		if ( $expires_at === false || $expires_at <= time() ) {
+			// Bad/expired timestamp from backend — treat the refresh as failed so
+			// we don't store an instantly-expired token that loops the retry path.
+			return false;
+		}
+
+		update_option( 'quoted_jwt', $result['jwt'] );
+		update_option( 'quoted_jwt_expires_at', $expires_at );
+		return true;
 	}
 
 	private function request_unauthenticated_with_existing_jwt( $method, $path ) {

@@ -120,10 +120,17 @@ class Quoted_Public {
 
 	/**
 	 * Best-effort client IP detection.
-	 * Respects CF-Connecting-IP and X-Forwarded-For if behind a proxy.
+	 *
+	 * Forwarded-for / Cloudflare headers are only honored when the operator
+	 * explicitly opts in via `quoted_trust_proxy`. On a non-proxied install
+	 * those headers are attacker-controlled and would let bot traffic spoof
+	 * IPs to drown out dedup. REMOTE_ADDR is always consulted last.
 	 */
 	private function get_client_ip() {
-		$keys = array( 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' );
+		$keys = array( 'REMOTE_ADDR' );
+		if ( get_option( 'quoted_trust_proxy', false ) ) {
+			$keys = array( 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' );
+		}
 		foreach ( $keys as $key ) {
 			if ( ! empty( $_SERVER[ $key ] ) ) {
 				$ip = trim( explode( ',', $_SERVER[ $key ] )[0] );
