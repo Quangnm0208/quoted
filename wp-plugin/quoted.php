@@ -28,6 +28,15 @@ define( 'QUOTED_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QUOTED_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'QUOTED_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
+// Lemon Squeezy store + variant IDs.
+// REPLACE these placeholders with real values after creating the LS store
+// + Solo / Pro+ product variants. Each variant's "Share" tab gives the
+// /buy/<uuid> URL — copy the UUID portion into the matching constant.
+define( 'QUOTED_LS_STORE_SLUG',          'YOUR-LS-STORE-SLUG' );        // e.g. 'quoted'
+define( 'QUOTED_LS_VARIANT_SOLO',        'PLACEHOLDER-SOLO-VARIANT' );  // e.g. '12345' or UUID
+define( 'QUOTED_LS_VARIANT_PRO_PLUS',    'PLACEHOLDER-PROPLUS-VARIANT' );
+define( 'QUOTED_LS_CUSTOMER_PORTAL_URL', 'https://app.lemonsqueezy.com/my-orders' ); // global LS portal
+
 // Minimum requirements check (graceful, no white screen).
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	add_action( 'admin_notices', function () {

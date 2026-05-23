@@ -39,6 +39,22 @@ class Quoted_Admin {
 			'quoted-settings',
 			array( $this, 'render_settings' )
 		);
+
+		add_submenu_page(
+			'quoted',
+			__( 'Upgrade', 'quoted' ),
+			__( 'Upgrade', 'quoted' ),
+			'manage_options',
+			'quoted-billing',
+			array( $this, 'render_billing' )
+		);
+	}
+
+	public function render_billing() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'quoted' ) );
+		}
+		require_once QUOTED_PLUGIN_DIR . 'admin/partials/billing-page.php';
 	}
 
 	public function enqueue_assets( $hook ) {
@@ -83,6 +99,17 @@ class Quoted_Admin {
 				'success'      => __( 'Done!', 'quoted' ),
 			),
 		) );
+
+		// Billing CSS only on the Upgrade page. No JS needed — buy buttons
+		// are plain anchor tags to the Lemon Squeezy hosted checkout.
+		if ( strpos( $hook, 'quoted-billing' ) !== false ) {
+			wp_enqueue_style(
+				'quoted-billing',
+				QUOTED_PLUGIN_URL . 'admin/css/billing.css',
+				array( 'quoted-admin' ),
+				QUOTED_VERSION
+			);
+		}
 	}
 
 	public function maybe_redirect_to_onboarding() {
