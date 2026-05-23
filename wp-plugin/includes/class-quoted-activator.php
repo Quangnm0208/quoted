@@ -19,8 +19,11 @@ class Quoted_Activator {
 		self::schedule_cron();
 		self::set_activation_redirect();
 
-		// Flush rewrite rules so /llms.txt routes correctly.
-		// Cheap on activation, never call this elsewhere.
+		// Register our rewrite rule directly here so flush_rewrite_rules()
+		// below persists it. The activator runs before `init`, so the
+		// init-hooked Quoted_Public::add_rewrite_rules() hasn't fired yet.
+		// Without this, /llms.txt 404s until the operator saves Permalinks.
+		add_rewrite_rule( '^llms\.txt$', 'index.php?quoted_route=llms_txt', 'top' );
 		flush_rewrite_rules();
 	}
 
