@@ -69,14 +69,6 @@ class Quoted_Core {
 
 		// Plugin row links.
 		$this->loader->add_filter( 'plugin_action_links_' . QUOTED_PLUGIN_BASENAME, $admin, 'plugin_action_links' );
-
-		// Billing module — hooks for the Upgrade page + LS checkout flow.
-		$billing = new Quoted_Billing();
-		$this->loader->add_action( 'admin_init', $billing, 'maybe_auto_activate_after_checkout' );
-		$this->loader->add_action( 'admin_init', $billing, 'maybe_show_upgrade_success_notice' );
-		$this->loader->add_action( 'wp_ajax_quoted_create_checkout',       $billing, 'ajax_create_checkout' );
-		$this->loader->add_action( 'wp_ajax_quoted_get_subscription',      $billing, 'ajax_get_subscription' );
-		$this->loader->add_action( 'wp_ajax_quoted_get_customer_portal',   $billing, 'ajax_get_customer_portal' );
 	}
 
 	/**
