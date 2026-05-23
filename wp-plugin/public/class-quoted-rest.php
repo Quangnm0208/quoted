@@ -38,14 +38,8 @@ class Quoted_Rest {
 	}
 
 	public function serve_llms_txt( $request ) {
-		$llms = new Quoted_Llms_Txt();
-		$content = $llms->get_content();
-
-		return new WP_REST_Response( $content, 200, array(
-			'Content-Type'    => 'text/markdown; charset=utf-8',
-			'Cache-Control'   => 'public, max-age=300, s-maxage=86400',
-			'X-Quoted-Version' => QUOTED_VERSION,
-		) );
+		$content = ( new Quoted_Llms_Txt() )->get_content();
+		$this->send_raw_markdown( $content, null );
 	}
 
 	public function serve_post_markdown( $request ) {
@@ -66,12 +60,7 @@ class Quoted_Rest {
 		$cached = get_transient( $cache_key );
 
 		if ( $cached !== false ) {
-			return new WP_REST_Response( $cached, 200, array(
-				'Content-Type'    => 'text/markdown; charset=utf-8',
-				'Cache-Control'   => 'public, max-age=300, s-maxage=86400',
-				'X-Quoted-Version' => QUOTED_VERSION,
-				'X-Quoted-Cache'  => 'HIT',
-			) );
+			$this->send_raw_markdown( $cached, true );
 		}
 
 		$md = ( new Quoted_Markdown() )->serialize( $post );
@@ -79,12 +68,31 @@ class Quoted_Rest {
 		// 1-hour transient (post modification flushes via key).
 		set_transient( $cache_key, $md, 3600 );
 
-		return new WP_REST_Response( $md, 200, array(
-			'Content-Type'    => 'text/markdown; charset=utf-8',
-			'Cache-Control'   => 'public, max-age=300, s-maxage=86400',
-			'X-Quoted-Version' => QUOTED_VERSION,
-			'X-Quoted-Cache'  => 'MISS',
-		) );
+		$this->send_raw_markdown( $md, false );
+	}
+
+	/**
+	 * Bypass WP_REST_Server's JSON serialization and emit raw markdown.
+	 *
+	 * WP_REST_Response with a Content-Type header is overridden by the REST
+	 * server, which always serializes the body as JSON and sets
+	 * Content-Type: application/json. The only way to emit raw text from a
+	 * REST callback is to send headers + body ourselves and exit before the
+	 * dispatcher runs its serializer.
+	 *
+	 * @param string    $content   Raw markdown body.
+	 * @param bool|null $cache_hit True = HIT header, false = MISS, null = no header.
+	 */
+	private function send_raw_markdown( $content, $cache_hit ) {
+		status_header( 200 );
+		header( 'Content-Type: text/markdown; charset=utf-8' );
+		header( 'Cache-Control: public, max-age=300, s-maxage=86400' );
+		header( 'X-Quoted-Version: ' . QUOTED_VERSION );
+		if ( $cache_hit !== null ) {
+			header( 'X-Quoted-Cache: ' . ( $cache_hit ? 'HIT' : 'MISS' ) );
+		}
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — raw markdown body
+		exit;
 	}
 
 	/**
