@@ -228,18 +228,19 @@ class Quoted_Admin {
 			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
-		$sync = new Quoted_Sync();
-		$result = $sync->initial_sync( 20 );
+		// Standalone plugin — there is no backend to sync to. The onboarding
+		// "Auto-scan now" step now just refreshes the local llms.txt cache so
+		// it picks up any new posts on this site. Kept under the existing
+		// AJAX action name so the onboarding JS doesn't need to change.
+		Quoted_Llms_Txt::flush_cache();
 
-		if ( ! empty( $result['errors'] ) && empty( $result['synced'] ) ) {
-			wp_send_json_error( array(
-				'message' => __( 'Sync failed.', 'quoted' ),
-				'errors'  => $result['errors'],
-			), 500 );
-			return;
-		}
+		$count = (int) wp_count_posts( 'post' )->publish + (int) wp_count_posts( 'page' )->publish;
+		$result = array(
+			'synced' => $count,
+			'errors' => array(),
+		);
 
-		// Mark onboarded after first successful sync.
+		// Mark onboarded after the refresh.
 		update_option( 'quoted_onboarded', true );
 
 		wp_send_json_success( array(

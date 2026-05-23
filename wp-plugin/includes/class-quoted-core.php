@@ -26,7 +26,7 @@ class Quoted_Core {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-		$this->define_cron_hooks();
+		$this->define_license_cron_hooks();
 		$this->define_rest_hooks();
 	}
 
@@ -92,14 +92,15 @@ class Quoted_Core {
 	}
 
 	/**
-	 * Cron jobs.
+	 * License-side cron jobs.
+	 *
+	 * Standalone plugin — no syncing to a backend. The only recurring task
+	 * is revalidating the Lemon Squeezy license periodically so a revoked
+	 * or expired key reverts to the Free tier.
 	 */
-	private function define_cron_hooks() {
-		$sync = new Quoted_Sync();
-
-		$this->loader->add_action( 'quoted_cron_sync_crawls', $sync, 'sync_bot_crawls' );
-		$this->loader->add_action( 'quoted_cron_sync_posts', $sync, 'sync_posts' );
-		$this->loader->add_action( 'quoted_cron_refresh_token', $sync, 'refresh_token_if_needed' );
+	private function define_license_cron_hooks() {
+		$license = new Quoted_License();
+		$this->loader->add_action( 'quoted_cron_license_revalidate', $license, 'cron_revalidate' );
 	}
 
 	/**

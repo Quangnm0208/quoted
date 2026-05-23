@@ -78,14 +78,10 @@ class Quoted_Activator {
 	}
 
 	private static function schedule_cron() {
-		if ( ! wp_next_scheduled( 'quoted_cron_sync_crawls' ) ) {
-			wp_schedule_event( time() + 300, 'hourly', 'quoted_cron_sync_crawls' );
-		}
-		if ( ! wp_next_scheduled( 'quoted_cron_sync_posts' ) ) {
-			wp_schedule_event( time() + 600, 'twicedaily', 'quoted_cron_sync_posts' );
-		}
-		if ( ! wp_next_scheduled( 'quoted_cron_refresh_token' ) ) {
-			wp_schedule_event( time() + 3600, 'hourly', 'quoted_cron_refresh_token' );
+		// Standalone plugin: only one cron, daily license revalidate.
+		// Lemon Squeezy License API call is cheap and rate-limit safe at this cadence.
+		if ( ! wp_next_scheduled( 'quoted_cron_license_revalidate' ) ) {
+			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'quoted_cron_license_revalidate' );
 		}
 	}
 

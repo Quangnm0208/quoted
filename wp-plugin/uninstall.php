@@ -52,6 +52,8 @@ $wpdb->query(
 );
 
 // Clear any scheduled crons (defensive — deactivation should already have).
+wp_clear_scheduled_hook( 'quoted_cron_license_revalidate' );
+// Legacy hooks from the pre-standalone backend-sync architecture.
 wp_clear_scheduled_hook( 'quoted_cron_sync_crawls' );
 wp_clear_scheduled_hook( 'quoted_cron_sync_posts' );
 wp_clear_scheduled_hook( 'quoted_cron_refresh_token' );
