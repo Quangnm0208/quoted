@@ -73,6 +73,10 @@ class Quoted_Activator {
 			// AI Crawler Allowlist — empty means "all bots allowed", which is
 			// the only safe default. Operator opts into blocks explicitly.
 			'quoted_bot_allowlist'        => array(),
+			// Schema engine — on by default; mode 'auto' defers Article to
+			// any active SEO plugin to avoid duplicate JSON-LD.
+			'quoted_schema_enabled'       => true,
+			'quoted_schema_mode'          => 'auto', // 'auto' | 'always' | 'never'
 			// Privacy / behaviour toggles.
 			'quoted_hash_ips'             => true,
 			'quoted_disable_logging'      => false,

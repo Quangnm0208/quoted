@@ -205,6 +205,16 @@ class Quoted_Admin {
 		update_option( 'quoted_disable_logging', isset( $_POST['quoted_disable_logging'] ) );
 		update_option( 'quoted_trust_proxy',     isset( $_POST['quoted_trust_proxy'] ) );
 
+		// Schema engine — boolean enable + 3-state mode (auto/always/never).
+		update_option( 'quoted_schema_enabled', isset( $_POST['quoted_schema_enabled'] ) );
+		if ( isset( $_POST['quoted_schema_mode'] ) ) {
+			$mode = sanitize_key( wp_unslash( $_POST['quoted_schema_mode'] ) );
+			if ( ! in_array( $mode, array( 'auto', 'always', 'never' ), true ) ) {
+				$mode = 'auto';
+			}
+			update_option( 'quoted_schema_mode', $mode );
+		}
+
 		// AI Crawler Allowlist — only accept bot IDs we know about, and only
 		// 'allow' / 'block' as values. Anything else is silently ignored.
 		if ( isset( $_POST['quoted_bot_allowlist'] ) && is_array( $_POST['quoted_bot_allowlist'] ) ) {

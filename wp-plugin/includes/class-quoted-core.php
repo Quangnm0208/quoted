@@ -94,6 +94,12 @@ class Quoted_Core {
 		// blocked in the AI Crawler Allowlist. Two accepted_args because WP
 		// passes the existing body + the "is public" flag.
 		$this->loader->add_filter( 'robots_txt', $public, 'filter_robots_txt', 10, 2 );
+
+		// Schema engine — output JSON-LD (Article + FAQ) in wp_head. Late
+		// priority so SEO plugins emit theirs first and we can defer to them
+		// in auto mode. See Quoted_Schema::conflicting_seo_plugin().
+		$schema = new Quoted_Schema();
+		$this->loader->add_action( 'wp_head', $schema, 'maybe_output', 20 );
 	}
 
 	/**

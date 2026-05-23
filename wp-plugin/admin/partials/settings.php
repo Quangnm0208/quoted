@@ -29,6 +29,10 @@ $bot_allowlist       = get_option( 'quoted_bot_allowlist', array() );
 if ( ! is_array( $bot_allowlist ) ) { $bot_allowlist = array(); }
 $bot_meta            = Quoted_Bot_Detector::bot_metadata();
 
+$schema_enabled      = (bool) get_option( 'quoted_schema_enabled', true );
+$schema_mode         = get_option( 'quoted_schema_mode', 'auto' );
+$conflicting_seo     = Quoted_Schema::conflicting_seo_plugin();
+
 settings_errors( 'quoted' );
 ?>
 <div class="wrap quoted-settings">
@@ -255,6 +259,53 @@ settings_errors( 'quoted' );
 					</td>
 				</tr>
 			<?php endforeach; ?>
+		</table>
+
+		<h2><?php esc_html_e( 'Schema markup', 'quoted' ); ?></h2>
+		<p class="description" style="margin-bottom:1em">
+			<?php esc_html_e( 'Quoted ships Article and FAQPage JSON-LD on single posts and pages. AI engines use schema to identify what each page is and which sections are quote-worthy.', 'quoted' ); ?>
+		</p>
+		<table class="form-table">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Enable schema output', 'quoted' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="quoted_schema_enabled" value="1" <?php checked( $schema_enabled ); ?> />
+						<?php esc_html_e( 'Output Article + FAQPage JSON-LD on single posts and pages', 'quoted' ); ?>
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Mode', 'quoted' ); ?></th>
+				<td>
+					<fieldset>
+						<label style="display:block;margin-bottom:6px">
+							<input type="radio" name="quoted_schema_mode" value="auto" <?php checked( $schema_mode, 'auto' ); ?> />
+							<strong><?php esc_html_e( 'Auto (recommended)', 'quoted' ); ?></strong>
+							<?php if ( $conflicting_seo ) : ?>
+								<br><small style="color:#996600">⚠
+									<?php
+									/* translators: %s: name of the active SEO plugin */
+									printf( esc_html__( 'Detected %s — Article schema will be skipped to avoid duplicates. FAQ schema still emitted.', 'quoted' ), '<strong>' . esc_html( $conflicting_seo ) . '</strong>' );
+									?>
+								</small>
+							<?php else : ?>
+								<br><small><?php esc_html_e( 'No conflicting SEO plugin detected — both Article and FAQ schemas will be output.', 'quoted' ); ?></small>
+							<?php endif; ?>
+						</label>
+						<label style="display:block;margin-bottom:6px">
+							<input type="radio" name="quoted_schema_mode" value="always" <?php checked( $schema_mode, 'always' ); ?> />
+							<strong><?php esc_html_e( 'Always', 'quoted' ); ?></strong>
+							<br><small><?php esc_html_e( 'Output our schema even if Yoast / Rank Math / SEOPress are active. May produce duplicate JSON-LD; verify with Google Rich Results test.', 'quoted' ); ?></small>
+						</label>
+						<label style="display:block">
+							<input type="radio" name="quoted_schema_mode" value="never" <?php checked( $schema_mode, 'never' ); ?> />
+							<strong><?php esc_html_e( 'Never', 'quoted' ); ?></strong>
+							<br><small><?php esc_html_e( 'Suppress Article schema entirely. FAQ schema is still emitted from [faq] shortcodes and question-shaped headings — disable the master toggle above to suppress everything.', 'quoted' ); ?></small>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
 		</table>
 
 		<h2><?php esc_html_e( 'Display', 'quoted' ); ?></h2>

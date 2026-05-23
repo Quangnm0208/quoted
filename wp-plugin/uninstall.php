@@ -34,6 +34,8 @@ $options = array(
 	'quoted_perplexity_api_key',
 	'quoted_tavily_api_key',
 	'quoted_bot_allowlist',
+	'quoted_schema_enabled',
+	'quoted_schema_mode',
 	'quoted_hash_ips',
 	'quoted_disable_logging',
 	'quoted_show_badge',
