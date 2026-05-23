@@ -23,8 +23,12 @@ class Quoted_Public {
 			return;
 		}
 
-		// Only on frontend GET requests.
-		if ( is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
+		// Only on frontend GET requests. Skip REST and XML-RPC too — a bot
+		// hitting /wp-json/quoted/v1/llm/foo otherwise triggers the
+		// detector twice (once on init, once on the REST request).
+		if ( is_admin() || wp_doing_ajax() || wp_doing_cron()
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| wp_is_xmlrpc_request() ) {
 			return;
 		}
 
