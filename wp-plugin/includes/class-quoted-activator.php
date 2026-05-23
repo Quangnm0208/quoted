@@ -13,11 +13,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Quoted_Activator {
 
-	public static function activate() {
+	public static function activate( $network_wide = false ) {
+		// Refuse network activation — the plugin stores per-site data
+		// (wp_quoted_bot_log table) and the standalone billing flow assumes
+		// one license = one install. Trying to network-activate would create
+		// the table only on the main site, leaving subsites broken.
+		if ( $network_wide && function_exists( 'is_multisite' ) && is_multisite() ) {
+			deactivate_plugins( plugin_basename( QUOTED_PLUGIN_FILE ) );
+			wp_die(
+				esc_html__( 'Quoted does not support multisite network activation. Activate it per-site instead. The plugin stores per-site bot crawl data and licenses are tied to a single domain.', 'quoted' ),
+				esc_html__( 'Quoted — multisite network activation not supported', 'quoted' ),
+				array( 'back_link' => true )
+			);
+		}
+
+		// Hard requirement: DOMDocument (libxml). Used by the Markdown
+		// serializer. Some minimal Docker WP images skip libxml.
+		if ( ! class_exists( 'DOMDocument' ) ) {
+			deactivate_plugins( plugin_basename( QUOTED_PLUGIN_FILE ) );
+			wp_die(
+				esc_html__( 'Quoted requires the PHP libxml extension (the DOMDocument class). Your server is missing it. Ask your host to enable libxml-dom or install the php-xml package.', 'quoted' ),
+				esc_html__( 'Quoted — missing PHP extension', 'quoted' ),
+				array( 'back_link' => true )
+			);
+		}
+
 		self::create_tables();
 		self::set_default_options();
 		self::schedule_cron();
 		self::set_activation_redirect();
+
+		// Record install time once — the dashboard uses it to know when the
+		// "no bots after 7 days, check your firewall" advisory should fire.
+		if ( ! get_option( 'quoted_installed_at', false ) ) {
+			add_option( 'quoted_installed_at', time(), '', 'no' );
+		}
 
 		// Register our rewrite rule directly here so flush_rewrite_rules()
 		// below persists it. The activator runs before `init`, so the

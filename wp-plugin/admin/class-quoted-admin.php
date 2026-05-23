@@ -441,8 +441,20 @@ class Quoted_Admin {
 		$quota     = ( $plan === 'free' ) ? 50 : 0; // 0 = unlimited
 
 		// Next action — simple heuristic for empty-state guidance.
-		$next_action = null;
-		if ( $total_this === 0 ) {
+		$next_action  = null;
+		$installed_at = (int) get_option( 'quoted_installed_at', time() );
+		$days_since   = max( 0, (int) floor( ( time() - $installed_at ) / DAY_IN_SECONDS ) );
+
+		if ( $total_this === 0 && $days_since >= 7 ) {
+			// Most common reason for "zero crawls after a week" is a security
+			// plugin (Wordfence, Sucuri, iThemes) blocking AI bot user-agents
+			// in its WAF before they reach us.
+			$next_action = array(
+				'title'       => __( 'No AI bot visits in 7+ days — check your firewall', 'quoted' ),
+				'description' => __( "ClaudeBot and GPTBot should have discovered /llms.txt by now. If you run Wordfence, Sucuri, or iThemes Security, their default WAF rules often block AI bot user-agents. Whitelist ClaudeBot, GPTBot, PerplexityBot, Google-Extended in your security plugin, or ask your host to allow them at the server level.", 'quoted' ),
+				'action_url'  => 'https://quotedeasy.com/docs/security-plugin-conflict',
+			);
+		} elseif ( $total_this === 0 ) {
 			$next_action = array(
 				'title'       => __( 'Waiting for AI bots', 'quoted' ),
 				'description' => __( 'No crawls yet. ClaudeBot and GPTBot usually discover new /llms.txt files within 24 hours. Share your llms.txt URL to speed things up.', 'quoted' ),

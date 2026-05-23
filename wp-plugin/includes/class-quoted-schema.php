@@ -28,6 +28,7 @@ class Quoted_Schema {
 	 */
 	private static function conflicting_plugins() {
 		return array(
+			// Big four.
 			'wordpress-seo/wp-seo.php'                          => 'Yoast SEO',
 			'wordpress-seo-premium/wp-seo-premium.php'          => 'Yoast SEO Premium',
 			'seo-by-rank-math/rank-math.php'                    => 'Rank Math SEO',
@@ -36,6 +37,15 @@ class Quoted_Schema {
 			'all-in-one-seo-pack-pro/all_in_one_seo_pack.php'   => 'All in One SEO Pro',
 			'wp-seopress/seopress.php'                          => 'SEOPress',
 			'wp-seopress-pro/seopress-pro.php'                  => 'SEOPress Pro',
+			// Smaller but real install bases that also emit Article/FAQ schema.
+			'slim-seo/slim-seo.php'                             => 'Slim SEO',
+			'autodescription/autodescription.php'               => 'The SEO Framework',
+			'squirrly-seo/squirrly.php'                         => 'Squirrly SEO',
+			'wp-meta-seo/wp-meta-seo.php'                       => 'WP Meta SEO',
+			'schema/schema.php'                                 => 'Schema',
+			'schema-pro/schema-pro.php'                         => 'Schema Pro',
+			'wp-schema-pro/wp-schema-pro.php'                   => 'Schema Pro',
+			'schema-and-structured-data-for-wp/structured-data-for-wp.php' => 'Schema & Structured Data for WP',
 		);
 	}
 

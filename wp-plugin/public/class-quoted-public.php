@@ -152,7 +152,9 @@ class Quoted_Public {
 
 		status_header( 200 );
 		header( 'Content-Type: text/markdown; charset=utf-8' );
-		header( 'Cache-Control: public, max-age=300, s-maxage=86400' );
+		// Short browser cache + must-revalidate, no edge cache. Avoids
+		// CDN/page-cache plugins holding stale llms.txt after post edits.
+		header( 'Cache-Control: public, max-age=300, must-revalidate' );
 		header( 'X-Quoted-Version: ' . QUOTED_VERSION );
 
 		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — markdown body

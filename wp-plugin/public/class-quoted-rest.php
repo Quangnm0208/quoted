@@ -120,7 +120,11 @@ class Quoted_Rest {
 	private function send_raw_markdown( $content, $cache_hit ) {
 		status_header( 200 );
 		header( 'Content-Type: text/markdown; charset=utf-8' );
-		header( 'Cache-Control: public, max-age=300, s-maxage=86400' );
+		// Short browser cache, no edge cache. Cloudflare / W3 Total Cache /
+		// WP Rocket otherwise hold a stale /llms.txt for up to 24h after
+		// the operator publishes new posts. 5 min is the sweet spot —
+		// AI bots see fresh content fast, hosts don't get hammered.
+		header( 'Cache-Control: public, max-age=300, must-revalidate' );
 		header( 'X-Quoted-Version: ' . QUOTED_VERSION );
 		if ( $cache_hit !== null ) {
 			header( 'X-Quoted-Cache: ' . ( $cache_hit ? 'HIT' : 'MISS' ) );

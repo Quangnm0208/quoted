@@ -120,3 +120,38 @@ function quoted_run() {
 	$plugin->run();
 }
 add_action( 'plugins_loaded', 'quoted_run', 10 );
+
+/**
+ * Admin notice when the site is using "Plain" permalinks.
+ *
+ * Pretty URLs are required for the /llms.txt rewrite rule to resolve. The
+ * REST endpoint /index.php?rest_route=/quoted/v1/llms.txt always works as a
+ * fallback, but most operators expect /llms.txt to be a clean URL — that's
+ * the whole reason the spec exists. This nudges them to flip the setting.
+ */
+add_action( 'admin_notices', function () {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	if ( get_option( 'permalink_structure' ) ) {
+		return; // pretty permalinks already set
+	}
+	// Dismissable per-user.
+	if ( get_user_meta( get_current_user_id(), 'quoted_permalink_notice_dismissed', true ) ) {
+		return;
+	}
+	?>
+	<div class="notice notice-warning is-dismissible" data-quoted-notice="permalink">
+		<p>
+			<strong><?php esc_html_e( 'Quoted needs pretty permalinks', 'quoted' ); ?></strong> —
+			<?php
+			printf(
+				/* translators: %s: link to Settings → Permalinks */
+				esc_html__( 'your site is currently using "Plain" permalinks (e.g. ?p=123), so the AI sitemap at /llms.txt will 404. %s and pick any option other than "Plain".', 'quoted' ),
+				'<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">' . esc_html__( 'Go to Settings → Permalinks', 'quoted' ) . '</a>'
+			);
+			?>
+		</p>
+	</div>
+	<?php
+} );

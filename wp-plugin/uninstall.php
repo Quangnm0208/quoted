@@ -36,6 +36,7 @@ $options = array(
 	'quoted_bot_allowlist',
 	'quoted_schema_enabled',
 	'quoted_schema_mode',
+	'quoted_installed_at',
 	'quoted_hash_ips',
 	'quoted_disable_logging',
 	'quoted_show_badge',
