@@ -55,9 +55,8 @@ class Quoted_Rest {
 			);
 		}
 
-		// Cache key tied to post's modified_gmt so updates invalidate.
-		$cache_key = 'quoted_md_' . md5( $post->ID . '|' . $post->post_modified_gmt );
-		$cached = get_transient( $cache_key );
+		$cache_key = self::cache_key_for_post( $post );
+		$cached    = get_transient( $cache_key );
 
 		if ( $cached !== false ) {
 			$this->send_raw_markdown( $cached, true );
@@ -65,10 +64,45 @@ class Quoted_Rest {
 
 		$md = ( new Quoted_Markdown() )->serialize( $post );
 
-		// 1-hour transient (post modification flushes via key).
-		set_transient( $cache_key, $md, 3600 );
+		set_transient( $cache_key, $md, HOUR_IN_SECONDS );
+		// Remember the current key so save_post can delete it later, even
+		// after post_modified_gmt has changed and we can no longer derive it.
+		update_post_meta( $post->ID, '_quoted_md_cache_key', $cache_key );
 
 		$this->send_raw_markdown( $md, false );
+	}
+
+	/**
+	 * Per-post markdown cache key. Tied to post_modified_gmt so a fresh edit
+	 * always misses, but old keys would orphan in wp_options without an
+	 * explicit save_post invalidation — see invalidate_post_cache().
+	 */
+	public static function cache_key_for_post( $post ) {
+		return 'quoted_md_' . md5( $post->ID . '|' . $post->post_modified_gmt );
+	}
+
+	/**
+	 * Delete the previously-cached markdown transient for a post.
+	 *
+	 * Hooked on save_post and before_delete_post by Quoted_Core. Without
+	 * this, every edit creates a new transient row and the old one lives
+	 * in wp_options until manually cleaned.
+	 *
+	 * @param int $post_id
+	 */
+	public static function invalidate_post_cache( $post_id ) {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+		$prev_key = get_post_meta( $post_id, '_quoted_md_cache_key', true );
+		if ( ! empty( $prev_key ) ) {
+			delete_transient( $prev_key );
+			delete_post_meta( $post_id, '_quoted_md_cache_key' );
+		}
+		// Also flush the llms.txt sitemap so newly-published posts appear.
+		if ( class_exists( 'Quoted_Llms_Txt' ) ) {
+			Quoted_Llms_Txt::flush_cache();
+		}
 	}
 
 	/**

@@ -107,6 +107,13 @@ class Quoted_Core {
 		$rest = new Quoted_Rest();
 
 		$this->loader->add_action( 'rest_api_init', $rest, 'register_routes' );
+
+		// Invalidate the per-post markdown transient whenever a post is
+		// saved or deleted. Without this, every edit orphans the previous
+		// transient row in wp_options forever (post_modified_gmt changes
+		// → cache_key changes → old key is unreachable).
+		$this->loader->add_action( 'save_post', 'Quoted_Rest', 'invalidate_post_cache' );
+		$this->loader->add_action( 'before_delete_post', 'Quoted_Rest', 'invalidate_post_cache' );
 	}
 
 	public function run() {

@@ -40,9 +40,14 @@ foreach ( $options as $opt ) {
 
 // Delete all our transients (any cached markdown).
 $wpdb->query(
-	"DELETE FROM {$wpdb->options} 
-	 WHERE option_name LIKE '_transient_quoted_%' 
+	"DELETE FROM {$wpdb->options}
+	 WHERE option_name LIKE '_transient_quoted_%'
 	    OR option_name LIKE '_transient_timeout_quoted_%'"
+);
+
+// Delete per-post markdown cache-key tracking meta.
+$wpdb->query(
+	"DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_quoted_md_cache_key'"
 );
 
 // Clear any scheduled crons (defensive — deactivation should already have).
