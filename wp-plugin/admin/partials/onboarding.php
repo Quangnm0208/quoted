@@ -122,7 +122,7 @@ $niches = array(
 			printf(
 				/* translators: %s: signup URL */
 				wp_kses_post( __( "Don't have a license key yet? <a href='%s' target='_blank'>Get one free</a>.", 'quoted' ) ),
-				'https://quoted.io/signup'
+				'https://quotedeasy.com/signup'
 			);
 			?></p>
 		</div>

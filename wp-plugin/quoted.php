@@ -1,19 +1,33 @@
 <?php
 /**
- * Plugin Name:       Quoted — AI Citation Tracker
- * Plugin URI:        https://quoted.io
- * Description:       Make your WordPress site AI-readable. Track when ChatGPT, Claude, Perplexity, and Google AI cite your content.
- * Version:           0.1.0
+ * Plugin Name:       Quoted — Make your WordPress site AI-readable
+ * Plugin URI:        https://quotedeasy.com
+ * Description:       Make your WordPress site readable by ChatGPT, Claude, Perplexity, and Google AI. Auto-generates llms.txt, serves clean Markdown per post, detects AI bot crawls, and lets you allow/block bots one by one.
+ * Version:           0.2.0
  * Requires at least: 6.0
+ * Tested up to:      6.8
  * Requires PHP:      7.4
  * Author:            Nguyễn Mạnh Quang
- * Author URI:        mailto:quangnm0208@gmail.com
- * License:           Proprietary
+ * Author URI:        https://quotedeasy.com
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       quoted
  * Domain Path:       /languages
+ * Network:           false
+ * Update URI:        false
  *
  * @package Quoted
- * @copyright 2026 Nguyễn Mạnh Quang. All rights reserved.
+ * @copyright 2026 Nguyễn Mạnh Quang
+ *
+ * Quoted is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Quoted is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  */
 
 // Prevent direct access.
@@ -22,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'QUOTED_VERSION', '0.1.0' );
+define( 'QUOTED_VERSION', '0.2.0' );
 define( 'QUOTED_PLUGIN_FILE', __FILE__ );
 define( 'QUOTED_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QUOTED_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
