@@ -83,10 +83,12 @@ class Quoted_Core {
 		// "Powered by Quoted" badge (free tier only).
 		$this->loader->add_action( 'wp_footer', $public, 'render_powered_by_badge' );
 
-		// llms.txt rewrite rule.
+		// llms.txt rewrite rule. Serve at template_redirect priority 1 so we
+		// run before redirect_canonical (priority 10) and emit the body
+		// instead of getting 301'd to a trailing-slash variant.
 		$this->loader->add_action( 'init', $public, 'add_rewrite_rules' );
 		$this->loader->add_filter( 'query_vars', $public, 'add_query_vars' );
-		$this->loader->add_action( 'template_redirect', $public, 'maybe_serve_llms_txt' );
+		$this->loader->add_action( 'template_redirect', $public, 'maybe_serve_llms_txt', 1 );
 	}
 
 	/**
