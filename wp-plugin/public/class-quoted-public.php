@@ -84,8 +84,10 @@ class Quoted_Public {
 	 * Add /llms.txt rewrite rule that routes to our REST endpoint.
 	 */
 	public function add_rewrite_rules() {
+		// Accept both /llms.txt and /llms.txt/ — WP's redirect_canonical
+		// adds a trailing slash whenever permalink_structure ends in one.
 		add_rewrite_rule(
-			'^llms\.txt$',
+			'^llms\.txt/?$',
 			'index.php?quoted_route=llms_txt',
 			'top'
 		);

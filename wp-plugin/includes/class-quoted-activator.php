@@ -23,7 +23,9 @@ class Quoted_Activator {
 		// below persists it. The activator runs before `init`, so the
 		// init-hooked Quoted_Public::add_rewrite_rules() hasn't fired yet.
 		// Without this, /llms.txt 404s until the operator saves Permalinks.
-		add_rewrite_rule( '^llms\.txt$', 'index.php?quoted_route=llms_txt', 'top' );
+		// Pattern matches both /llms.txt and /llms.txt/ because WP's
+		// redirect_canonical appends a slash when permalink_structure does.
+		add_rewrite_rule( '^llms\.txt/?$', 'index.php?quoted_route=llms_txt', 'top' );
 		flush_rewrite_rules();
 	}
 
