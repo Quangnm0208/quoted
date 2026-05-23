@@ -1,0 +1,31 @@
+#  Copyright (C) 2026 Nguyễn Mạnh Quang
+#  This file is distributed under the proprietary Quoted license.
+msgid ""
+msgstr ""
+"Project-Id-Version: Quoted 0.1.0\n"
+"Report-Msgid-Bugs-To: quangnm0208@gmail.com\n"
+"POT-Creation-Date: 2026-05-23T00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: WP-CLI 2.x\n"
+"X-Domain: quoted\n"
+
+#. Plugin Name of the plugin
+msgid "Quoted — AI Citation Tracker"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://quoted.io"
+msgstr ""
+
+#. Description of the plugin
+msgid "Make your WordPress site AI-readable. Track when ChatGPT, Claude, Perplexity, and Google AI cite your content."
+msgstr ""
+
+#. Author of the plugin
+msgid "Nguyễn Mạnh Quang"
+msgstr ""
+
+# Generate full PO using: wp i18n make-pot wp-plugin languages/quoted.pot --domain=quoted
+# All __('...', 'quoted') strings in the codebase will be auto-extracted.
