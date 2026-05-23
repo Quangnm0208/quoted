@@ -53,7 +53,6 @@ $niches = array(
 	'other'                     => __( 'Other / general', 'quoted' ),
 );
 
-$current_backend = get_option( 'quoted_backend_url', '' );
 ?>
 <div class="wrap quoted-onboarding">
 
@@ -72,10 +71,18 @@ $current_backend = get_option( 'quoted_backend_url', '' );
 		</ol>
 	</div>
 
-	<!-- Step 1: Connect -->
+	<!-- Step 1: Activate license -->
 	<section class="quoted-step quoted-step-1 active">
-		<h2><?php esc_html_e( 'Step 1 — Connect to Quoted backend', 'quoted' ); ?></h2>
-		<p class="description"><?php esc_html_e( "Paste your license key. You'll find it in the welcome email after signup.", 'quoted' ); ?></p>
+		<h2><?php esc_html_e( 'Step 1 — Activate your license', 'quoted' ); ?></h2>
+		<p class="description">
+			<?php
+			printf(
+				/* translators: %s: Upgrade page link */
+				esc_html__( "Paste the license key Lemon Squeezy emailed you after checkout. Don't have one? %s", 'quoted' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=quoted-billing' ) ) . '">' . esc_html__( 'See pricing →', 'quoted' ) . '</a>'
+			);
+			?>
+		</p>
 
 		<form id="quoted-connect-form" autocomplete="off">
 			<table class="form-table">
@@ -89,35 +96,24 @@ $current_backend = get_option( 'quoted_backend_url', '' );
 							id="quoted-license-key"
 							name="license_key"
 							class="regular-text"
-							placeholder="qtd_live_..."
+							placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 							autocomplete="off"
 							required
 						/>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row">
-						<label for="quoted-backend-url"><?php esc_html_e( 'Backend URL', 'quoted' ); ?></label>
-					</th>
-					<td>
-						<input
-							type="url"
-							id="quoted-backend-url"
-							name="backend_url"
-							class="regular-text"
-							placeholder="https://api.quoted.io"
-							value="<?php echo esc_attr( $current_backend ); ?>"
-						/>
-						<p class="description"><?php esc_html_e( 'Leave default unless you have a self-hosted backend.', 'quoted' ); ?></p>
 					</td>
 				</tr>
 			</table>
 
 			<p class="submit">
 				<button type="submit" class="button button-primary button-hero" id="quoted-connect-btn">
-					<?php esc_html_e( 'Connect', 'quoted' ); ?>
+					<?php esc_html_e( 'Activate', 'quoted' ); ?>
 				</button>
 				<span class="quoted-status" id="quoted-connect-status"></span>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'Or skip this step — Quoted Free works without a license. You can activate later in Settings.', 'quoted' ); ?>
+				<br>
+				<a href="#" id="quoted-skip-license"><?php esc_html_e( 'Continue on the Free plan →', 'quoted' ); ?></a>
 			</p>
 		</form>
 

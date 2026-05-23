@@ -237,6 +237,13 @@ class Quoted_Admin {
 
 	// ─── AJAX handlers ────────────────────────────────────────────────
 
+	/**
+	 * AJAX handler for license activation (called from the onboarding flow).
+	 *
+	 * The handler name is still ajax_connect_backend for back-compat with the
+	 * existing onboarding JS, but the implementation now talks to Lemon
+	 * Squeezy directly via Quoted_License::activate(). No backend_url needed.
+	 */
 	public function ajax_connect_backend() {
 		check_ajax_referer( 'quoted_admin_nonce', 'nonce' );
 
@@ -246,24 +253,22 @@ class Quoted_Admin {
 		}
 
 		$license_key = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
-		$backend_url = isset( $_POST['backend_url'] ) ? esc_url_raw( wp_unslash( $_POST['backend_url'] ) ) : '';
 
 		$license = new Quoted_License();
-		$result = $license->activate( $license_key, $backend_url );
+		$result  = $license->activate( $license_key );
 
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( array(
 				'code'    => $result->get_error_code(),
 				'message' => $result->get_error_message(),
-				'details' => $result->get_error_data(),
 			), 400 );
 			return;
 		}
 
 		wp_send_json_success( array(
-			'tenant_id' => $result['tenant_id'],
-			'plan'      => $result['plan'],
-			'quota'     => isset( $result['quota'] ) ? $result['quota'] : array(),
+			'plan'         => $result['plan'],
+			'variant_name' => $result['variant_name'],
+			'expires_at'   => $result['expires_at'],
 		) );
 	}
 
@@ -440,8 +445,8 @@ class Quoted_Admin {
 		}
 
 		$license = new Quoted_License();
-		$license->disconnect();
+		$license->deactivate();
 
-		wp_send_json_success( array( 'message' => __( 'Disconnected.', 'quoted' ) ) );
+		wp_send_json_success( array( 'message' => __( 'License deactivated.', 'quoted' ) ) );
 	}
 }

@@ -27,16 +27,20 @@
 
 		function initOnboarding() {
 
-			// Step 1: Connect
+			// Step 1: Activate license (or skip)
+			$('#quoted-skip-license').on('click', function (e) {
+				e.preventDefault();
+				goToStep(2);
+			});
+
 			$('#quoted-connect-form').on('submit', function (e) {
 				e.preventDefault();
 				var licenseKey = $('#quoted-license-key').val().trim();
-				var backendUrl = $('#quoted-backend-url').val().trim();
 				var $status = $('#quoted-connect-status');
 				var $btn = $('#quoted-connect-btn');
 
 				if (!licenseKey) {
-					$status.addClass('error').text(QuotedAdmin.i18n.error_generic);
+					$status.addClass('error').text('License key is required.');
 					return;
 				}
 
@@ -46,8 +50,7 @@
 				$.post(QuotedAdmin.ajax_url, {
 					action: 'quoted_connect_backend',
 					nonce: QuotedAdmin.nonce,
-					license_key: licenseKey,
-					backend_url: backendUrl
+					license_key: licenseKey
 				}).done(function (resp) {
 					if (resp.success) {
 						$status.text(QuotedAdmin.i18n.success);

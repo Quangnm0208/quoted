@@ -35,38 +35,13 @@ class Quoted_Llms_Txt {
 			return $cached;
 		}
 
-		$content = $this->fetch_from_backend();
-		if ( $content === null ) {
-			$content = $this->generate_locally();
-		}
+		// Standalone plugin — no backend to fetch from. Always generate locally.
+		// The 50-post cap inside generate_locally() is what gates the Free tier;
+		// paid plans simply bump the cap (see Quoted_License::current_plan()).
+		$content = $this->generate_locally();
 
 		set_transient( self::CACHE_KEY, $content, self::CACHE_TTL );
 		return $content;
-	}
-
-	/**
-	 * Try to fetch from backend.
-	 *
-	 * @return string|null
-	 */
-	private function fetch_from_backend() {
-		$license = new Quoted_License();
-		if ( ! $license->is_connected() ) {
-			return null;
-		}
-
-		$api = new Quoted_Api_Client();
-		$result = $api->get_public( '/api/public/llm/sitemap.txt' );
-
-		if ( is_wp_error( $result ) ) {
-			return null;
-		}
-
-		if ( is_string( $result ) && strlen( $result ) > 0 ) {
-			return $result;
-		}
-
-		return null;
 	}
 
 	/**
