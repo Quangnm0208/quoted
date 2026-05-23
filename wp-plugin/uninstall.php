@@ -20,19 +20,29 @@ $wpdb->query( "DROP TABLE IF EXISTS $table" );
 
 // Delete options.
 $options = array(
+	// Current (v0.2.0+).
 	'quoted_version',
-	'quoted_backend_url',
 	'quoted_license_key',
-	'quoted_jwt',
-	'quoted_jwt_expires_at',
-	'quoted_tenant_id',
+	'quoted_license_instance_id',
+	'quoted_license_status',
+	'quoted_license_expires_at',
+	'quoted_license_validated_at',
 	'quoted_plan',
-	'quoted_niche',
+	'quoted_variant_name',
+	'quoted_customer_email',
 	'quoted_onboarded',
+	'quoted_perplexity_api_key',
+	'quoted_tavily_api_key',
 	'quoted_hash_ips',
 	'quoted_disable_logging',
 	'quoted_show_badge',
 	'quoted_trust_proxy',
+	// Legacy (pre-standalone, in case the user is upgrading from v0.1.x).
+	'quoted_backend_url',
+	'quoted_jwt',
+	'quoted_jwt_expires_at',
+	'quoted_tenant_id',
+	'quoted_niche',
 );
 
 foreach ( $options as $opt ) {

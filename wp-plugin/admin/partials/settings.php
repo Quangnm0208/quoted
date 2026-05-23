@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings view.
+ * Settings page — License activation, Pro feature API keys, Privacy, Display.
  *
  * @package Quoted
  */
@@ -9,14 +9,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$backend_url     = get_option( 'quoted_backend_url', '' );
-$hash_ips        = (bool) get_option( 'quoted_hash_ips', true );
-$show_badge      = (bool) get_option( 'quoted_show_badge', true );
-$disable_logging = (bool) get_option( 'quoted_disable_logging', false );
-$trust_proxy     = (bool) get_option( 'quoted_trust_proxy', false );
-$tenant_id       = get_option( 'quoted_tenant_id', '' );
-$plan            = get_option( 'quoted_plan', 'free' );
-$niche           = get_option( 'quoted_niche', '' );
+$plan                = Quoted_License::current_plan();
+$is_paid             = ( $plan !== 'free' );
+$license_key         = get_option( 'quoted_license_key', '' );
+$license_status      = get_option( 'quoted_license_status', '' );
+$license_expires_at  = (int) get_option( 'quoted_license_expires_at', 0 );
+$license_validated_at = (int) get_option( 'quoted_license_validated_at', 0 );
+$variant_name        = get_option( 'quoted_variant_name', '' );
+$customer_email      = get_option( 'quoted_customer_email', '' );
+
+$hash_ips            = (bool) get_option( 'quoted_hash_ips', true );
+$show_badge          = (bool) get_option( 'quoted_show_badge', true );
+$disable_logging     = (bool) get_option( 'quoted_disable_logging', false );
+$trust_proxy         = (bool) get_option( 'quoted_trust_proxy', false );
+
+$perplexity_api_key  = get_option( 'quoted_perplexity_api_key', '' );
+$tavily_api_key      = get_option( 'quoted_tavily_api_key', '' );
 
 settings_errors( 'quoted' );
 ?>
@@ -24,38 +32,162 @@ settings_errors( 'quoted' );
 
 	<h1><?php esc_html_e( 'Quoted Settings', 'quoted' ); ?></h1>
 
+	<!-- ────────────── License section (separate form for activate/deactivate) ────────────── -->
+	<h2><?php esc_html_e( 'License', 'quoted' ); ?></h2>
+
+	<form method="post" action="">
+		<?php wp_nonce_field( 'quoted_license_action' ); ?>
+
+		<table class="form-table">
+			<tr>
+				<th scope="row">
+					<label for="quoted_license_key"><?php esc_html_e( 'License key', 'quoted' ); ?></label>
+				</th>
+				<td>
+					<input
+						type="text"
+						id="quoted_license_key"
+						name="quoted_license_key"
+						class="regular-text"
+						placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+						value="<?php echo esc_attr( $license_key ); ?>"
+						<?php echo $is_paid ? 'readonly' : ''; ?>
+					/>
+					<p class="description">
+						<?php
+						if ( $is_paid ) {
+							esc_html_e( 'Currently active. Use "Deactivate" to free this seat and unbind the key from this site.', 'quoted' );
+						} else {
+							printf(
+								/* translators: %s: Upgrade page URL */
+								esc_html__( 'Paste the UUID we emailed you after purchase. No license yet? %s', 'quoted' ),
+								'<a href="' . esc_url( admin_url( 'admin.php?page=quoted-billing' ) ) . '">' . esc_html__( 'See pricing →', 'quoted' ) . '</a>'
+							);
+						}
+						?>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Status', 'quoted' ); ?></th>
+				<td>
+					<?php if ( $is_paid && $license_status === 'active' ) : ?>
+						<span style="color:#00a32a;font-weight:600">✓ <?php esc_html_e( 'Active', 'quoted' ); ?></span>
+						<?php if ( $variant_name ) : ?>
+							— <?php echo esc_html( $variant_name ); ?>
+						<?php endif; ?>
+						<?php if ( $license_expires_at ) : ?>
+							<br><small><?php
+							printf(
+								/* translators: %s: human-readable date */
+								esc_html__( 'Renews / expires %s', 'quoted' ),
+								esc_html( date_i18n( get_option( 'date_format' ), $license_expires_at ) )
+							);
+							?></small>
+						<?php endif; ?>
+						<?php if ( $customer_email ) : ?>
+							<br><small><?php esc_html_e( 'Billed to:', 'quoted' ); ?> <code><?php echo esc_html( $customer_email ); ?></code></small>
+						<?php endif; ?>
+					<?php elseif ( $license_status === 'expired' ) : ?>
+						<span style="color:#d63638;font-weight:600">✗ <?php esc_html_e( 'Expired', 'quoted' ); ?></span>
+					<?php elseif ( $license_status === 'disabled' ) : ?>
+						<span style="color:#d63638;font-weight:600">✗ <?php esc_html_e( 'Disabled', 'quoted' ); ?></span>
+					<?php else : ?>
+						<span style="color:#8c8f94"><?php esc_html_e( 'Free plan', 'quoted' ); ?></span>
+					<?php endif; ?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Plan', 'quoted' ); ?></th>
+				<td>
+					<strong><?php echo esc_html( strtoupper( str_replace( '_', ' ', $plan ) ) ); ?></strong>
+					<?php if ( ! $is_paid ) : ?>
+						— <a href="<?php echo esc_url( admin_url( 'admin.php?page=quoted-billing' ) ); ?>"><?php esc_html_e( 'See plans →', 'quoted' ); ?></a>
+					<?php endif; ?>
+				</td>
+			</tr>
+		</table>
+
+		<p>
+			<?php if ( $is_paid ) : ?>
+				<button type="submit" name="quoted_license_deactivate" class="button button-secondary"
+				        onclick="return confirm('<?php echo esc_js( __( 'Deactivate this license? You can re-activate any time using the same key.', 'quoted' ) ); ?>');">
+					<?php esc_html_e( 'Deactivate license', 'quoted' ); ?>
+				</button>
+			<?php else : ?>
+				<button type="submit" name="quoted_license_activate" class="button button-primary">
+					<?php esc_html_e( 'Activate license', 'quoted' ); ?>
+				</button>
+			<?php endif; ?>
+		</p>
+	</form>
+
+	<hr/>
+
+	<!-- ────────────── Main settings form ────────────── -->
 	<form method="post" action="">
 		<?php wp_nonce_field( 'quoted_settings_save' ); ?>
 		<input type="hidden" name="quoted_settings_submit" value="1" />
 
-		<h2><?php esc_html_e( 'Connection', 'quoted' ); ?></h2>
+		<!-- AI provider API keys (Pro features) -->
+		<h2><?php esc_html_e( 'Pro feature API keys', 'quoted' ); ?></h2>
+		<p class="description" style="margin-bottom:1em">
+			<?php esc_html_e( 'Citation tracking and Live AI Test call third-party APIs. Bring your own keys — Quoted never proxies your queries through a backend, and your spend stays on your own provider account.', 'quoted' ); ?>
+		</p>
 		<table class="form-table">
 			<tr>
 				<th scope="row">
-					<label for="quoted_backend_url"><?php esc_html_e( 'Backend URL', 'quoted' ); ?></label>
+					<label for="quoted_perplexity_api_key"><?php esc_html_e( 'Perplexity API key', 'quoted' ); ?></label>
 				</th>
 				<td>
 					<input
-						type="url"
-						id="quoted_backend_url"
-						name="quoted_backend_url"
+						type="password"
+						id="quoted_perplexity_api_key"
+						name="quoted_perplexity_api_key"
 						class="regular-text"
-						value="<?php echo esc_attr( $backend_url ); ?>"
+						value="<?php echo esc_attr( $perplexity_api_key ); ?>"
+						placeholder="pplx-..."
+						autocomplete="off"
+						<?php disabled( ! $is_paid ); ?>
 					/>
-					<p class="description"><?php esc_html_e( 'Default: https://api.quoted.io', 'quoted' ); ?></p>
+					<p class="description">
+						<?php if ( $is_paid ) : ?>
+							<?php
+							printf(
+								/* translators: %s: Perplexity dashboard URL */
+								esc_html__( 'Get one at %s. Stored locally, never sent to Quoted.', 'quoted' ),
+								'<a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener">perplexity.ai/settings/api ↗</a>'
+							);
+							?>
+						<?php else : ?>
+							🔒 <?php esc_html_e( 'Requires Solo or Pro+ license.', 'quoted' ); ?>
+						<?php endif; ?>
+					</p>
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Tenant ID', 'quoted' ); ?></th>
-				<td><code><?php echo esc_html( $tenant_id ?: __( '(not connected)', 'quoted' ) ); ?></code></td>
-			</tr>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Plan', 'quoted' ); ?></th>
-				<td><strong><?php echo esc_html( strtoupper( $plan ) ); ?></strong></td>
-			</tr>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Niche', 'quoted' ); ?></th>
-				<td><?php echo esc_html( $niche ?: __( '(not set)', 'quoted' ) ); ?></td>
+				<th scope="row">
+					<label for="quoted_tavily_api_key"><?php esc_html_e( 'Tavily API key', 'quoted' ); ?></label>
+				</th>
+				<td>
+					<input
+						type="password"
+						id="quoted_tavily_api_key"
+						name="quoted_tavily_api_key"
+						class="regular-text"
+						value="<?php echo esc_attr( $tavily_api_key ); ?>"
+						placeholder="tvly-..."
+						autocomplete="off"
+						<?php disabled( ! $is_paid ); ?>
+					/>
+					<p class="description">
+						<?php if ( $is_paid ) : ?>
+							<?php esc_html_e( 'Optional alternative search-grounded LLM. Use either Perplexity or Tavily.', 'quoted' ); ?>
+						<?php else : ?>
+							🔒 <?php esc_html_e( 'Requires Solo or Pro+ license.', 'quoted' ); ?>
+						<?php endif; ?>
+					</p>
+				</td>
 			</tr>
 		</table>
 
@@ -66,9 +198,9 @@ settings_errors( 'quoted' );
 				<td>
 					<label>
 						<input type="checkbox" name="quoted_hash_ips" value="1" <?php checked( $hash_ips ); ?> />
-						<?php esc_html_e( 'Hash visitor IPs (SHA-256) before sending to Quoted backend', 'quoted' ); ?>
+						<?php esc_html_e( 'Hash visitor IPs (SHA-256) before storing in the bot log', 'quoted' ); ?>
 					</label>
-					<p class="description"><?php esc_html_e( 'Recommended ON. Raw IPs never leave your server.', 'quoted' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Recommended ON. With this on, raw IPs are never written to the database.', 'quoted' ); ?></p>
 				</td>
 			</tr>
 			<tr>
@@ -104,13 +236,13 @@ settings_errors( 'quoted' );
 							name="quoted_show_badge"
 							value="1"
 							<?php checked( $show_badge ); ?>
-							<?php disabled( $plan === 'free' ); ?>
+							<?php disabled( ! $is_paid ); ?>
 						/>
 						<?php esc_html_e( 'Show "Powered by Quoted" badge in site footer', 'quoted' ); ?>
 					</label>
-					<?php if ( $plan === 'free' ) : ?>
+					<?php if ( ! $is_paid ) : ?>
 						<p class="description">
-							<?php esc_html_e( 'Free plan: badge is required. Upgrade to Pro to remove.', 'quoted' ); ?>
+							<?php esc_html_e( 'Free plan: badge is required. Upgrade to Solo to remove.', 'quoted' ); ?>
 						</p>
 					<?php endif; ?>
 				</td>
@@ -119,17 +251,5 @@ settings_errors( 'quoted' );
 
 		<?php submit_button(); ?>
 	</form>
-
-	<hr/>
-
-	<h2><?php esc_html_e( 'Danger zone', 'quoted' ); ?></h2>
-	<p>
-		<button type="button" class="button button-secondary button-link-delete" id="quoted-disconnect-btn">
-			<?php esc_html_e( 'Disconnect from Quoted', 'quoted' ); ?>
-		</button>
-		<span class="description">
-			<?php esc_html_e( 'Removes your JWT and license info from this site. Data on the backend is preserved.', 'quoted' ); ?>
-		</span>
-	</p>
 
 </div>

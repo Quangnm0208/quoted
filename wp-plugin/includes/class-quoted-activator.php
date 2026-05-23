@@ -55,24 +55,31 @@ class Quoted_Activator {
 
 	private static function set_default_options() {
 		$defaults = array(
-			'quoted_version'         => QUOTED_VERSION,
-			'quoted_backend_url'     => '',
-			'quoted_license_key'     => '',
-			'quoted_jwt'             => '',
-			'quoted_jwt_expires_at'  => 0,
-			'quoted_tenant_id'       => '',
-			'quoted_plan'            => 'free',
-			'quoted_niche'           => '',
-			'quoted_onboarded'       => false,
-			'quoted_hash_ips'        => true,
-			'quoted_disable_logging' => false,
-			'quoted_show_badge'      => true,
-			'quoted_trust_proxy'     => false,
+			'quoted_version'              => QUOTED_VERSION,
+			// License (Lemon Squeezy License API).
+			'quoted_license_key'          => '',
+			'quoted_license_instance_id'  => '',
+			'quoted_license_status'       => '',
+			'quoted_license_expires_at'   => 0,
+			'quoted_license_validated_at' => 0,
+			'quoted_plan'                 => 'free',
+			'quoted_variant_name'         => '',
+			'quoted_customer_email'       => '',
+			// Onboarding state.
+			'quoted_onboarded'            => false,
+			// BYO API keys for Pro features.
+			'quoted_perplexity_api_key'   => '',
+			'quoted_tavily_api_key'       => '',
+			// Privacy / behaviour toggles.
+			'quoted_hash_ips'             => true,
+			'quoted_disable_logging'      => false,
+			'quoted_show_badge'           => true,
+			'quoted_trust_proxy'          => false,
 		);
 
 		foreach ( $defaults as $key => $value ) {
 			if ( get_option( $key ) === false ) {
-				add_option( $key, $value );
+				add_option( $key, $value, '', 'no' );
 			}
 		}
 	}

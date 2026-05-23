@@ -152,7 +152,13 @@ class Quoted_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'quoted' ) );
 		}
 
-		// Save settings on POST. Gate on an explicit submit marker so a stray
+		// 1. License activate / deactivate (separate form with its own nonce).
+		if ( isset( $_POST['quoted_license_activate'] ) || isset( $_POST['quoted_license_deactivate'] ) ) {
+			check_admin_referer( 'quoted_license_action' );
+			$this->handle_license_action();
+		}
+
+		// 2. Main settings form. Gate on an explicit submit marker so a stray
 		// POST (e.g. from another plugin's form on the same screen) doesn't
 		// trigger check_admin_referer() and the "link expired" interstitial.
 		if ( isset( $_POST['quoted_settings_submit'] ) ) {
@@ -163,20 +169,54 @@ class Quoted_Admin {
 		require_once QUOTED_PLUGIN_DIR . 'admin/partials/settings.php';
 	}
 
+	private function handle_license_action() {
+		$license = new Quoted_License();
+
+		if ( isset( $_POST['quoted_license_deactivate'] ) ) {
+			$license->deactivate();
+			add_settings_error( 'quoted', 'quoted_deactivated',
+				__( 'License deactivated. This seat has been freed.', 'quoted' ), 'updated' );
+			return;
+		}
+
+		$key = isset( $_POST['quoted_license_key'] )
+			? sanitize_text_field( wp_unslash( $_POST['quoted_license_key'] ) )
+			: '';
+
+		$result = $license->activate( $key );
+		if ( is_wp_error( $result ) ) {
+			add_settings_error( 'quoted', $result->get_error_code(),
+				$result->get_error_message(), 'error' );
+			return;
+		}
+
+		add_settings_error( 'quoted', 'quoted_activated',
+			sprintf(
+				/* translators: %s: plan name */
+				__( 'License activated. Plan: %s.', 'quoted' ),
+				esc_html( strtoupper( str_replace( '_', ' ', $result['plan'] ) ) )
+			),
+			'updated' );
+	}
+
 	private function save_settings() {
-		$hash_ips = isset( $_POST['quoted_hash_ips'] ) ? 1 : 0;
-		$show_badge = isset( $_POST['quoted_show_badge'] ) ? 1 : 0;
-		$disable_logging = isset( $_POST['quoted_disable_logging'] ) ? 1 : 0;
-		$trust_proxy = isset( $_POST['quoted_trust_proxy'] ) ? 1 : 0;
+		update_option( 'quoted_hash_ips',        isset( $_POST['quoted_hash_ips'] ) );
+		update_option( 'quoted_show_badge',      isset( $_POST['quoted_show_badge'] ) );
+		update_option( 'quoted_disable_logging', isset( $_POST['quoted_disable_logging'] ) );
+		update_option( 'quoted_trust_proxy',     isset( $_POST['quoted_trust_proxy'] ) );
 
-		update_option( 'quoted_hash_ips', (bool) $hash_ips );
-		update_option( 'quoted_show_badge', (bool) $show_badge );
-		update_option( 'quoted_disable_logging', (bool) $disable_logging );
-		update_option( 'quoted_trust_proxy', (bool) $trust_proxy );
-
-		if ( isset( $_POST['quoted_backend_url'] ) ) {
-			$url = esc_url_raw( wp_unslash( $_POST['quoted_backend_url'] ) );
-			update_option( 'quoted_backend_url', $url );
+		// BYO API keys — only saved when the user has a paid plan that unlocks
+		// the fields. Stored as-is (no transforms). Empty string clears.
+		$is_paid = ( Quoted_License::current_plan() !== 'free' );
+		if ( $is_paid ) {
+			if ( isset( $_POST['quoted_perplexity_api_key'] ) ) {
+				$key = sanitize_text_field( wp_unslash( $_POST['quoted_perplexity_api_key'] ) );
+				update_option( 'quoted_perplexity_api_key', $key );
+			}
+			if ( isset( $_POST['quoted_tavily_api_key'] ) ) {
+				$key = sanitize_text_field( wp_unslash( $_POST['quoted_tavily_api_key'] ) );
+				update_option( 'quoted_tavily_api_key', $key );
+			}
 		}
 
 		add_settings_error(
