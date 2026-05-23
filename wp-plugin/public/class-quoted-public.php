@@ -26,9 +26,11 @@ class Quoted_Public {
 		// Only on frontend GET requests. Skip REST and XML-RPC too — a bot
 		// hitting /wp-json/quoted/v1/llm/foo otherwise triggers the
 		// detector twice (once on init, once on the REST request).
+		// wp_is_xmlrpc_request() exists since WP 4.5 but is missing in some
+		// stripped runtimes (e.g. WordPress Playground); guard with function_exists().
 		if ( is_admin() || wp_doing_ajax() || wp_doing_cron()
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			|| wp_is_xmlrpc_request() ) {
+			|| ( function_exists( 'wp_is_xmlrpc_request' ) && wp_is_xmlrpc_request() ) ) {
 			return;
 		}
 
