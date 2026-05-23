@@ -284,18 +284,111 @@ class Quoted_Admin {
 			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
-		$api = new Quoted_Api_Client();
-		$result = $api->request( 'GET', '/api/v1/dashboard/summary?days=7' );
+		// Standalone plugin — read everything from the local bot log table.
+		global $wpdb;
+		$table = $wpdb->prefix . 'quoted_bot_log';
 
-		if ( is_wp_error( $result ) ) {
-			wp_send_json_error( array(
-				'code'    => $result->get_error_code(),
-				'message' => $result->get_error_message(),
-			), 500 );
-			return;
+		// Free tier: 7-day window. Paid tier: 90-day window for dashboard widgets.
+		$plan         = Quoted_License::current_plan();
+		$window_days  = ( $plan === 'free' ) ? 7 : 90;
+		$window_start = gmdate( 'Y-m-d H:i:s', time() - ( $window_days * DAY_IN_SECONDS ) );
+
+		// Total crawls in window + previous window (for delta).
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		$total_this = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table} WHERE crawled_at >= %s",
+			$window_start
+		) );
+		$prev_start = gmdate( 'Y-m-d H:i:s', time() - ( 2 * $window_days * DAY_IN_SECONDS ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		$total_prev = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table} WHERE crawled_at >= %s AND crawled_at < %s",
+			$prev_start, $window_start
+		) );
+
+		// AI Distribution Score = local heuristic: count of distinct bots seen
+		// in the window × 10, capped at 100. (A site reached by 10+ different
+		// AI bots is treated as "well distributed".)
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		$distinct_bots = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(DISTINCT bot_name) FROM {$table} WHERE crawled_at >= %s",
+			$window_start
+		) );
+		$score      = min( 100, $distinct_bots * 10 );
+		$prev_score = 0;
+		if ( $total_prev > 0 ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+			$prev_distinct = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(DISTINCT bot_name) FROM {$table} WHERE crawled_at >= %s AND crawled_at < %s",
+				$prev_start, $window_start
+			) );
+			$prev_score = min( 100, $prev_distinct * 10 );
 		}
 
-		wp_send_json_success( $result );
+		// Recent crawls feed (latest 10).
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		$recent = $wpdb->get_results(
+			"SELECT bot_name, url_path, crawled_at FROM {$table} ORDER BY id DESC LIMIT 10"
+		);
+		$recent_crawls = array();
+		foreach ( $recent as $r ) {
+			$recent_crawls[] = array(
+				'bot_name'   => $r->bot_name,
+				'url_path'   => $r->url_path,
+				'crawled_at' => $r->crawled_at,
+				'human_time' => human_time_diff( strtotime( $r->crawled_at . ' UTC' ), time() ) . ' ago',
+			);
+		}
+
+		// Top bots in window.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		$top = $wpdb->get_results( $wpdb->prepare(
+			"SELECT bot_name, COUNT(*) AS c FROM {$table} WHERE crawled_at >= %s GROUP BY bot_name ORDER BY c DESC LIMIT 8",
+			$window_start
+		) );
+		$top_bots = array();
+		foreach ( $top as $t ) {
+			$top_bots[] = array(
+				'bot_name' => $t->bot_name,
+				'count'    => (int) $t->c,
+			);
+		}
+
+		// Quota — Free tier capped at 50 published posts in llms.txt.
+		$published = (int) wp_count_posts( 'post' )->publish + (int) wp_count_posts( 'page' )->publish;
+		$quota     = ( $plan === 'free' ) ? 50 : 0; // 0 = unlimited
+
+		// Next action — simple heuristic for empty-state guidance.
+		$next_action = null;
+		if ( $total_this === 0 ) {
+			$next_action = array(
+				'title'       => __( 'Waiting for AI bots', 'quoted' ),
+				'description' => __( 'No crawls yet. ClaudeBot and GPTBot usually discover new /llms.txt files within 24 hours. Share your llms.txt URL to speed things up.', 'quoted' ),
+				'action_url'  => home_url( '/llms.txt' ),
+			);
+		} elseif ( $plan === 'free' && $published >= 45 ) {
+			$next_action = array(
+				'title'       => __( 'Approaching the 50-post Free cap', 'quoted' ),
+				'description' => __( 'Your llms.txt will only include the 50 most-recent posts on the Free tier. Upgrade to Solo for unlimited.', 'quoted' ),
+				'action_url'  => admin_url( 'admin.php?page=quoted-billing' ),
+			);
+		}
+
+		wp_send_json_success( array(
+			'ai_distribution_score' => $score,
+			'score_delta_7d'        => $score - $prev_score,
+			'window_days'           => $window_days,
+			'bot_activity'          => array(
+				'total_crawls_7d' => $total_this,
+				'recent_crawls'   => $recent_crawls,
+				'top_bots'        => $top_bots,
+			),
+			'posts'                 => array(
+				'synced' => $published,
+				'quota'  => $quota,
+			),
+			'next_action'           => $next_action,
+		) );
 	}
 
 	public function ajax_disconnect() {
