@@ -25,6 +25,7 @@ settings_errors( 'quoted' );
 
 	<form method="post" action="">
 		<?php wp_nonce_field( 'quoted_settings_save' ); ?>
+		<input type="hidden" name="quoted_settings_submit" value="1" />
 
 		<h2><?php esc_html_e( 'Connection', 'quoted' ); ?></h2>
 		<table class="form-table">

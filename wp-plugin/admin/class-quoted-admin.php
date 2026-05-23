@@ -115,8 +115,11 @@ class Quoted_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'quoted' ) );
 		}
 
-		// Save settings on POST.
-		if ( ! empty( $_POST ) && check_admin_referer( 'quoted_settings_save' ) ) {
+		// Save settings on POST. Gate on an explicit submit marker so a stray
+		// POST (e.g. from another plugin's form on the same screen) doesn't
+		// trigger check_admin_referer() and the "link expired" interstitial.
+		if ( isset( $_POST['quoted_settings_submit'] ) ) {
+			check_admin_referer( 'quoted_settings_save' );
 			$this->save_settings();
 		}
 
