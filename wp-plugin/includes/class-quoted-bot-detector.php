@@ -106,10 +106,15 @@ class Quoted_Bot_Detector {
 
 	/**
 	 * Hash IP for privacy. SHA-256 by default; can be disabled via setting.
+	 *
+	 * When hashing is disabled, the raw IP is stored with the prefix `raw:`.
+	 * Earlier versions returned a constant 64-zero hash in that branch, which
+	 * collapsed every disabled-hash crawl into a single dedup bucket on the
+	 * backend (effectively dropping 99% of traffic).
 	 */
 	private function hash_ip( $ip_raw ) {
 		if ( ! get_option( 'quoted_hash_ips', true ) ) {
-			return 'sha256:' . str_repeat( '0', 64 );
+			return 'raw:' . $ip_raw;
 		}
 		return 'sha256:' . hash( 'sha256', $ip_raw . wp_salt( 'auth' ) );
 	}
