@@ -72,8 +72,8 @@ $tenant_id = get_option( 'quoted_tenant_id', '' );
 				<div class="quoted-paywall-teaser">
 					<p class="quoted-locked-icon">🔒</p>
 					<p><?php esc_html_e( 'Citation tracking arrives in the Pro plan. See exactly when ChatGPT, Claude, and Perplexity quote your content.', 'quoted' ); ?></p>
-					<a href="https://quoted.io/pricing" target="_blank" class="button button-secondary">
-						<?php esc_html_e( 'Learn more', 'quoted' ); ?>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=quoted-billing' ) ); ?>" class="button button-primary">
+						<?php esc_html_e( 'Upgrade to Solo', 'quoted' ); ?>
 					</a>
 				</div>
 			<?php else : ?>

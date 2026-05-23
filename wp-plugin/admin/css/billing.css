@@ -1,0 +1,238 @@
+/**
+ * Quoted Billing styles — pricing page in WP admin.
+ */
+
+.quoted-billing {
+	max-width: 1200px;
+}
+
+/* Current plan card */
+.quoted-current-plan-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px 24px;
+	margin: 20px 0 30px;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 20px;
+}
+.quoted-current-plan-label {
+	color: #50575e;
+	font-size: 14px;
+}
+.quoted-current-plan-value .quoted-plan-badge {
+	padding: 8px 16px;
+	border-radius: 4px;
+	font-weight: 700;
+	font-size: 12px;
+	letter-spacing: 1px;
+}
+.quoted-plan-badge.plan-free {
+	background: #f0f0f1;
+	color: #50575e;
+}
+.quoted-plan-badge.plan-solo {
+	background: #2271b1;
+	color: #fff;
+}
+.quoted-plan-badge.plan-pro_plus {
+	background: #674ea7;
+	color: #fff;
+}
+.quoted-current-plan-actions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.quoted-current-plan-actions .description {
+	color: #8c8f94;
+	font-size: 13px;
+}
+
+/* Pricing grid */
+.quoted-pricing-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 24px;
+	margin-bottom: 40px;
+}
+
+.quoted-pricing-card {
+	background: #fff;
+	border: 2px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 32px 24px;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+.quoted-pricing-card.featured {
+	border-color: #2271b1;
+	box-shadow: 0 4px 20px rgba(34, 113, 177, 0.15);
+	transform: scale(1.02);
+}
+
+.quoted-pricing-card.current {
+	border-color: #00a32a;
+	background: #f0fdf4;
+}
+
+.quoted-pricing-badge {
+	position: absolute;
+	top: -12px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: #2271b1;
+	color: #fff;
+	padding: 4px 16px;
+	border-radius: 20px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 1px;
+}
+
+.quoted-pricing-header {
+	text-align: center;
+	margin-bottom: 24px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #e5e7eb;
+}
+.quoted-pricing-header h2 {
+	margin: 0 0 12px;
+	font-size: 24px;
+	color: #1d2327;
+}
+
+.quoted-price {
+	margin: 8px 0;
+}
+.quoted-price .amount {
+	font-size: 48px;
+	font-weight: 700;
+	color: #1d2327;
+}
+.quoted-price .period {
+	font-size: 16px;
+	color: #50575e;
+	margin-left: 4px;
+}
+.quoted-billed {
+	font-size: 12px;
+	color: #8c8f94;
+	margin: 0;
+}
+
+.quoted-features {
+	flex: 1;
+	list-style: none;
+	padding: 0;
+	margin: 0 0 24px;
+}
+.quoted-features li {
+	padding: 8px 0;
+	font-size: 14px;
+	color: #1d2327;
+}
+.quoted-features li.muted {
+	color: #8c8f94;
+	font-size: 13px;
+}
+
+.quoted-pricing-cta {
+	text-align: center;
+}
+.quoted-pricing-cta .button {
+	width: 100%;
+	text-align: center;
+	justify-content: center;
+}
+.quoted-current-label {
+	display: inline-block;
+	padding: 8px 16px;
+	background: #00a32a;
+	color: #fff;
+	border-radius: 4px;
+	font-weight: 600;
+	font-size: 13px;
+}
+
+/* Trust signals */
+.quoted-trust {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 16px;
+	margin: 40px 0;
+	padding: 24px;
+	background: #f6f7f7;
+	border-radius: 8px;
+}
+.quoted-trust-item {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.quoted-trust-item strong {
+	font-size: 14px;
+	color: #1d2327;
+}
+.quoted-trust-item small {
+	color: #50575e;
+	font-size: 12px;
+}
+
+/* FAQ */
+.quoted-faq {
+	margin: 40px 0;
+}
+.quoted-faq h2 {
+	font-size: 20px;
+	margin-bottom: 20px;
+}
+.quoted-faq details {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 4px;
+	padding: 16px 20px;
+	margin-bottom: 8px;
+}
+.quoted-faq details summary {
+	font-weight: 600;
+	cursor: pointer;
+	color: #1d2327;
+	list-style: none;
+	padding-left: 24px;
+	position: relative;
+}
+.quoted-faq details summary::before {
+	content: '+';
+	position: absolute;
+	left: 0;
+	top: 0;
+	font-size: 20px;
+	color: #2271b1;
+	transition: transform 0.2s;
+}
+.quoted-faq details[open] summary::before {
+	content: '−';
+}
+.quoted-faq details p {
+	margin-top: 12px;
+	color: #50575e;
+	line-height: 1.6;
+}
+
+/* Footer info */
+.quoted-footer-info {
+	margin-top: 40px;
+	padding: 20px;
+	text-align: center;
+	color: #8c8f94;
+	font-size: 13px;
+}
+.quoted-footer-info a {
+	color: #2271b1;
+}
