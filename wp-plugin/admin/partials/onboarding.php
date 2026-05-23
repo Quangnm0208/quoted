@@ -71,61 +71,60 @@ $niches = array(
 		</ol>
 	</div>
 
-	<!-- Step 1: Activate license -->
+	<!-- Step 1: Welcome (varies by whether Pro / LS is configured) -->
 	<section class="quoted-step quoted-step-1 active">
-		<h2><?php esc_html_e( 'Step 1 — Activate your license', 'quoted' ); ?></h2>
-		<p class="description">
-			<?php
-			printf(
-				/* translators: %s: Upgrade page link */
-				esc_html__( "Paste the license key Lemon Squeezy emailed you after checkout. Don't have one? %s", 'quoted' ),
-				'<a href="' . esc_url( admin_url( 'admin.php?page=quoted-billing' ) ) . '">' . esc_html__( 'See pricing →', 'quoted' ) . '</a>'
-			);
-			?>
-		</p>
-
-		<form id="quoted-connect-form" autocomplete="off">
-			<table class="form-table">
-				<tr>
-					<th scope="row">
-						<label for="quoted-license-key"><?php esc_html_e( 'License key', 'quoted' ); ?></label>
-					</th>
-					<td>
-						<input
-							type="text"
-							id="quoted-license-key"
-							name="license_key"
-							class="regular-text"
-							placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-							autocomplete="off"
-							required
-						/>
-					</td>
-				</tr>
-			</table>
-
-			<p class="submit">
-				<button type="submit" class="button button-primary button-hero" id="quoted-connect-btn">
-					<?php esc_html_e( 'Activate', 'quoted' ); ?>
-				</button>
-				<span class="quoted-status" id="quoted-connect-status"></span>
-			</p>
+		<?php if ( Quoted_Billing::is_configured() ) : ?>
+			<h2><?php esc_html_e( 'Step 1 — Activate your license', 'quoted' ); ?></h2>
 			<p class="description">
-				<?php esc_html_e( 'Or skip this step — Quoted Free works without a license. You can activate later in Settings.', 'quoted' ); ?>
-				<br>
-				<a href="#" id="quoted-skip-license"><?php esc_html_e( 'Continue on the Free plan →', 'quoted' ); ?></a>
+				<?php
+				printf(
+					/* translators: %s: Upgrade page link */
+					esc_html__( "Paste the license key Lemon Squeezy emailed you after checkout. Don't have one? %s", 'quoted' ),
+					'<a href="' . esc_url( admin_url( 'admin.php?page=quoted-billing' ) ) . '">' . esc_html__( 'See pricing →', 'quoted' ) . '</a>'
+				);
+				?>
 			</p>
-		</form>
 
-		<div class="quoted-help">
-			<p><?php
-			printf(
-				/* translators: %s: signup URL */
-				wp_kses_post( __( "Don't have a license key yet? <a href='%s' target='_blank'>Get one free</a>.", 'quoted' ) ),
-				'https://quotedeasy.com/signup'
-			);
-			?></p>
-		</div>
+			<form id="quoted-connect-form" autocomplete="off">
+				<table class="form-table">
+					<tr>
+						<th scope="row">
+							<label for="quoted-license-key"><?php esc_html_e( 'License key', 'quoted' ); ?></label>
+						</th>
+						<td>
+							<input
+								type="text"
+								id="quoted-license-key"
+								name="license_key"
+								class="regular-text"
+								placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+								autocomplete="off"
+								required
+							/>
+						</td>
+					</tr>
+				</table>
+
+				<p class="submit">
+					<button type="submit" class="button button-primary button-hero" id="quoted-connect-btn">
+						<?php esc_html_e( 'Activate', 'quoted' ); ?>
+					</button>
+					<span class="quoted-status" id="quoted-connect-status"></span>
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'Or skip this step — Quoted Free works without a license. You can activate later in Settings.', 'quoted' ); ?>
+					<br>
+					<a href="#" id="quoted-skip-license"><?php esc_html_e( 'Continue on the Free plan →', 'quoted' ); ?></a>
+				</p>
+			</form>
+		<?php else : ?>
+			<h2><?php esc_html_e( 'Welcome to Quoted Free', 'quoted' ); ?></h2>
+			<p class="description"><?php esc_html_e( "Your site is about to become AI-readable. The Free tier ships everything you need to start: llms.txt at /llms.txt, clean Markdown endpoints, AI bot detection, allowlist, schema markup.", 'quoted' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Pro features (citation tracking, Live AI Test, niche benchmark) are in active development. Free will always be free.', 'quoted' ); ?></p>
+			<p class="submit">
+				<a href="#" class="button button-primary button-hero" id="quoted-skip-license"><?php esc_html_e( "Let's go →", 'quoted' ); ?></a>
+			</p>
+		<?php endif; ?>
 	</section>
 
 	<!-- Step 2: Niche -->

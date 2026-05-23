@@ -31,21 +31,20 @@ It runs **alongside** your existing SEO plugin (Yoast, Rank Math, AIOSEO, SEOPre
 * **< 2 ms overhead** per pageview — one substring scan on the User-Agent header.
 * **Multi-language** — UTF-8 safe; tested with French accents, Vietnamese diacritics, Japanese kanji, CJK characters.
 
-= ⭐ What Pro adds =
+= ⭐ Pro features (coming soon) =
 
-A Pro license from [quotedeasy.com](https://quotedeasy.com) unlocks (via Lemon Squeezy checkout):
+The Free tier above is fully functional and will stay free forever. A paid Pro tier is in active development at [quotedeasy.com](https://quotedeasy.com), planned features:
 
 * **Unlimited posts** in llms.txt (free tier caps at 50)
 * **12 months** of bot history (free is 7 days)
 * **Citation tracking** with your own Perplexity/Tavily API key — we never proxy your queries or use our credits
 * **Live AI Test** — ask AI a question and see if your site is cited
-* **Niche benchmark** (Pro+) — compare your AI distribution vs competitors
-* **Bot whitelist/blocklist by category** (Pro+)
-* **Up to 5 sites per license** (Solo) or 30 (Pro+)
+* **Niche benchmark** — compare your AI distribution vs competitors
+* **Multi-site license** (up to 30 sites)
 * **Remove the "Powered by Quoted" badge** in footer
-* **Priority support** (Pro+, 24h SLA)
+* **Priority support**
 
-Pricing: Solo $19/mo, Pro+ $39/mo. 14-day money-back. See [quotedeasy.com/pricing](https://quotedeasy.com).
+Pricing and exact launch date will be announced at [quotedeasy.com](https://quotedeasy.com). Subscribe there to be notified.
 
 = 🤖 AI engines supported =
 
@@ -107,9 +106,11 @@ Yes. Quoted is UTF-8 throughout. Post titles, body content, and category names s
 
 == External services ==
 
-This plugin connects to external services in the following situations. **None of these activate on the Free tier without explicit license activation.**
+**This Free release of Quoted does not connect to any external service.** Everything happens on your own server: llms.txt is generated from your local posts, Markdown is rendered from your local content, bot crawls are logged to your local database, schema is emitted into your own pages, and the dashboard reads only from your `wp_quoted_bot_log` table.
 
-= Lemon Squeezy License API (Pro only) =
+The integrations below are described for transparency — they will activate **only after the Pro tier launches** and only if you choose to activate a paid license. Until then, none of these URLs are hit by the plugin.
+
+= Lemon Squeezy License API (Pro only — not active in this release) =
 
 When you activate a Pro license, the plugin sends a POST request to `https://api.lemonsqueezy.com/v1/licenses/activate` with your license key and the site's hostname. Once daily, it revalidates by POSTing to `https://api.lemonsqueezy.com/v1/licenses/validate`. The plugin stores the instance ID returned by Lemon Squeezy locally so you can deactivate the seat later.
 
@@ -118,13 +119,13 @@ When you activate a Pro license, the plugin sends a POST request to `https://api
 * **Terms of service:** https://www.lemonsqueezy.com/legal/terms-of-service
 * **Privacy policy:** https://www.lemonsqueezy.com/legal/privacy
 
-= Lemon Squeezy hosted checkout (when upgrading) =
+= Lemon Squeezy hosted checkout (Pro only — not active in this release) =
 
-The Upgrade page contains anchor links to `https://YOUR-STORE.lemonsqueezy.com/buy/...`. Clicking opens Lemon Squeezy's hosted checkout in a new tab. No data is sent from the plugin to Lemon Squeezy until you click. Subject to Lemon Squeezy's own terms/privacy linked above.
+When Pro launches, the Upgrade page will contain anchor links to `https://STORE.lemonsqueezy.com/buy/...`. Clicking opens Lemon Squeezy's hosted checkout in a new tab. No data is sent from the plugin to Lemon Squeezy until you click. Subject to Lemon Squeezy's own terms/privacy linked above.
 
-= Perplexity AI / Tavily (Pro only, BYO key) =
+= Perplexity AI / Tavily (Pro only, BYO key, not active in this release) =
 
-When you paste a Perplexity or Tavily API key into Settings and trigger a Live AI Test or Citation Check, the plugin posts your query directly from your WordPress server to `https://api.perplexity.ai` or `https://api.tavily.com` using **your** API key. Quoted never sees the query.
+After Pro launches: when you paste a Perplexity or Tavily API key into Settings and trigger a Live AI Test or Citation Check, the plugin will post your query directly from your WordPress server to `https://api.perplexity.ai` or `https://api.tavily.com` using **your** API key. Quoted never sees the query.
 
 * Perplexity terms: https://www.perplexity.ai/hub/legal/perplexity-api-terms-of-service
 * Perplexity privacy: https://www.perplexity.ai/hub/legal/privacy-policy
@@ -137,14 +138,15 @@ When you paste a Perplexity or Tavily API key into Settings and trigger a Live A
 3. Schema settings — master enable + Auto / Always / Never mode. The Auto label calls out the active SEO plugin so you know why Article is being deferred.
 4. llms.txt rendered output in the browser, with site description and the latest 50 posts.
 5. Per-post markdown endpoint — clean Markdown body, no ads, no scripts.
-6. Settings → Pro feature API keys — BYO Perplexity and Tavily key fields (gated by license).
-7. Upgrade page — 3 pricing tiers, transparent monthly pricing, secure Lemon Squeezy checkout.
-8. Onboarding step 1 — paste license key or skip to start on the Free plan.
+6. Settings → Privacy — IP hashing toggle, disable-logging kill switch, trust-proxy opt-in.
+7. Welcome screen on first activation — Free tier ready in one click.
 
 == Changelog ==
 
 = 0.2.0 =
-* Standalone refactor — plugin now ships fully self-contained. No backend hop, no JWT token lifecycle. License talks directly to Lemon Squeezy's License API.
+* **First public release — Free tier.** The plugin ships fully self-contained: no backend, no SaaS proxy, no required external service.
+* Paid Pro tier is in development at quotedeasy.com — the Pro UI auto-appears once the operator's Lemon Squeezy store is wired up. Until then the plugin runs Free-only.
+* Architecture: standalone refactor. License module talks directly to Lemon Squeezy's License API; no JWT, no backend hop.
 * New: **AI Crawler Allowlist** — Allow / Block any of 14 supported bots from Settings. Blocked bots get HTTP 403 and a `Disallow` rule in robots.txt.
 * New: **Schema engine** — Article and FAQPage JSON-LD output on single posts/pages. Auto-detects active SEO plugins and defers Article to them in Auto mode. FAQ extraction from `[faq_item]` shortcodes and H2/H3 question patterns.
 * New: **BYO API keys** for Pro citation tracking — Perplexity and Tavily fields in Settings.
@@ -166,4 +168,4 @@ When you paste a Perplexity or Tavily API key into Settings and trigger a Live A
 == Upgrade Notice ==
 
 = 0.2.0 =
-Major refactor: plugin is now fully standalone. The "Backend URL" setting is gone (now irrelevant). New AI Crawler Allowlist and Schema engine sections appear in Settings. Existing license activations need to be re-done once via the new License section in Settings (Quoted now talks directly to Lemon Squeezy).
+First public release. Free tier — no account needed, no data leaves your server. Pro features coming soon.

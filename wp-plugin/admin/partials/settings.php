@@ -33,12 +33,15 @@ $schema_enabled      = (bool) get_option( 'quoted_schema_enabled', true );
 $schema_mode         = get_option( 'quoted_schema_mode', 'auto' );
 $conflicting_seo     = Quoted_Schema::conflicting_seo_plugin();
 
+$pro_available       = Quoted_Billing::is_configured();
+
 settings_errors( 'quoted' );
 ?>
 <div class="wrap quoted-settings">
 
 	<h1><?php esc_html_e( 'Quoted Settings', 'quoted' ); ?></h1>
 
+	<?php if ( $pro_available ) : ?>
 	<!-- ────────────── License section (separate form for activate/deactivate) ────────────── -->
 	<h2><?php esc_html_e( 'License', 'quoted' ); ?></h2>
 
@@ -130,13 +133,15 @@ settings_errors( 'quoted' );
 	</form>
 
 	<hr/>
+	<?php endif; // pro_available — closes the License section ?>
 
 	<!-- ────────────── Main settings form ────────────── -->
 	<form method="post" action="">
 		<?php wp_nonce_field( 'quoted_settings_save' ); ?>
 		<input type="hidden" name="quoted_settings_submit" value="1" />
 
-		<!-- AI provider API keys (Pro features) -->
+		<?php if ( $pro_available ) : ?>
+		<!-- AI provider API keys (Pro features) — only shown once LS is configured. -->
 		<h2><?php esc_html_e( 'Pro feature API keys', 'quoted' ); ?></h2>
 		<p class="description" style="margin-bottom:1em">
 			<?php esc_html_e( 'Citation tracking and Live AI Test call third-party APIs. Bring your own keys — Quoted never proxies your queries through a backend, and your spend stays on your own provider account.', 'quoted' ); ?>
@@ -197,6 +202,7 @@ settings_errors( 'quoted' );
 				</td>
 			</tr>
 		</table>
+		<?php endif; // pro_available — closes the Pro API keys section ?>
 
 		<h2><?php esc_html_e( 'Privacy', 'quoted' ); ?></h2>
 		<table class="form-table">

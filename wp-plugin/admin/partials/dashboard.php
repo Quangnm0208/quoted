@@ -71,10 +71,15 @@ $tenant_id = get_option( 'quoted_tenant_id', '' );
 			<?php if ( $plan === 'free' ) : ?>
 				<div class="quoted-paywall-teaser">
 					<p class="quoted-locked-icon">🔒</p>
-					<p><?php esc_html_e( 'Citation tracking arrives in the Solo plan. See exactly when ChatGPT, Claude, and Perplexity quote your content.', 'quoted' ); ?></p>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=quoted-billing' ) ); ?>" class="button button-primary">
-						<?php esc_html_e( 'Upgrade to Solo', 'quoted' ); ?>
-					</a>
+					<?php if ( Quoted_Billing::is_configured() ) : ?>
+						<p><?php esc_html_e( 'Citation tracking arrives in the Solo plan. See exactly when ChatGPT, Claude, and Perplexity quote your content.', 'quoted' ); ?></p>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=quoted-billing' ) ); ?>" class="button button-primary">
+							<?php esc_html_e( 'Upgrade to Solo', 'quoted' ); ?>
+						</a>
+					<?php else : ?>
+						<p><strong><?php esc_html_e( 'Pro features coming soon.', 'quoted' ); ?></strong></p>
+						<p><?php esc_html_e( 'Citation tracking, Live AI Test, and Niche Benchmark are in active development. The Free tier (llms.txt, Markdown endpoints, bot detection, allowlist, schema) is fully functional.', 'quoted' ); ?></p>
+					<?php endif; ?>
 				</div>
 			<?php else : ?>
 				<div id="quoted-citations-list">

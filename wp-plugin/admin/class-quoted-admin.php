@@ -40,14 +40,19 @@ class Quoted_Admin {
 			array( $this, 'render_settings' )
 		);
 
-		add_submenu_page(
-			'quoted',
-			__( 'Upgrade', 'quoted' ),
-			__( 'Upgrade', 'quoted' ),
-			'manage_options',
-			'quoted-billing',
-			array( $this, 'render_billing' )
-		);
+		// Upgrade submenu only appears once Lemon Squeezy is configured (Solo + Pro+
+		// variant IDs replaced from placeholders). Until then we ship Free-only —
+		// no broken buy buttons, no half-working license activation flow.
+		if ( Quoted_Billing::is_configured() ) {
+			add_submenu_page(
+				'quoted',
+				__( 'Upgrade', 'quoted' ),
+				__( 'Upgrade', 'quoted' ),
+				'manage_options',
+				'quoted-billing',
+				array( $this, 'render_billing' )
+			);
+		}
 	}
 
 	public function render_billing() {
@@ -100,9 +105,10 @@ class Quoted_Admin {
 			),
 		) );
 
-		// Billing CSS only on the Upgrade page. No JS needed — buy buttons
-		// are plain anchor tags to the Lemon Squeezy hosted checkout.
-		if ( strpos( $hook, 'quoted-billing' ) !== false ) {
+		// Billing CSS only on the Upgrade page (which itself only registers
+		// when LS is configured). No JS needed — buy buttons are plain anchor
+		// tags to the Lemon Squeezy hosted checkout.
+		if ( Quoted_Billing::is_configured() && strpos( $hook, 'quoted-billing' ) !== false ) {
 			wp_enqueue_style(
 				'quoted-billing',
 				QUOTED_PLUGIN_URL . 'admin/css/billing.css',
@@ -153,7 +159,10 @@ class Quoted_Admin {
 		}
 
 		// 1. License activate / deactivate (separate form with its own nonce).
-		if ( isset( $_POST['quoted_license_activate'] ) || isset( $_POST['quoted_license_deactivate'] ) ) {
+		// Only accepted when LS is configured — otherwise the form isn't rendered
+		// in the partial, so any POST here is bogus.
+		if ( Quoted_Billing::is_configured()
+			&& ( isset( $_POST['quoted_license_activate'] ) || isset( $_POST['quoted_license_deactivate'] ) ) ) {
 			check_admin_referer( 'quoted_license_action' );
 			$this->handle_license_action();
 		}
