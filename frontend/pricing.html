@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pricing — Quoted</title>
+<meta name="description" content="Free is for testing. Starter is for one business site at $19/mo. Pro is for small agencies at $29/mo. Annual billing gives you two months free.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+  .price-hero { padding: 80px 0 32px; text-align: center; }
+  .price-hero h1 { font-size: clamp(40px, 5vw, 64px); line-height: 1.02; letter-spacing: -0.035em; }
+  .price-hero p { font-size: 18px; color: var(--q-text-muted); margin: 20px auto 0; max-width: 52ch; }
+
+  .billing-toggle {
+    display: inline-flex; gap: 0; background: var(--q-surface-2); border-radius: var(--q-r-pill); padding: 4px;
+    border: 1px solid var(--q-border); margin-top: 32px;
+  }
+  .billing-toggle button { padding: 10px 20px; border-radius: var(--q-r-pill); font-size: 14px; font-weight: 500; color: var(--q-text-muted); }
+  .billing-toggle button.active { background: var(--q-surface); color: var(--q-text); box-shadow: var(--q-shadow-1); }
+  .billing-toggle .save { color: var(--q-primary); font-size: 12px; margin-left: 6px; font-family: var(--q-font-mono); }
+
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
+  @media (max-width: 980px) { .plans { grid-template-columns: 1fr; } }
+
+  .plan {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    padding: 32px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .plan.highlight { border-color: var(--q-primary); box-shadow: 0 0 0 4px var(--q-accent-ring); }
+  .plan .plan-head { display: flex; align-items: center; justify-content: space-between; }
+  .plan h3 { font-size: 20px; font-weight: 600; }
+  .plan .tag { font-size: 14px; color: var(--q-text-muted); margin-top: 8px; min-height: 42px; }
+  .plan .price { margin-top: 22px; display: flex; align-items: baseline; gap: 6px; }
+  .plan .price .amt { font-size: 44px; font-weight: 600; letter-spacing: -0.025em; color: var(--q-text-strong); }
+  .plan .price .per { font-size: 14px; color: var(--q-text-muted); }
+  .plan .price-sub { font-size: 12px; color: var(--q-text-faint); margin-top: 6px; font-family: var(--q-font-mono); height: 16px; }
+  .plan .cta { margin-top: 22px; }
+  .plan .feats { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--q-border-soft); flex: 1; }
+  .plan .feats ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .plan .feats li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+  .plan .feats li::before {
+    content: ""; flex: 0 0 auto; width: 14px; height: 14px; margin-top: 4px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M3 7.2 5.5 9.7 11 4' fill='none' stroke='%233b3fbf' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-size: contain;
+  }
+  .plan .limits { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--q-border-soft); font-size: 12px; color: var(--q-text-faint); }
+  .plan .badge {
+    position: absolute; top: -10px; right: 28px;
+    background: var(--q-primary); color: #fff;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+    padding: 4px 12px; border-radius: var(--q-r-pill);
+  }
+
+  /* Compare table (legacy classes kept for backwards compat) */
+  .compare {
+    overflow: hidden;
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    background: var(--q-surface);
+  }
+
+  /* ── Shared baseline strip ─────────────────────────────── */
+  .shared-baseline {
+    display: flex; gap: 24px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .shared-baseline .shared-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #066848;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 6px 10px; border-radius: var(--q-r-pill);
+    font-family: var(--q-font-mono);
+    flex: 0 0 auto;
+  }
+  [data-theme="dark"] .shared-baseline .shared-label { color: #34d399; background: rgba(16,185,129,0.16); }
+  .shared-baseline .shared-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    flex: 1; min-width: 0;
+  }
+  .shared-baseline .shared-pill {
+    font-size: 13px; padding: 6px 12px;
+    background: var(--q-bg-soft); border: 1px solid var(--q-border-soft);
+    border-radius: var(--q-r-md);
+    color: var(--q-text);
+  }
+  .shared-baseline .shared-pill code { font-family: var(--q-font-mono); font-size: 12px; }
+
+  /* ── Diff matrix grid ──────────────────────────────────── */
+  .diff-matrix {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    background: var(--q-border);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    overflow: hidden;
+    gap: 1px;
+  }
+  @media (max-width: 880px) {
+    .diff-matrix { grid-template-columns: 1fr; }
+    .diff-matrix .dm-head.dm-feature { display: none; }
+    .diff-matrix .dm-feature { background: var(--q-bg-soft); }
+    .diff-matrix .dm-feature::before { content: attr(data-plan); }
+  }
+
+  .diff-matrix > * { background: var(--q-surface); padding: 16px 18px; }
+
+  /* Header row */
+  .diff-matrix .dm-head {
+    background: var(--q-bg-soft);
+    padding: 20px 18px;
+  }
+  .diff-matrix .dm-feature-label {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--q-text-faint);
+    font-family: var(--q-font-mono);
+  }
+  .diff-matrix .dm-col {
+    display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+  }
+  .diff-matrix .dm-col-rec {
+    background: var(--q-primary-soft);
+    position: relative;
+  }
+  .diff-matrix .dm-col-rec::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+    height: 3px; background: var(--q-primary);
+  }
+  .diff-matrix .dm-plan-name {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 15px; font-weight: 600; color: var(--q-text-strong);
+  }
+  .diff-matrix .rec-badge {
+    font-size: 10px; padding: 3px 8px; border-radius: var(--q-r-pill);
+    background: var(--q-primary); color: #fff;
+    font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+    font-family: var(--q-font-mono);
+  }
+  .diff-matrix .dm-plan-price {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+    color: var(--q-text-strong);
+    line-height: 1;
+  }
+  .diff-matrix .dm-plan-price small {
+    font-size: 12px; font-weight: 400; color: var(--q-text-muted);
+    letter-spacing: 0;
+  }
+
+  /* Group divider rows */
+  .diff-matrix .dm-group {
+    grid-column: 1 / -1;
+    background: var(--q-bg-soft);
+    font-family: var(--q-font-mono);
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--q-text-faint);
+    padding: 12px 18px;
+  }
+
+  /* Feature label cells */
+  .diff-matrix .dm-feature {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 18px;
+  }
+  .diff-matrix .dm-feature strong { font-size: 14px; font-weight: 600; color: var(--q-text-strong); }
+  .diff-matrix .dm-feature small { font-size: 12px; color: var(--q-text-muted); line-height: 1.45; }
+
+  /* Value cells */
+  .diff-matrix .dm-cell {
+    display: flex; flex-direction: column; gap: 6px;
+    justify-content: center;
+    padding: 18px;
+  }
+  .diff-matrix .dm-cell-rec { background: rgba(59, 63, 191, 0.04); }
+  [data-theme="dark"] .diff-matrix .dm-cell-rec { background: rgba(107, 111, 245, 0.08); }
+  .diff-matrix .dm-cell-rec:has(.dm-up) { background: var(--q-primary-soft); }
+
+  .diff-matrix .dm-value {
+    font-size: 15px; line-height: 1.3;
+    color: var(--q-text-strong);
+  }
+  .diff-matrix .dm-value strong { font-weight: 700; }
+  .diff-matrix .dm-value.muted { color: var(--q-text-muted); }
+  .diff-matrix .dm-value.dash { color: var(--q-text-faint); font-style: italic; font-size: 13px; }
+  .diff-matrix .dm-value.highlight {
+    color: var(--q-text-strong);
+    font-weight: 600;
+  }
+  .diff-matrix .dm-cell-rec .dm-value.highlight { color: var(--q-primary-ink); }
+  [data-theme="dark"] .diff-matrix .dm-cell-rec .dm-value.highlight { color: var(--q-primary); }
+
+  .diff-matrix .dm-cap {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; padding: 3px 8px; border-radius: var(--q-r-pill);
+    background: var(--q-surface-2); color: var(--q-text-muted);
+    font-family: var(--q-font-mono); align-self: flex-start;
+  }
+  .diff-matrix .dm-up {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; padding: 3px 8px; border-radius: var(--q-r-pill);
+    background: var(--q-primary); color: #fff;
+    font-family: var(--q-font-mono); font-weight: 500; align-self: flex-start;
+    letter-spacing: 0.02em;
+  }
+  .diff-matrix .dm-same {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--q-text-faint);
+    font-family: var(--q-font-mono); align-self: flex-start;
+  }
+  .diff-matrix .dm-same::before {
+    content: "≡"; font-size: 12px; opacity: 0.6;
+  }
+
+  /* Trust strip */
+  .trust {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--q-border);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    overflow: hidden;
+  }
+  @media (max-width: 880px) { .trust { grid-template-columns: 1fr; } }
+  .trust .item { background: var(--q-surface); padding: 28px; display: grid; gap: 8px; }
+  .trust .item .ico { width: 36px; height: 36px; border-radius: 8px; background: var(--q-primary-soft); color: var(--q-primary); display: flex; align-items: center; justify-content: center; }
+  .trust .item h4 { font-size: 15px; font-weight: 600; }
+  .trust .item p { margin: 0; font-size: 13px; color: var(--q-text-muted); line-height: 1.55; }
+
+  /* FAQ (reused) */
+  .faq { display: grid; gap: 8px; }
+  .faq details { background: var(--q-surface); border: 1px solid var(--q-border); border-radius: var(--q-r-md); transition: border-color 160ms var(--q-ease); }
+  .faq details[open] { border-color: var(--q-primary); }
+  .faq summary {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 18px 22px; font-weight: 500; font-size: 15px;
+    cursor: pointer; list-style: none;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary .ico { transition: transform 200ms var(--q-ease); color: var(--q-text-muted); }
+  .faq details[open] summary .ico { transform: rotate(45deg); color: var(--q-primary); }
+  .faq .answer { padding: 0 22px 20px; font-size: 14px; color: var(--q-text-muted); line-height: 1.6; }
+</style>
+</head>
+<body data-screen-label="Pricing">
+
+<div data-include="header"></div>
+
+<section class="price-hero">
+  <div class="wrap-narrow">
+    <span class="eyebrow no-dot" style="justify-self:center;display:flex;justify-content:center;">Pricing</span>
+    <h1 class="mt-16 text-balance">Honest pricing for a small piece of software.</h1>
+    <p class="text-pretty">
+      Free is for testing and validation. Starter is for one business site. Pro is for small agencies and repeatable client workflows.
+      Annual billing gives you two months free.
+    </p>
+    <div style="display:flex;justify-content:center;">
+      <div class="billing-toggle" id="billing-toggle">
+        <button class="active" data-cycle="monthly">Monthly</button>
+        <button data-cycle="yearly">Yearly <span class="save">−17%</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top: 40px;">
+  <div class="wrap">
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-head"><h3>Free</h3><span class="chip chip-muted">Self-host</span></div>
+        <p class="tag">Test AI-readiness on one WordPress site.</p>
+        <div class="price"><span class="amt">$0</span><span class="per">/forever</span></div>
+        <div class="price-sub">No card. No account.</div>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary cta">Install free plugin</a>
+        <div class="feats">
+          <ul>
+            <li>Generate <code class="mono" style="font-size:12.5px;">/llms.txt</code> for up to 50 posts/pages</li>
+            <li>Clean Markdown endpoints for published content</li>
+            <li>Detect 60+ AI and data crawlers locally</li>
+            <li>Allow or block individual AI crawlers</li>
+            <li>Article and FAQ schema (SEO-plugin compatible)</li>
+            <li>View recent AI bot activity in WordPress</li>
+            <li>No account, telemetry, or external service required</li>
+          </ul>
+        </div>
+        <div class="limits">1 site · 50 posts in <code class="mono">/llms.txt</code> · 7-day local bot history</div>
+      </div>
+
+      <div class="plan highlight">
+        <span class="badge">Best for businesses</span>
+        <div class="plan-head"><h3>Starter</h3><span class="chip">Most popular</span></div>
+        <p class="tag">For business owners who want a maintained AI-ready site.</p>
+        <div class="price">
+          <span class="amt" data-price data-monthly="$19" data-yearly="$15.83">$19</span>
+          <span class="per">/month</span>
+        </div>
+        <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$190 billed yearly · save $38">billed monthly</div>
+        <a href="#" class="btn btn-primary cta">Start Starter</a>
+        <div class="feats">
+          <ul>
+            <li>Everything in Free</li>
+            <li>Unlimited posts in <code class="mono" style="font-size:12.5px;">/llms.txt</code></li>
+            <li>12-month bot crawl history</li>
+            <li>Citation checks and Live AI Test with your own provider key</li>
+            <li>Remove the "Powered by Quoted" footer badge</li>
+            <li>Clear setup guidance for key pages, FAQs, and service content</li>
+            <li>Email support</li>
+          </ul>
+        </div>
+        <div class="limits">1 site · best for local businesses, consultants, and solo founders</div>
+      </div>
+
+      <div class="plan">
+        <div class="plan-head"><h3>Pro</h3><span class="chip chip-muted">Agencies</span></div>
+        <p class="tag">For small agencies and repeatable client workflows.</p>
+        <div class="price">
+          <span class="amt" data-price data-monthly="$29" data-yearly="$24.17">$29</span>
+          <span class="per">/month</span>
+        </div>
+        <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$290 billed yearly · save $58">billed monthly</div>
+        <a href="#" class="btn btn-secondary cta">Start Pro</a>
+        <div class="feats">
+          <ul>
+            <li>Everything in Starter</li>
+            <li>Use across up to 5 client or owned sites</li>
+            <li>Higher citation-check allowance for recurring checks</li>
+            <li>Repeatable setup workflow for client WordPress sites</li>
+            <li>Single subscription for small multi-site portfolios</li>
+            <li>Priority email support</li>
+          </ul>
+        </div>
+        <div class="limits">Up to 5 sites · best for freelancers and small agencies</div>
+      </div>
+    </div>
+    <p style="margin-top:24px;text-align:center;font-size:13px;color:var(--q-text-faint);">
+      Billing is securely handled by Lemon Squeezy. VAT and sales tax are calculated automatically for your region.
+    </p>
+  </div>
+</section>
+
+<!-- ── Compare ─────────────────────────────────────────────── -->
+<section class="bg-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Compare plans</span>
+      <h2 class="h1 text-balance">Where each plan stops, and where the next one begins.</h2>
+      <p class="lead">Same plugin core. Different limits and add-ons. Differences are highlighted below — equal features are listed once, not repeated three times.</p>
+    </div>
+
+    <!-- Shared baseline -->
+    <div class="shared-baseline">
+      <div class="shared-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Every plan includes</span>
+      </div>
+      <div class="shared-list">
+        <span class="shared-pill"><code class="mono">/llms.txt</code> generation</span>
+        <span class="shared-pill">Clean Markdown endpoints</span>
+        <span class="shared-pill">Article &amp; FAQ JSON-LD schema</span>
+        <span class="shared-pill">SEO-plugin conflict detection</span>
+        <span class="shared-pill">60+ AI crawler signatures</span>
+        <span class="shared-pill">Allow / block crawlers</span>
+        <span class="shared-pill">Local bot activity log</span>
+      </div>
+    </div>
+
+    <!-- Plan headers + diff matrix -->
+    <div class="diff-matrix">
+      <!-- Header row -->
+      <div class="dm-head dm-feature"><span class="dm-feature-label">What changes between plans</span></div>
+      <div class="dm-head dm-col" data-plan="free">
+        <div class="dm-plan-name">Free</div>
+        <div class="dm-plan-price">$0<small>/forever</small></div>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Install free</a>
+      </div>
+      <div class="dm-head dm-col dm-col-rec" data-plan="starter">
+        <div class="dm-plan-name">Starter <span class="rec-badge">Recommended</span></div>
+        <div class="dm-plan-price"><span data-price data-monthly="$19" data-yearly="$15.83">$19</span><small>/month</small></div>
+        <a href="#" class="btn btn-primary btn-sm">Start Starter</a>
+      </div>
+      <div class="dm-head dm-col" data-plan="pro">
+        <div class="dm-plan-name">Pro</div>
+        <div class="dm-plan-price"><span data-price data-monthly="$29" data-yearly="$24.17">$29</span><small>/month</small></div>
+        <a href="#" class="btn btn-secondary btn-sm">Start Pro</a>
+      </div>
+
+      <!-- Group: Limits -->
+      <div class="dm-group">Limits</div>
+      <div class="dm-feature">
+        <strong>/llms.txt coverage</strong>
+        <small>How many posts &amp; pages get listed.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value muted">Up to <strong>50</strong></span>
+        <span class="dm-cap">capped</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value highlight">Unlimited</span>
+        <span class="dm-up">▲ unlocked</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value highlight">Unlimited</span>
+        <span class="dm-same">same as Starter</span>
+      </div>
+
+      <div class="dm-feature">
+        <strong>Sites per license</strong>
+        <small>Activate Quoted on multiple WordPress installs.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value muted"><strong>1</strong> site</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value"><strong>1</strong> site</span>
+        <span class="dm-same">same as Free</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value highlight">Up to <strong>5</strong> sites</span>
+        <span class="dm-up">▲ 5× more</span>
+      </div>
+
+      <div class="dm-feature">
+        <strong>Bot crawl history</strong>
+        <small>How far back the dashboard can show AI bot activity.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value muted"><strong>7</strong> days</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value highlight"><strong>12</strong> months</span>
+        <span class="dm-up">▲ ~52× longer</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value highlight"><strong>12</strong> months</span>
+        <span class="dm-same">same as Starter</span>
+      </div>
+
+      <!-- Group: Verification -->
+      <div class="dm-group">Verification &amp; testing</div>
+      <div class="dm-feature">
+        <strong>Citation checks</strong>
+        <small>Probe whether AI assistants cite your pages using your own provider key.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value dash">Not included</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value highlight">BYO key</span>
+        <span class="dm-up">▲ new</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value highlight">BYO key · higher allowance</span>
+        <span class="dm-up">▲ for agencies</span>
+      </div>
+
+      <div class="dm-feature">
+        <strong>Live AI Test</strong>
+        <small>One-click sanity check that a clean Markdown twin renders correctly.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value dash">Not included</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value highlight">Included</span>
+        <span class="dm-up">▲ new</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value highlight">Included</span>
+        <span class="dm-same">same as Starter</span>
+      </div>
+
+      <!-- Group: Branding & support -->
+      <div class="dm-group">Branding &amp; support</div>
+      <div class="dm-feature">
+        <strong>"Powered by Quoted" footer badge</strong>
+        <small>Removable on paid plans.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value muted">Shown</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value highlight">Removed</span>
+        <span class="dm-up">▲ white-label</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value highlight">Removed</span>
+        <span class="dm-same">same as Starter</span>
+      </div>
+
+      <div class="dm-feature">
+        <strong>Support</strong>
+        <small>How quickly you'll hear back from us.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value muted">Community + docs</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value highlight">Email support</span>
+        <span class="dm-up">▲ direct line</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value highlight">Priority email</span>
+        <span class="dm-up">▲ faster</span>
+      </div>
+
+      <!-- Group: Best for -->
+      <div class="dm-group">Best fit</div>
+      <div class="dm-feature">
+        <strong>Who it's built for</strong>
+        <small>Our recommended use of each tier.</small>
+      </div>
+      <div class="dm-cell" data-plan="free">
+        <span class="dm-value muted">Validating the workflow on one site.</span>
+      </div>
+      <div class="dm-cell dm-cell-rec" data-plan="starter">
+        <span class="dm-value">One local business or solo founder.</span>
+      </div>
+      <div class="dm-cell" data-plan="pro">
+        <span class="dm-value">Freelancers &amp; small agencies (5 sites).</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Trust strip ─────────────────────────────────────────── -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What we don't sell</span>
+      <h2 class="h1 text-balance">Clear limits. Practical setup. No AI ranking promises.</h2>
+    </div>
+    <div class="trust">
+      <div class="item">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+        <h4>No ranking guarantees</h4>
+        <p>No plugin can guarantee AI visibility, citations, or traffic. Quoted prepares the source material; AI systems decide what to use.</p>
+      </div>
+      <div class="item">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h4>Local-first telemetry</h4>
+        <p>The Free plan operates entirely on your WordPress site. Paid AI checks use your own provider key.</p>
+      </div>
+      <div class="item">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+        <h4>Cancel anytime</h4>
+        <p>Cancel from the Lemon Squeezy customer portal. Your plan stays active until the period ends, then reverts to Free.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Billing FAQ ─────────────────────────────────────────── -->
+<section class="bg-soft">
+  <div class="wrap-narrow">
+    <div class="section-head">
+      <span class="eyebrow">Billing questions</span>
+      <h2 class="h1 text-balance">Before you upgrade</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>How does billing work?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">Billing is handled by Lemon Squeezy. Starter is $19/month or $190/year for one business site. Pro is $29/month or $290/year for small agency and client-site workflows.</div>
+      </details>
+      <details>
+        <summary>Can I cancel anytime?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">Yes. Cancel from the Lemon Squeezy customer portal. Your paid plan stays active until the end of the billing period, then the plugin reverts to the Free tier.</div>
+      </details>
+      <details>
+        <summary>Is the Free plan enough?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">Free is enough to validate the workflow on one site. It includes <code class="mono">/llms.txt</code> for up to 50 posts or pages, Markdown endpoints, AI bot tracking, crawler controls, and basic schema. Paid plans add unlimited coverage, longer history, citation checks, multi-site use, and support.</div>
+      </details>
+      <details>
+        <summary>Can agencies use Quoted for clients?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">Yes. The Pro plan is designed for freelancers and small agencies that want a repeatable AI-readiness setup across client WordPress sites.</div>
+      </details>
+      <details>
+        <summary>Will my data be sent to Quoted servers?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">The Free plan operates locally on your WordPress site and does not send telemetry to Quoted. Paid AI checks use your own provider key where applicable.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ───────────────────────────────────────────── -->
+<section style="padding-bottom: 0;">
+  <div class="wrap">
+    <div style="background:var(--q-ink-bg);color:var(--q-ink-text);border-radius:var(--q-r-xl);padding:64px 48px;text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 80%, rgba(59,63,191,0.35) 0%, transparent 50%),radial-gradient(circle at 80% 20%, rgba(107,111,245,0.25) 0%, transparent 45%);"></div>
+      <div style="position:relative;">
+        <h2 style="color:#fff;font-size:clamp(28px,3.4vw,40px);line-height:1.05;letter-spacing:-0.03em;" class="text-balance">Try the Free plugin first.</h2>
+        <p style="color:var(--q-ink-muted);font-size:16px;max-width:48ch;margin:16px auto 28px;">
+          Validate the workflow on your own WordPress site. Upgrade only when the dashboard becomes part of your weekly routine.
+        </p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-lg btn-on-dark">Install free</a>
+          <a href="docs.html" class="btn btn-secondary btn-lg btn-on-dark">Setup guide</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div data-include="footer"></div>
+
+<script src="assets/shared.js"></script>
+<script>
+  document.querySelectorAll('#billing-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cycle = btn.dataset.cycle;
+      document.querySelectorAll('#billing-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('[data-price]').forEach(el => { el.textContent = el.dataset[cycle]; });
+      document.querySelectorAll('[data-price-sub]').forEach(el => { el.textContent = el.dataset[cycle]; });
+    });
+  });
+</script>
+</body>
+</html>

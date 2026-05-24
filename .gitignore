@@ -11,6 +11,9 @@ Thumbs.db
 # Node (used by .pot extractor + zip builder)
 node_modules/
 package-lock.json
+# Keep the vendored upstream lockfile so `npm ci` is reproducible.
+!backend/omniplug/package-lock.json
+!frontend/package-lock.json
 
 # Local-only working copies (not part of the shipped plugin)
 quoted-payments-v0.1.0/
@@ -25,3 +28,12 @@ release/
 # Backup / draft files
 *.bak
 *.orig
+
+# Local backend runtime + secrets (never commit)
+backend/omniplug/.env
+backend/omniplug/data/
+backend/omniplug/uploads/
+backend/omniplug/backups/
+backend/omniplug/keys/*.priv.pem
+backend/omniplug/keys/*.qtd-license.txt
+backend/omniplug/.qtd-inner.*.jwt

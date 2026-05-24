@@ -1,0 +1,33 @@
+services:
+  cms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: omniplug-cms-core:1.4.0
+    container_name: omniplug-cms-core
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./backups:/app/backups
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_PATH: /app/data/cms.db
+      UPLOAD_DIR: /app/uploads
+      BACKUP_DIR: /app/backups
+      BACKUP_RETENTION_DAYS: 7
+      TENANT_DEFAULT_DOMAIN: ${TENANT_DEFAULT_DOMAIN:-localhost}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:5173,http://localhost:4000}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@omniplug.local}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-ChangeMe123!}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

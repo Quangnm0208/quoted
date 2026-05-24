@@ -11,101 +11,163 @@ track AI bot activity, and surface citations from Perplexity / ChatGPT / Claude.
 
 ---
 
-## What's in this package
+## What's in this repo
 
 ```
-quoted-mvp-v0.1.0/
+quoted/
 ├── README.md                  ← you are here
 ├── LICENSE.txt
 ├── NOTICE.txt
 ├── CHANGELOG.md
 │
 ├── docs/                      ← Strategy + architecture docs
-│   ├── PHASE-0-BUILD-PLAN.md  ← 4-week task-by-task build plan
-│   ├── CITATION-TRACKING-SPEC.md  ← Algorithm spec for Phase 2 (build later)
-│   ├── ARCHITECTURE.md        ← System overview
-│   ├── API-CONTRACT.md        ← WP plugin ↔ backend contract
-│   ├── DEPLOYMENT.md          ← Fly.io + WP plugin deploy steps
-│   └── DEBUGGING.md           ← Common failure modes + fixes
+│   ├── PHASE-0-BUILD-PLAN.md
+│   ├── CITATION-TRACKING-SPEC.md
+│   ├── ARCHITECTURE.md
+│   ├── API-CONTRACT.md
+│   ├── DEPLOYMENT.md
+│   └── DEBUGGING.md
 │
-├── wp-plugin/                 ← WordPress plugin (PHP, ready to zip & install)
-│   ├── quoted.php             ← Main entry
-│   ├── readme.txt             ← wp.org directory format
-│   ├── includes/              ← Core classes
-│   ├── admin/                 ← Admin dashboard + onboarding
-│   ├── public/                ← REST API + bot detector
-│   └── languages/
+├── wp-plugin/                 ← WordPress plugin (PHP)
+│   ├── quoted.php
+│   ├── includes/  admin/  public/  languages/
+│   └── readme.txt
 │
-├── backend/                   ← OmniPlug extensions
-│   ├── migrations/            ← SQL migrations 022–025
-│   ├── modules/               ← New modules (wp-sites, bot-crawls, etc.)
-│   └── scripts/               ← Operator CLIs
+├── backend/                   ← Node.js API (OmniPlug + Quoted overlay)
+│   ├── README.md              ← Overlay layout + rules
+│   └── omniplug/              ← OmniPlug CMS Core v1.4.4 vendored with the
+│                              quoted overlay applied in-place. This is the
+│                              runnable backend. See its package.json.
+│
+├── frontend/                  ← Static marketing site (HTML/CSS/JS, no bundler)
+│   ├── package.json           ← `npm run dev` → `serve` on :5500
+│   ├── index.html  pricing.html  docs.html  faq.html  blog.html  changelog.html
+│   └── assets/  README.md
 │
 └── tests/
-    ├── wp-plugin-tests.md     ← Manual test plan for plugin
-    └── backend-tests.md       ← Backend test plan
+    ├── wp-plugin-tests.md
+    └── backend-tests.md
 ```
 
 ---
 
-## Quick start (debug locally)
+## Local run — one terminal each
 
-### 1. Backend setup (extends OmniPlug v1.4.4)
+You need **Node 22.x** (the backend pins `>=22 <24`). Check with `node --version`.
+
+### Terminal 1 — Backend (port 4000)
 
 ```bash
-# In your existing omniplug-cms-core-v1.4.4 directory:
-cp -r /path/to/quoted-mvp-v0.1.0/backend/migrations/*.sql src/core/db/migrations/
-cp -r /path/to/quoted-mvp-v0.1.0/backend/modules/* src/backend/modules/
-
-# Wire routes in src/backend/server.js — see backend/README.md
-
-# Run migrations
-node src/core/db/migrate.js
-
-# Boot backend
-JWT_SECRET="$(openssl rand -hex 32)" \
-ADMIN_EMAIL=admin@local \
-ADMIN_INITIAL_PASSWORD=ChangeMe123! \
-LICENSE_ENFORCEMENT=warn \
-PERPLEXITY_API_KEY=pplx-xxx \
-TELEMETRY_URL=disabled \
-npm run dev
+cd backend/omniplug
+npm install                                  # one-time
+# .env ships with safe local defaults; LICENSE_PUBLIC_KEY_PATH points at
+# keys/op-license-pub.pem. To generate a fresh keypair instead, see "License
+# keys" below.
+node --env-file=.env src/core/db/migrate.js  # runs migrations 001-029
+node --env-file=.env scripts/verify-schema.js
+node --env-file=.env src/backend/server.js   # boots on :4000
 ```
 
-### 2. WordPress plugin install (local dev)
+Visit:
+- Admin UI: <http://localhost:4000/admin/> — login `admin@quoted.local` / `ChangeMe123!`
+- Health: <http://localhost:4000/api/health>
+
+### Terminal 2 — Frontend (port 5500)
+
+```bash
+cd frontend
+npm install                                  # one-time
+npm run dev                                  # serve on :5500
+```
+
+Visit:
+- <http://localhost:5500/> — Home
+- <http://localhost:5500/pricing> — `serve` strips the `.html`
+- <http://localhost:5500/docs> · `/faq` · `/blog` · `/changelog`
+
+The marketing site is fully static — it does NOT call the backend today (by
+design — the brief was to integrate the existing pieces, not add a new fetch
+layer). When/if `pricing`, `faq`, `changelog`, etc. are made CMS-driven, the
+landmarks in `frontend/README.md` show where to wire each section.
+
+---
+
+## License keys (local dev)
+
+The repo ships an operator public key at `backend/omniplug/keys/op-license-pub.pem`
+and a test license envelope at `backend/omniplug/keys/marcus-outdoor.qtd-license.txt`
+for domain `marcus-outdoor.test`. Use those for smoke tests.
+
+To regenerate from scratch:
+
+```bash
+cd backend/omniplug
+node scripts/op-key-generate.js --rsa --basename=keys/op-license-rsa
+cp keys/op-license-rsa.pub.pem keys/op-license-pub.pem      # the server trusts this
+
+node scripts/qtd-license-sign.js \
+  --priv=keys/op-license-rsa.priv.pem \
+  --signed-for=marcus-outdoor.test \
+  --plan=lite \
+  --customer-email=ops@marcus-outdoor.test \
+  --expires-in-days=365 \
+  --env=test \
+  --out=keys/marcus-outdoor.qtd-license.txt
+```
+
+The `qtd_test_…` envelope written to the `--out` file is what the Quoted WP
+plugin pastes into its **Settings → License key** field. The private key is
+gitignored and must stay off the repo (operator-managed).
+
+---
+
+## Smoke tests (backend already running)
+
+```bash
+# 1. Register the test domain
+LICENSE=$(cat backend/omniplug/keys/marcus-outdoor.qtd-license.txt)
+curl -s -X POST http://localhost:4000/api/v1/wp-sites/register \
+  -H "Content-Type: application/json" \
+  -d "{\"license_key\":\"$LICENSE\",\"domain\":\"marcus-outdoor.test\",\"site_name\":\"Marcus Outdoor\"}" \
+  | tee /tmp/register.json
+
+JWT=$(python3 -c "import json; print(json.load(open('/tmp/register.json'))['jwt'])")
+
+# 2. Sync a post
+curl -s -X POST http://localhost:4000/api/v1/wp-sites/posts/sync \
+  -H "Authorization: Bearer $JWT" -H "Content-Type: application/json" \
+  -d '{"posts":[{"wp_post_id":1,"slug":"hello","title":"Hello","content_html":"<p>Hi</p>","published_at":"2026-05-24T00:00:00Z","modified_at":"2026-05-24T00:00:00Z","url":"https://marcus-outdoor.test/hello/"}]}'
+
+# 3. Read it back via the public llms.txt surface
+curl -s -H "X-Quoted-Domain: marcus-outdoor.test" \
+  http://localhost:4000/api/public/llm/sitemap.txt
+curl -s -H "X-Quoted-Domain: marcus-outdoor.test" \
+  http://localhost:4000/api/public/llm/posts/hello.md
+
+# 4. Dashboard
+curl -s -H "Authorization: Bearer $JWT" \
+  "http://localhost:4000/api/v1/dashboard/summary?days=7"
+```
+
+---
+
+## WordPress plugin install (when you have a WP environment)
 
 ```bash
 # Symlink for live edits:
 cd /path/to/your/wp-content/plugins
-ln -s /path/to/quoted-mvp-v0.1.0/wp-plugin quoted
+ln -s /path/to/quoted/wp-plugin quoted
 
 # Or zip for prod install:
-cd /path/to/quoted-mvp-v0.1.0
+cd /path/to/quoted
 zip -r quoted.zip wp-plugin/ -x "*.DS_Store"
 # Upload via WP Admin → Plugins → Add New → Upload
 ```
 
-### 3. Connect plugin to backend
-
-```php
-// In wp-admin → Plugins → Quoted → Settings
-// 1. Backend URL: http://localhost:4000  (or your Fly.io URL)
-// 2. License key: paste from backend issue script
-// 3. Click "Connect"
-```
-
-### 4. Smoke test
-
-```bash
-# llms.txt should serve:
-curl http://your-site.local/llms.txt
-
-# Markdown endpoint for any post:
-curl http://your-site.local/wp-json/quoted/v1/llm/hello-world
-
-# Bot detection (simulate ClaudeBot):
-curl -A "ClaudeBot/1.0" http://your-site.local/sample-post/
-```
+Then in `wp-admin → Plugins → Quoted → Settings`:
+1. Backend URL: `http://localhost:4000`
+2. License key: paste the contents of `backend/omniplug/keys/<your>.qtd-license.txt`
+3. Click **Connect**.
 
 ---
 

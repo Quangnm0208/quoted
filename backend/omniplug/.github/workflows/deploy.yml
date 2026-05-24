@@ -1,0 +1,111 @@
+name: CI / Deploy CMS v15
+
+on:
+  push:
+    branches: [main, release/*]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint - SQL anti-patterns
+        run: npm run lint:sql
+
+      - name: Lint - positive antipattern detection
+        run: |
+          if node scripts/check-sql-patterns.mjs scripts/__lint_fixtures__/ 2>&1 | grep -q "top-level-obj-db-prepare"; then
+            echo "Lint correctly detected antipattern fixture"
+          else
+            echo "Lint failed to detect known antipattern - regex too narrow"
+            exit 1
+          fi
+
+      - name: Syntax check all JS files
+        run: |
+          for f in $(find src scripts -name "*.js"); do
+            node --check "$f" || { echo "Syntax error in $f"; exit 1; }
+          done
+
+      - name: Test - Migration idempotency
+        run: npm run test:migration
+
+      - name: NPM audit (moderate+)
+        run: npm audit --omit=dev --audit-level=high
+
+  docker-test:
+    name: Docker Fresh-Volume Boot
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t v15-test .
+
+      - name: Run fresh-volume smoke test
+        run: |
+          docker volume create test-data
+          docker run --rm -d --name ci-test \
+            -v test-data:/app/data \
+            -e JWT_SECRET=ci-test-secret-min-32-chars-long-aaaa \
+            -e ADMIN_EMAIL=ci@test.com \
+            -e ADMIN_INITIAL_PASSWORD='CiTest123!@#Pwd' \
+            -e CORS_ORIGIN=http://localhost \
+            -e TENANT_DEFAULT_DOMAIN=ci.localhost \
+            -p 14000:4000 \
+            v15-test
+          sleep 20
+          docker logs ci-test 2>&1 | head -40
+          if ! docker logs ci-test 2>&1 | grep -q "OmniPlug CMS Core"; then
+            echo "server did not boot"
+            exit 1
+          fi
+          curl -sS -f http://localhost:14000/api/health
+          docker exec ci-test sqlite3 /app/data/cms.db ".schema auth_attempts" | grep -q "CREATE TABLE"
+          docker exec ci-test sqlite3 /app/data/cms.db "SELECT COUNT(*) FROM tenants WHERE status = 'active';"
+          CODE=$(curl -sS -o /dev/null -w "%{http_code}" -X POST http://localhost:14000/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"ci@test.com","password":"WRONG"}')
+          [ "$CODE" = "401" ] || { echo "Expected 401, got $CODE"; exit 1; }
+          CODE_PUBLIC=$(curl -sS -o /dev/null -w "%{http_code}" \
+            -H "Host: ci.localhost" \
+            http://localhost:14000/api/public/site)
+          [ "$CODE_PUBLIC" = "200" ] || { echo "Tenant bootstrap regression: expected 200 on ci.localhost, got $CODE_PUBLIC"; exit 1; }
+          CODE_UNKNOWN=$(curl -sS -o /dev/null -w "%{http_code}" \
+            -H "Host: random-attacker.invalid" \
+            http://localhost:14000/api/public/site)
+          [ "$CODE_UNKNOWN" = "404" ] || { echo "Strict-host regression: expected 404 on unknown host, got $CODE_UNKNOWN"; exit 1; }
+          echo "All Docker fresh-volume checks passed"
+          docker stop ci-test
+          docker volume rm test-data
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: [quality-gates, docker-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy (blue-green)
+        run: flyctl deploy --strategy bluegreen --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FAQ — Quoted</title>
+<meta name="description" content="Frequently asked questions about Quoted: how it works with Yoast and Rank Math, billing, free plan, multi-site licenses, and GDPR.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+  .faq-hero { padding: 80px 0 32px; text-align: center; }
+  .faq-hero h1 { font-size: clamp(40px, 5vw, 60px); line-height: 1.02; letter-spacing: -0.032em; }
+  .faq-hero p { font-size: 18px; color: var(--q-text-muted); margin: 18px auto 0; max-width: 52ch; }
+
+  .faq-search {
+    margin-top: 32px;
+    max-width: 480px; margin-left: auto; margin-right: auto;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-md);
+    padding: 12px 16px;
+  }
+  .faq-search input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font: inherit; font-size: 15px;
+    color: var(--q-text);
+  }
+  .faq-search input::placeholder { color: var(--q-text-faint); }
+
+  .faq-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 56px;
+    padding: 24px 0 96px;
+    align-items: start;
+  }
+  @media (max-width: 880px) { .faq-layout { grid-template-columns: 1fr; gap: 32px; } .faq-side { display: none; } }
+
+  .faq-side {
+    position: sticky; top: 80px;
+    align-self: start;
+    font-size: 13px;
+  }
+  .faq-side h5 {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--q-text-faint); margin: 0 0 12px;
+    font-family: var(--q-font-mono);
+  }
+  .faq-side ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .faq-side a {
+    display: flex; justify-content: space-between; padding: 8px 12px;
+    color: var(--q-text-muted); border-radius: var(--q-r-sm);
+    transition: 120ms;
+  }
+  .faq-side a:hover, .faq-side a.active { color: var(--q-text); background: var(--q-bg-soft); }
+  .faq-side a.active { color: var(--q-primary); background: var(--q-primary-soft); font-weight: 500; }
+  .faq-side a .count { font-family: var(--q-font-mono); font-size: 11px; opacity: 0.7; }
+
+  .faq-group { margin-bottom: 48px; scroll-margin-top: 80px; }
+  .faq-group h2 {
+    font-size: 22px; letter-spacing: -0.02em; margin-bottom: 4px;
+  }
+  .faq-group .group-sub {
+    font-size: 14px; color: var(--q-text-muted);
+    margin-bottom: 20px;
+  }
+
+  .qa { display: grid; gap: 8px; }
+  .qa details {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-md);
+    transition: 160ms;
+  }
+  .qa details[open] { border-color: var(--q-primary); }
+  .qa summary {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 18px 22px;
+    font-weight: 500; font-size: 15px;
+    cursor: pointer; list-style: none;
+  }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary .ico { transition: transform 200ms var(--q-ease); color: var(--q-text-muted); }
+  .qa details[open] summary .ico { transform: rotate(45deg); color: var(--q-primary); }
+  .qa .answer { padding: 0 22px 20px; font-size: 14px; color: var(--q-text-muted); line-height: 1.65; }
+  .qa .answer code { font-family: var(--q-font-mono); font-size: 0.92em; background: var(--q-surface-2); border: 1px solid var(--q-border-soft); padding: 1px 6px; border-radius: 4px; }
+  .qa details.hide { display: none; }
+
+  .still-stuck {
+    margin-top: 40px;
+    padding: 32px;
+    background: var(--q-bg-soft);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  }
+  .still-stuck .ico {
+    width: 56px; height: 56px; flex: 0 0 auto;
+    border-radius: 14px;
+    background: var(--q-primary-soft); color: var(--q-primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .still-stuck .copy { flex: 1; min-width: 220px; }
+  .still-stuck h3 { font-size: 17px; }
+  .still-stuck p { font-size: 14px; color: var(--q-text-muted); margin-top: 4px; }
+</style>
+</head>
+<body data-screen-label="FAQ">
+
+<div data-include="header"></div>
+
+<section class="faq-hero">
+  <div class="wrap">
+    <span class="eyebrow no-dot" style="justify-self:center;display:flex;justify-content:center;">FAQ</span>
+    <h1 class="mt-16 text-balance">Frequently asked questions</h1>
+    <p class="text-pretty">
+      Quick, honest answers from the team. Can't find what you're looking for? Email
+      <a href="mailto:support@quotedeasy.com" style="color:var(--q-primary);">support@quotedeasy.com</a>.
+    </p>
+    <div class="faq-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--q-text-faint);"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="faq-search-input" placeholder="Search questions…">
+      <span id="faq-count" style="font-family:var(--q-font-mono);font-size:12px;color:var(--q-text-faint);">17 answers</span>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="faq-layout">
+
+    <!-- Sidebar -->
+    <aside class="faq-side">
+      <h5>Categories</h5>
+      <ul id="faq-side-list">
+        <li><a href="#general" class="active">General <span class="count">4</span></a></li>
+        <li><a href="#compat">Compatibility <span class="count">3</span></a></li>
+        <li><a href="#setup">Setup &amp; usage <span class="count">4</span></a></li>
+        <li><a href="#pricing">Pricing &amp; billing <span class="count">4</span></a></li>
+        <li><a href="#privacy">Privacy &amp; data <span class="count">2</span></a></li>
+      </ul>
+    </aside>
+
+    <!-- Articles -->
+    <div id="faq-body">
+
+      <!-- General -->
+      <section class="faq-group" id="general">
+        <h2>General</h2>
+        <p class="group-sub">What Quoted is, who it's for, and what AI visibility actually means.</p>
+        <div class="qa">
+          <details open>
+            <summary>What is Quoted?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Quoted is a lightweight AI visibility and content-structure layer for WordPress. It helps expose important WordPress content through <code>/llms.txt</code>, clean Markdown endpoints, AI bot tracking, crawler controls, and SEO-plugin compatible schema.</div>
+          </details>
+          <details>
+            <summary>Is Quoted an SEO plugin?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Quoted is not positioned as another traditional SEO plugin. It complements SEO plugins by helping AI assistants and AI-powered search systems read clearer versions of your site content.</div>
+          </details>
+          <details>
+            <summary>What is AI visibility?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">AI visibility means making your business, pages, FAQs, documentation, updates, and expertise easier for AI-powered search and assistant tools to understand, reference, and represent accurately.</div>
+          </details>
+          <details>
+            <summary>Does Quoted guarantee ChatGPT, Gemini, Claude, Perplexity, or Google AI visibility?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">No. No plugin can guarantee AI visibility, citations, rankings, or traffic. Quoted helps prepare and structure your content so AI systems have clearer source material to read.</div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Compatibility -->
+      <section class="faq-group" id="compat">
+        <h2>Compatibility</h2>
+        <p class="group-sub">Where Quoted sits next to your existing WordPress setup.</p>
+        <div class="qa">
+          <details>
+            <summary>Does Quoted replace Yoast, Rank Math, AIOSEO, or SEOPress?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">No. Keep your existing SEO plugin for titles, meta descriptions, XML sitemaps, on-page SEO guidance, and search workflows. Quoted adds <code>/llms.txt</code>, clean Markdown, AI bot tracking, crawler controls, and schema that is designed to coexist with common SEO plugins.</div>
+          </details>
+          <details>
+            <summary>Does it work with existing WordPress content?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Yes. Quoted works from your existing published posts and pages. You do not need to move content into a separate CMS or rewrite your site.</div>
+          </details>
+          <details>
+            <summary>Does it support documentation and changelog pages?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Quoted can expose published WordPress pages and posts as AI-readable content. If your documentation or changelog lives in WordPress, it can be part of your AI-readable site guide.</div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Setup -->
+      <section class="faq-group" id="setup">
+        <h2>Setup &amp; usage</h2>
+        <p class="group-sub">Installing, configuring, and operating Quoted day-to-day.</p>
+        <div class="qa">
+          <details>
+            <summary>Will Quoted slow down my website?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Quoted is designed to be lightweight. The Free plan runs locally, <code>/llms.txt</code> output is cached, and bot detection is a simple user-agent check. It does not require an external SaaS call for the core workflow.</div>
+          </details>
+          <details>
+            <summary>Do I need technical skills?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">No. Install the plugin, activate it, and review the generated AI-readable output from WordPress. Advanced users can still inspect endpoints, crawler rules, schema behavior, and settings.</div>
+          </details>
+          <details>
+            <summary>What content should I include?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Start with your homepage, service pages, product pages, pricing pages, FAQs, documentation, changelog or update posts, and high-value educational articles.</div>
+          </details>
+          <details>
+            <summary>Can I edit the generated content?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Your WordPress content remains the source of truth. Edit your posts and pages as usual, and Quoted exposes cleaner AI-readable versions from that content.</div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      <section class="faq-group" id="pricing">
+        <h2>Pricing &amp; billing</h2>
+        <p class="group-sub">Plans, payment, and what changes when you upgrade.</p>
+        <div class="qa">
+          <details>
+            <summary>Is the Free plan enough?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Free is enough to validate the workflow on one site. It includes <code>/llms.txt</code> for up to 50 posts or pages, Markdown endpoints, AI bot tracking, crawler controls, and basic schema. Paid plans add unlimited coverage, longer history, citation checks, multi-site use, and support.</div>
+          </details>
+          <details>
+            <summary>How does billing work?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Billing is handled by Lemon Squeezy. Starter is $19/month or $190/year for one business site. Pro is $29/month or $290/year for small agency and client-site workflows.</div>
+          </details>
+          <details>
+            <summary>Can I cancel anytime?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Yes. Cancel from the Lemon Squeezy customer portal. Your paid plan stays active until the end of the billing period, then the plugin reverts to the Free tier.</div>
+          </details>
+          <details>
+            <summary>Can agencies use Quoted for clients?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">Yes. The Pro plan is designed for freelancers and small agencies that want a repeatable AI-readiness setup across client WordPress sites.</div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Privacy -->
+      <section class="faq-group" id="privacy">
+        <h2>Privacy &amp; data</h2>
+        <p class="group-sub">What leaves your WordPress site and what doesn't.</p>
+        <div class="qa">
+          <details>
+            <summary>Will my data be sent to Quoted servers?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">The Free plan operates locally on your WordPress site and does not send telemetry to Quoted. Paid AI checks use your own provider key where applicable.</div>
+          </details>
+          <details>
+            <summary>How are visitor IPs handled in the bot log?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="answer">IPs are hashed before being stored in the local <code>wp_quoted_bot_log</code> table. The plugin records user-agent, timestamp, and hashed IP — nothing else.</div>
+          </details>
+        </div>
+      </section>
+
+      <div class="still-stuck">
+        <div class="ico">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <div class="copy">
+          <h3>Still stuck?</h3>
+          <p>Email <a href="mailto:support@quotedeasy.com" style="color:var(--q-primary);font-weight:500;">support@quotedeasy.com</a> — usually answered within one business day.</p>
+        </div>
+        <a href="docs.html" class="btn btn-secondary">Read the docs</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-include="footer"></div>
+
+<script src="assets/shared.js"></script>
+<script>
+  // Sidebar active state on scroll
+  const sideLinks = document.querySelectorAll('.faq-side a');
+  const groups = document.querySelectorAll('.faq-group');
+  const io = new IntersectionObserver((entries) => {
+    let best = null;
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        if (!best || e.boundingClientRect.top < best.boundingClientRect.top) best = e;
+      }
+    });
+    if (best) {
+      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + best.target.id));
+    }
+  }, { rootMargin: '-80px 0px -55% 0px' });
+  groups.forEach(g => io.observe(g));
+
+  // Smooth scroll on side links
+  sideLinks.forEach(a => a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      const top = target.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }));
+
+  // Search
+  const input = document.getElementById('faq-search-input');
+  const allDetails = document.querySelectorAll('.qa details');
+  const countEl = document.getElementById('faq-count');
+  countEl.textContent = `${allDetails.length} answers`;
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    allDetails.forEach(d => {
+      const text = d.textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      d.classList.toggle('hide', !match);
+      if (match) shown++;
+      if (q && match) d.setAttribute('open', '');
+      else if (!q) d.removeAttribute('open');
+    });
+    // Hide empty groups
+    document.querySelectorAll('.faq-group').forEach(g => {
+      const anyVisible = g.querySelectorAll('.qa details:not(.hide)').length > 0;
+      g.style.display = anyVisible ? '' : 'none';
+    });
+    countEl.textContent = q ? `${shown} match${shown===1?'':'es'}` : `${allDetails.length} answers`;
+  });
+</script>
+</body>
+</html>

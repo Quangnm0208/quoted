@@ -1,0 +1,2148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quoted — AI visibility for WordPress, without replacing your SEO plugin</title>
+<meta name="description" content="Quoted adds a lightweight AI visibility layer to WordPress: llms.txt, clean Markdown, crawler controls, and SEO-plugin compatible schema.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+  /* ── Hero specific ─────────────────────────────────────── */
+  .hero {
+    padding: 80px 0 120px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: 0;
+    background-image:
+      radial-gradient(circle at 20% 10%, var(--q-primary-soft) 0%, transparent 35%),
+      radial-gradient(circle at 80% 90%, var(--q-primary-soft) 0%, transparent 35%);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  [data-theme="dark"] .hero::before { opacity: 0.6; }
+  .hero::after {
+    content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(to right, var(--q-border-soft) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--q-border-soft) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+    opacity: 0.7;
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .hero { padding-bottom: 80px; }
+  }
+  .hero h1 { font-size: clamp(40px, 5.4vw, 72px); line-height: 1; letter-spacing: -0.035em; font-weight: 600; }
+  .hero h1 .accent { color: var(--q-primary); }
+  .hero h1 .strike { text-decoration: line-through; text-decoration-color: var(--q-text-faint); text-decoration-thickness: 2px; color: var(--q-text-faint); }
+  .hero .lead { margin-top: 24px; font-size: 19px; max-width: 52ch; }
+  .hero .cta-stack { margin-top: 36px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero .meta-row { margin-top: 28px; display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; color: var(--q-text-muted); }
+  .hero .meta-row span { display: inline-flex; align-items: center; gap: 6px; }
+  .hero .meta-row svg { color: var(--q-primary); flex: 0 0 auto; }
+
+  /* ── 3D Hero Stage ─────────────────────────────────────── */
+  .hero-stage {
+    position: relative;
+    height: 560px;
+    perspective: 1600px;
+    perspective-origin: 50% 50%;
+  }
+  @media (max-width: 980px) { .hero-stage { height: 480px; } }
+  .hero-stage [data-tilt-layer] {
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: box-shadow 320ms var(--q-ease);
+    will-change: transform;
+  }
+
+  @keyframes heroFloat {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -8px; }
+  }
+
+  /* Card: Source post (back) */
+  .hero-card-source {
+    width: 360px; left: 0; top: 30px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    box-shadow: var(--q-shadow-3);
+    padding: 20px 22px;
+    font-size: 13px; line-height: 1.5;
+    color: var(--q-text-muted);
+  }
+  .hero-card-source .browser-bar {
+    display: flex; align-items: center; gap: 6px;
+    padding-bottom: 12px; margin-bottom: 14px;
+    border-bottom: 1px solid var(--q-border-soft);
+  }
+  .hero-card-source .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--q-border); }
+  .hero-card-source .url {
+    flex: 1; margin-left: 8px;
+    font-family: var(--q-font-mono); font-size: 11px;
+    color: var(--q-text-faint);
+    background: var(--q-surface-2);
+    padding: 4px 10px; border-radius: var(--q-r-pill);
+  }
+  .hero-card-source .post-h { color: var(--q-text-strong); font-size: 16px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; margin: 0; }
+  .hero-card-source .post-meta { font-size: 11px; color: var(--q-text-faint); margin-top: 6px; font-family: var(--q-font-mono); }
+  .hero-card-source .post-body { margin-top: 12px; display: grid; gap: 6px; }
+  .hero-card-source .post-body span {
+    display: block; height: 8px; border-radius: 3px;
+    background: linear-gradient(90deg, var(--q-surface-2) 0%, var(--q-surface-2) 100%);
+  }
+  .hero-card-source .post-body span:nth-child(1) { width: 92%; }
+  .hero-card-source .post-body span:nth-child(2) { width: 78%; }
+  .hero-card-source .post-body span:nth-child(3) { width: 88%; }
+  .hero-card-source .post-body span:nth-child(4) { width: 60%; }
+
+  /* Card: llms.txt (middle) */
+  .hero-card-llms {
+    width: 320px; right: 30px; top: 0;
+    background: #0c0c12;
+    color: #e9eaf0;
+    border-radius: var(--q-r-lg);
+    box-shadow: var(--q-shadow-lift);
+    padding: 16px 18px 18px;
+    font-family: var(--q-font-mono); font-size: 12px; line-height: 1.7;
+    border: 1px solid #22232c;
+  }
+  .hero-card-llms .file-head {
+    display: flex; align-items: center; gap: 8px;
+    padding-bottom: 10px; margin-bottom: 10px;
+    border-bottom: 1px solid #22232c;
+    font-size: 11px;
+  }
+  .hero-card-llms .file-head .filename { color: #f4f4f7; font-weight: 500; }
+  .hero-card-llms .file-head .pill { margin-left: auto; padding: 2px 8px; border-radius: var(--q-r-pill); background: rgba(59,63,191,0.18); color: #b6bbed; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .hero-card-llms .h { color: #b6bbed; }
+  .hero-card-llms .com { color: #6c7280; }
+  .hero-card-llms .url { color: #9aa0ad; }
+  .hero-card-llms .ti { color: #f4f4f7; }
+
+  /* Card: AI answer (front) */
+  .hero-card-ai {
+    width: 380px; right: 0; bottom: 0;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    box-shadow: var(--q-shadow-lift);
+    padding: 20px 22px;
+  }
+  .hero-card-ai .ai-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .hero-card-ai .ai-avatar {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: conic-gradient(from 0deg, #6b6ff5, #3b3fbf, #1b1e6b, #6b6ff5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 600; font-size: 14px; font-family: var(--q-font-mono);
+  }
+  .hero-card-ai .ai-meta { font-size: 12px; color: var(--q-text-muted); }
+  .hero-card-ai .ai-meta strong { display: block; color: var(--q-text); font-size: 13px; font-weight: 600; }
+  .hero-card-ai .ai-q { font-size: 13px; color: var(--q-text-muted); border-left: 2px solid var(--q-border); padding-left: 10px; margin-bottom: 12px; line-height: 1.5; }
+  .hero-card-ai .ai-a { font-size: 14px; line-height: 1.55; color: var(--q-text); }
+  .hero-card-ai .ai-a .hl { background: var(--q-primary-soft); color: var(--q-primary-ink); padding: 0 4px; border-radius: 3px; }
+  .hero-card-ai .citation {
+    margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--q-border);
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--q-text-muted);
+  }
+  .hero-card-ai .citation a { color: var(--q-primary); font-weight: 500; font-family: var(--q-font-mono); }
+
+  /* Floating ping chip */
+  .hero-ping {
+    position: absolute; left: 280px; top: -20px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-pill);
+    padding: 6px 12px;
+    font-size: 12px;
+    box-shadow: var(--q-shadow-2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-ping .pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+
+  /* ── Bot marquee ───────────────────────────────────────── */
+  .bot-marquee {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
+    padding: 4px 0;
+  }
+  .bot-track {
+    display: flex;
+    gap: 12px;
+    padding-right: 12px;
+    flex-shrink: 0;
+    animation: botScroll 80s linear infinite;
+    will-change: transform;
+  }
+  @keyframes botScroll {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-100%, 0, 0); }
+  }
+  .bot-marquee:hover .bot-track { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) {
+    .bot-track { animation-duration: 240s; }
+  }
+  .bot-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-pill);
+    padding: 6px 14px 6px 6px;
+    font-size: 13px; font-weight: 500;
+    white-space: nowrap;
+    color: var(--q-text-muted);
+    transition: border-color 160ms var(--q-ease), color 160ms var(--q-ease), transform 160ms var(--q-ease);
+    flex: 0 0 auto;
+  }
+  .bot-pill:hover { border-color: var(--q-primary); color: var(--q-text); transform: translateY(-1px); }
+  .bot-pill .ico {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--q-font-mono); font-weight: 600; font-size: 11px;
+    flex: 0 0 auto;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .bot-pill .ico.openai     { background: #10a37f; }
+  .bot-pill .ico.anthropic  { background: #d4a273; color: #2b1810; }
+  .bot-pill .ico.perplexity { background: #20808d; }
+  .bot-pill .ico.google     { background: #4285f4; }
+  .bot-pill .ico.microsoft  { background: #00a4ef; }
+  .bot-pill .ico.apple      { background: #1d1d1f; }
+  .bot-pill .ico.meta       { background: #1877f2; }
+  .bot-pill .ico.amazon     { background: #ff9900; color: #1a1a1a; }
+  .bot-pill .ico.xai        { background: #0c0c12; }
+  .bot-pill .ico.byte       { background: #ff004f; }
+  .bot-pill .ico.yandex     { background: #fc3f1d; }
+  .bot-pill .ico.baidu      { background: #2932e1; }
+  .bot-pill .ico.duck       { background: #de5833; }
+  .bot-pill .ico.naver      { background: #03c75a; color: #062a1a; }
+  .bot-pill .ico.ahrefs     { background: #0089d6; }
+  .bot-pill .ico.semrush    { background: #ff642d; }
+  .bot-pill .ico.indigo     { background: var(--q-primary); }
+  .bot-pill .ico.violet     { background: #7c3aed; }
+  .bot-pill .ico.emerald    { background: #059669; }
+  .bot-pill .ico.amber      { background: #d97706; }
+  .bot-pill .ico.rose       { background: #e11d48; }
+  .bot-pill .ico.cyan       { background: #0891b2; }
+  .bot-pill .ico.slate      { background: #475569; }
+
+  /* ─────────────────────────────────────────────────────────
+   * The Shift — interactive Quoted ON/OFF demo
+   * ───────────────────────────────────────────────────────── */
+  .shift {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-xl);
+    padding: 32px;
+    box-shadow: var(--q-shadow-2);
+  }
+  @media (max-width: 880px) { .shift { padding: 20px; } }
+
+  /* Toggle row */
+  .shift-toggle {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    background: var(--q-bg-soft);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-pill);
+    padding: 8px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 720px) {
+    .shift-toggle { grid-template-columns: 1fr; padding: 16px; border-radius: var(--q-r-lg); }
+    .shift-toggle .shift-switch { display: none; }
+  }
+  .shift-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--q-r-pill);
+    cursor: pointer;
+    text-align: left;
+    transition: 180ms var(--q-ease);
+    color: var(--q-text-muted);
+    line-height: 1.2;
+  }
+  .shift-btn small { display: block; font-size: 11px; color: var(--q-text-faint); margin-top: 2px; font-family: var(--q-font-mono); letter-spacing: 0.02em; }
+  .shift-btn[data-shift="on"] { justify-content: flex-end; text-align: right; }
+  .shift-btn .shift-btn-label { font-size: 14px; font-weight: 500; color: var(--q-text); }
+  .shift-btn .shift-btn-label strong { color: var(--q-text-faint); font-weight: 600; text-transform: uppercase; font-family: var(--q-font-mono); font-size: 12px; letter-spacing: 0.06em; }
+  .shift-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--q-text-faint);
+    flex: 0 0 auto;
+    transition: 200ms;
+  }
+  .shift-dot.on { background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.18); }
+
+  /* Active state: highlight the active button */
+  .shift[data-quoted-state="off"] .shift-btn[data-shift="off"] { background: var(--q-surface); box-shadow: var(--q-shadow-1); }
+  .shift[data-quoted-state="off"] .shift-btn[data-shift="off"] .shift-btn-label strong { color: var(--q-text); }
+  .shift[data-quoted-state="on"]  .shift-btn[data-shift="on"]  { background: var(--q-primary-soft); box-shadow: var(--q-shadow-1); }
+  .shift[data-quoted-state="on"]  .shift-btn[data-shift="on"]  .shift-btn-label strong { color: var(--q-primary-ink); }
+  [data-theme="dark"] .shift[data-quoted-state="on"] .shift-btn[data-shift="on"] .shift-btn-label strong { color: var(--q-primary); }
+
+  /* The pill switch in the middle */
+  .shift-switch {
+    width: 64px; height: 36px;
+    border-radius: 999px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    padding: 3px;
+    cursor: pointer;
+    display: flex; align-items: center;
+    transition: 180ms;
+  }
+  .shift-switch:hover { border-color: var(--q-text-faint); }
+  .shift-switch-track {
+    position: relative;
+    width: 100%; height: 100%;
+  }
+  .shift-switch-thumb {
+    position: absolute; top: 0; left: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--q-text-muted);
+    transition: transform 240ms var(--q-ease), background 240ms var(--q-ease);
+  }
+  .shift[data-quoted-state="on"] .shift-switch-thumb {
+    transform: translateX(28px);
+    background: var(--q-primary);
+    box-shadow: 0 0 0 4px var(--q-accent-ring);
+  }
+
+  /* Buyer prompt */
+  .shift-prompt {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 20px;
+    background: var(--q-bg-soft);
+    border-radius: var(--q-r-md);
+    border: 1px solid var(--q-border-soft);
+    margin-bottom: 20px;
+  }
+  .shift-prompt-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--q-primary-soft); color: var(--q-primary-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 14px;
+    flex: 0 0 auto;
+  }
+  .shift-prompt-body small {
+    font-size: 11px; color: var(--q-text-faint); font-family: var(--q-font-mono);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .shift-prompt-body p { margin: 4px 0 0; font-size: 16px; color: var(--q-text); line-height: 1.4; }
+
+  /* Split panel */
+  .shift-panel {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    align-items: stretch;
+    gap: 16px;
+  }
+  @media (max-width: 880px) {
+    .shift-panel { grid-template-columns: 1fr; gap: 12px; }
+    .shift-panel .shift-arrow { display: none; }
+  }
+  .shift-col {
+    background: var(--q-bg-soft);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 360px;
+    position: relative;
+    overflow: hidden;
+  }
+  .shift-col-head { display: flex; align-items: center; justify-content: space-between; }
+  .shift-col-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 500;
+    color: var(--q-text-muted);
+    font-family: var(--q-font-mono); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .shift-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--q-text-faint);
+  }
+  .shift[data-quoted-state="on"] .shift-arrow { color: var(--q-primary); }
+
+  /* View visibility */
+  .shift-view { display: none; flex-direction: column; gap: 12px; flex: 1; animation: shiftFadeIn 320ms var(--q-ease); }
+  .shift[data-quoted-state="off"] .shift-view-off { display: flex; }
+  .shift[data-quoted-state="on"]  .shift-view-on  { display: flex; }
+  @keyframes shiftFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Code blocks inside views */
+  .shift-source-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-sm);
+    font-family: var(--q-font-mono); font-size: 11px;
+    color: var(--q-text-faint);
+  }
+  .shift-source-bar .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .shift-source-bar .dot.red { background: #ff5f57; }
+  .shift-source-bar .dot.yellow { background: #febc2e; }
+  .shift-source-bar .dot.green { background: #28c840; }
+  .shift-source-bar-clean { color: #10b981; }
+  .shift-source-bar-clean svg { color: #10b981; }
+  .shift-url { color: var(--q-text-muted); margin-left: 4px; }
+  .shift-pill-good {
+    margin-left: auto;
+    font-size: 10px; padding: 2px 8px; border-radius: var(--q-r-pill);
+    background: rgba(16,185,129,0.12); color: #066848;
+    font-family: var(--q-font-mono); letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  [data-theme="dark"] .shift-pill-good { color: #34d399; }
+  .shift-code {
+    margin: 0; padding: 14px 16px;
+    background: #0c0c12; color: #e9eaf0;
+    border-radius: var(--q-r-md);
+    font-family: var(--q-font-mono); font-size: 11.5px; line-height: 1.7;
+    overflow: auto;
+    flex: 1;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .shift-code-noisy .t { color: #a5b4fc; opacity: 0.7; }
+  .shift-code-noisy .c { color: #6c7280; }
+  .shift-code-noisy .dim { color: #6c7280; }
+  .shift-code-clean .k { color: #b6bbed; }
+  .shift-code-clean .cm { color: #6c7280; }
+  .shift-code-clean .u { color: #9aa0ad; }
+  .shift-code-clean .ti { color: #f4f4f7; }
+
+  .shift-anno {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 10px 12px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border-soft);
+    border-radius: var(--q-r-sm);
+    font-size: 12px; color: var(--q-text-muted);
+    line-height: 1.45;
+  }
+  .shift-anno svg { color: #d97706; flex: 0 0 auto; margin-top: 2px; }
+  .shift-anno-good svg { color: #10b981; }
+  .shift-anno-good { color: var(--q-text); }
+
+  /* AI cards */
+  .shift-ai-card {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-md);
+    padding: 16px 18px;
+    flex: 1;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .shift-ai-card-bad { border-color: rgba(220, 38, 38, 0.25); }
+  .shift-ai-card-good { border-color: var(--q-primary); box-shadow: 0 0 0 4px var(--q-accent-ring); }
+  .shift-ai-head { display: flex; align-items: center; gap: 10px; }
+  .shift-ai-avatar {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 600; font-size: 12px;
+    font-family: var(--q-font-mono);
+  }
+  .shift-ai-avatar.bad { background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); }
+  .shift-ai-avatar.good { background: conic-gradient(from 0deg, #6b6ff5, #3b3fbf, #1b1e6b, #6b6ff5); }
+  .shift-ai-meta strong { display: block; font-size: 13px; color: var(--q-text); }
+  .shift-ai-meta span { font-size: 11px; color: var(--q-text-faint); }
+  .shift-ai-reply { margin: 0; font-size: 14px; line-height: 1.55; color: var(--q-text); }
+  .shift-ai-reply em { color: var(--q-text-muted); font-style: normal; }
+  .shift-ai-reply .hl { background: var(--q-primary-soft); color: var(--q-primary-ink); padding: 0 4px; border-radius: 3px; font-weight: 500; }
+  [data-theme="dark"] .shift-ai-reply .hl { color: var(--q-primary); }
+  .shift-ai-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .shift-ai-tags .tag-bad {
+    font-size: 11px; padding: 3px 8px; border-radius: var(--q-r-pill);
+    background: rgba(220, 38, 38, 0.08); color: #a72020;
+    font-family: var(--q-font-mono); letter-spacing: 0.02em;
+  }
+  [data-theme="dark"] .shift-ai-tags .tag-bad { color: #f87171; }
+  .shift-citation {
+    margin-top: auto;
+    padding-top: 10px; border-top: 1px dashed var(--q-border-soft);
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--q-text-muted);
+  }
+  .shift-citation a { color: var(--q-primary); font-family: var(--q-font-mono); font-size: 11.5px; }
+
+  .shift-outcome {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--q-r-md);
+    font-size: 14px;
+  }
+  .shift-outcome span {
+    font-size: 11px; color: var(--q-text-faint);
+    font-family: var(--q-font-mono); text-transform: uppercase; letter-spacing: 0.06em;
+    flex: 0 0 auto;
+  }
+  .shift-outcome strong { color: var(--q-text); font-weight: 600; }
+  .shift-outcome-bad { background: rgba(220, 38, 38, 0.06); }
+  .shift-outcome-good { background: rgba(16, 185, 129, 0.08); }
+  .shift-outcome-good strong { color: #066848; }
+  [data-theme="dark"] .shift-outcome-good strong { color: #34d399; }
+
+  /* Stat row */
+  .shift-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--q-border-soft);
+  }
+  @media (max-width: 720px) { .shift-stats { grid-template-columns: 1fr; } }
+  .shift-stat { display: grid; gap: 6px; }
+  .shift-stat strong {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.025em;
+    color: var(--q-text-strong);
+    transition: color 240ms var(--q-ease);
+  }
+  .shift[data-quoted-state="on"] .shift-stat strong { color: var(--q-primary); }
+  .shift-stat small { font-size: 12px; color: var(--q-text-muted); line-height: 1.4; }
+  .shift-stat small em { font-style: normal; color: var(--q-text-faint); font-family: var(--q-font-mono); font-size: 11px; display: block; margin-top: 2px; }
+  .shift-stat-bar {
+    position: relative;
+    height: 6px;
+    background: var(--q-surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .shift-stat-bar-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: var(--w, 0%);
+    border-radius: 999px;
+    transition: width 320ms var(--q-ease), opacity 240ms var(--q-ease);
+  }
+  .shift-stat-bar-fill.off { background: linear-gradient(90deg, #fca5a5, #ef4444); opacity: 1; }
+  .shift-stat-bar-fill.on  { background: linear-gradient(90deg, #34d399, #059669); opacity: 0; }
+  .shift[data-quoted-state="on"] .shift-stat-bar-fill.off { opacity: 0; }
+  .shift[data-quoted-state="on"] .shift-stat-bar-fill.on  { opacity: 1; }
+
+  /* ── Sections ──────────────────────────────────────────── */
+  .section-head {
+    display: grid; gap: 14px;
+    margin-bottom: 56px;
+    max-width: 720px;
+  }
+  .section-head.center { text-align: center; margin-left: auto; margin-right: auto; }
+  .section-head.center .eyebrow { justify-self: center; }
+
+  /* How it works */
+  .steps {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px;
+    background: var(--q-border);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    overflow: hidden;
+  }
+  .steps .step {
+    background: var(--q-surface);
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .steps .step .num {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--q-primary-soft);
+    color: var(--q-primary);
+    font-family: var(--q-font-mono); font-size: 13px; font-weight: 500;
+  }
+  .steps .step h3 { font-size: 15px; font-weight: 600; }
+  .steps .step p { margin: 0; font-size: 13px; color: var(--q-text-muted); line-height: 1.55; }
+  @media (max-width: 980px) { .steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .steps { grid-template-columns: 1fr; } }
+
+  /* Live demo */
+  .demo {
+    display: grid; grid-template-columns: 320px 1fr; gap: 0;
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-xl);
+    overflow: hidden;
+    background: var(--q-surface);
+    box-shadow: var(--q-shadow-2);
+  }
+  @media (max-width: 880px) { .demo { grid-template-columns: 1fr; } }
+  .demo .controls {
+    padding: 24px;
+    background: var(--q-bg-soft);
+    border-right: 1px solid var(--q-border);
+    display: grid; gap: 20px;
+    align-content: start;
+  }
+  @media (max-width: 880px) { .demo .controls { border-right: 0; border-bottom: 1px solid var(--q-border); } }
+  .demo .controls .group h6 {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--q-text-faint);
+    margin: 0 0 10px;
+    font-family: var(--q-font-mono);
+  }
+  .demo .input-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-md);
+    padding: 6px 10px;
+    font-family: var(--q-font-mono); font-size: 13px;
+  }
+  .demo .input-row input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    color: var(--q-text); font: inherit; min-width: 0;
+  }
+  .demo .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 10px 0; font-size: 13px;
+  }
+  .demo .toggle-row + .toggle-row { border-top: 1px solid var(--q-border-soft); }
+  .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider {
+    position: absolute; inset: 0;
+    background: var(--q-border);
+    border-radius: 999px;
+    transition: 200ms;
+    cursor: pointer;
+  }
+  .switch .slider::before {
+    content: ""; position: absolute;
+    height: 16px; width: 16px; left: 2px; top: 2px;
+    background: #fff; border-radius: 50%;
+    transition: 200ms;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .slider { background: var(--q-primary); }
+  .switch input:checked + .slider::before { transform: translateX(16px); }
+
+  .demo .output {
+    padding: 24px;
+    background: #0c0c12;
+    color: #e9eaf0;
+    font-family: var(--q-font-mono); font-size: 13px; line-height: 1.7;
+    min-height: 380px;
+    overflow: auto;
+    position: relative;
+  }
+  .demo .output .head {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 14px; margin-bottom: 14px;
+    border-bottom: 1px solid #22232c;
+    font-size: 12px;
+  }
+  .demo .output .head .copy-btn {
+    margin-left: auto;
+    padding: 4px 10px; border-radius: 5px; border: 1px solid #22232c;
+    color: #9aa0ad; font-size: 11px; font-family: var(--q-font-mono);
+    transition: 120ms;
+  }
+  .demo .output .head .copy-btn:hover { color: #fff; border-color: #3b3fbf; }
+  .demo .output pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+  .demo .output .k { color: #b6bbed; }
+  .demo .output .c { color: #6c7280; }
+  .demo .output .u { color: #9aa0ad; }
+  .demo .output .t { color: #fff; }
+
+  /* Features grid */
+  .features {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--q-border);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    overflow: hidden;
+  }
+  @media (max-width: 980px) { .features { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
+  .features .f {
+    background: var(--q-surface);
+    padding: 28px 24px;
+    display: grid; gap: 12px;
+  }
+  .features .f .icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--q-primary-soft); color: var(--q-primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .features .f h3 { font-size: 16px; font-weight: 600; }
+  .features .f p { margin: 0; font-size: 14px; color: var(--q-text-muted); line-height: 1.55; }
+
+  /* Compat strip */
+  .compat {
+    display: grid; grid-template-columns: 1fr 2fr; gap: 48px; align-items: center;
+  }
+  @media (max-width: 880px) { .compat { grid-template-columns: 1fr; gap: 32px; } }
+  /* Compat strip — expanded multi-category product grid */
+  .compat-section { padding: var(--q-section-y) 0; }
+  .compat-header { margin-bottom: 36px; max-width: 760px; }
+  .compat-stats {
+    display: flex; gap: 32px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .compat-stats .stat {
+    display: flex; align-items: baseline; gap: 6px;
+    font-size: 14px; color: var(--q-text-muted);
+  }
+  .compat-stats .stat strong {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--q-text-strong);
+  }
+
+  .compat-tabs {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .compat-tabs button {
+    padding: 8px 14px; font-size: 13px; font-weight: 500;
+    border-radius: var(--q-r-pill);
+    background: var(--q-surface); border: 1px solid var(--q-border);
+    color: var(--q-text-muted);
+    transition: 120ms;
+  }
+  .compat-tabs button:hover { color: var(--q-text); border-color: var(--q-text-faint); }
+  .compat-tabs button.active { background: var(--q-text); color: var(--q-bg); border-color: var(--q-text); }
+  [data-theme="dark"] .compat-tabs button.active { background: var(--q-primary); border-color: var(--q-primary); color: #fff; }
+  .compat-tabs button .cnt {
+    margin-left: 6px; font-family: var(--q-font-mono); font-size: 11px;
+    opacity: 0.65;
+  }
+
+  .compat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 980px) { .compat-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 720px) { .compat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .compat-card {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-md);
+    padding: 16px 18px;
+    display: flex; align-items: center; gap: 12px;
+    transition: 160ms;
+  }
+  .compat-card:hover { border-color: var(--q-primary); transform: translateY(-1px); }
+  .compat-card.hide { display: none; }
+  .compat-card .ico {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-family: var(--q-font-mono); font-weight: 600; font-size: 12px;
+    flex: 0 0 auto;
+    letter-spacing: -0.01em;
+  }
+  .compat-card .body { flex: 1; min-width: 0; }
+  .compat-card .name { font-size: 14px; font-weight: 600; color: var(--q-text-strong); line-height: 1.2; }
+  .compat-card .meta { font-size: 11px; color: var(--q-text-faint); margin-top: 3px; font-family: var(--q-font-mono); letter-spacing: 0.02em; }
+  .compat-card .check {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(16,185,129,0.12); color: #066848;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  [data-theme="dark"] .compat-card .check { color: #34d399; }
+
+  /* Icon palette */
+  .ico-seo       { background: linear-gradient(135deg, #ac3030 0%, #d97757 100%); }
+  .ico-builder   { background: linear-gradient(135deg, #92278f 0%, #d4145a 100%); }
+  .ico-cache     { background: linear-gradient(135deg, #ff7a00 0%, #ffa800 100%); color: #1a1a1a; }
+  .ico-commerce  { background: linear-gradient(135deg, #7e57c2 0%, #4527a0 100%); }
+  .ico-forms     { background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); }
+  .ico-i18n      { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
+  .ico-security  { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); }
+  .ico-membership{ background: linear-gradient(135deg, #db2777 0%, #be185d 100%); }
+
+  .compat-cta {
+    margin-top: 32px;
+    padding: 20px 24px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    display: flex; align-items: center; gap: 18px;
+    flex-wrap: wrap;
+  }
+  .compat-cta .ico {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: rgba(16,185,129,0.12); color: #066848;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  [data-theme="dark"] .compat-cta .ico { color: #34d399; }
+  .compat-cta .copy { flex: 1; min-width: 220px; }
+  .compat-cta .copy strong { display: block; font-size: 15px; color: var(--q-text-strong); }
+  .compat-cta .copy p { margin: 4px 0 0; font-size: 13px; color: var(--q-text-muted); line-height: 1.5; }
+
+  /* Pricing */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    align-items: stretch;
+  }
+  @media (max-width: 980px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .plan {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    padding: 28px;
+    display: flex; flex-direction: column;
+    transition: border-color 200ms var(--q-ease), box-shadow 200ms var(--q-ease);
+  }
+  .plan.highlight { border-color: var(--q-primary); box-shadow: 0 0 0 4px var(--q-accent-ring); position: relative; }
+  .plan .plan-head { display: flex; align-items: center; justify-content: space-between; }
+  .plan .plan-head h3 { font-size: 18px; font-weight: 600; }
+  .plan .plan-tag { font-size: 13px; color: var(--q-text-muted); margin-top: 6px; min-height: 36px; }
+  .plan .price { margin-top: 18px; display: flex; align-items: baseline; gap: 4px; }
+  .plan .price .amt { font-size: 40px; font-weight: 600; letter-spacing: -0.025em; color: var(--q-text-strong); }
+  .plan .price .per { font-size: 13px; color: var(--q-text-muted); }
+  .plan .price-sub { font-size: 12px; color: var(--q-text-faint); margin-top: 4px; font-family: var(--q-font-mono); height: 16px; }
+  .plan .plan-cta { margin-top: 20px; }
+  .plan .plan-feats { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--q-border-soft); flex: 1; }
+  .plan .plan-feats ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .plan .plan-feats li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+  .plan .plan-feats li::before {
+    content: ""; flex: 0 0 auto; width: 14px; height: 14px; margin-top: 4px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M3 7.2 5.5 9.7 11 4' fill='none' stroke='%233b3fbf' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-size: contain;
+  }
+  .plan .limits { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--q-border-soft); font-size: 12px; color: var(--q-text-faint); }
+  .plan .badge {
+    position: absolute; top: -10px; right: 24px;
+    background: var(--q-primary); color: #fff;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: var(--q-r-pill);
+  }
+
+  .billing-toggle {
+    display: inline-flex; gap: 0; background: var(--q-surface-2); border-radius: var(--q-r-pill); padding: 4px;
+    border: 1px solid var(--q-border);
+  }
+  .billing-toggle button {
+    padding: 8px 18px; border-radius: var(--q-r-pill); font-size: 13px; font-weight: 500;
+    color: var(--q-text-muted);
+  }
+  .billing-toggle button.active { background: var(--q-surface); color: var(--q-text); box-shadow: var(--q-shadow-1); }
+  .billing-toggle .save { color: var(--q-primary); font-size: 11px; margin-left: 4px; font-family: var(--q-font-mono); }
+
+  /* Testimonials */
+  .quotes {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  @media (max-width: 980px) { .quotes { grid-template-columns: 1fr; } }
+  .quote {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    padding: 28px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .quote .mark {
+    font-family: 'Georgia', serif; font-size: 48px; line-height: 1;
+    color: var(--q-primary); opacity: 0.4; margin-bottom: -16px;
+  }
+  .quote .q { font-size: 15px; line-height: 1.55; flex: 1; }
+  .quote .person { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--q-border-soft); }
+  .quote .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--q-primary-soft); color: var(--q-primary-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 14px;
+  }
+  .quote .person-meta strong { display: block; font-size: 13px; }
+  .quote .person-meta span { font-size: 12px; color: var(--q-text-muted); }
+
+  /* FAQ */
+  .faq { display: grid; gap: 8px; }
+  .faq details {
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-md);
+    padding: 0;
+    transition: border-color 160ms var(--q-ease);
+  }
+  .faq details[open] { border-color: var(--q-primary); }
+  .faq summary {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 18px 22px;
+    font-weight: 500; font-size: 15px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary .ico { transition: transform 200ms var(--q-ease); color: var(--q-text-muted); }
+  .faq details[open] summary .ico { transform: rotate(45deg); color: var(--q-primary); }
+  .faq .answer { padding: 0 22px 20px; font-size: 14px; color: var(--q-text-muted); line-height: 1.6; }
+
+  /* Final CTA */
+  .final-cta {
+    background: var(--q-ink-bg);
+    color: var(--q-ink-text);
+    border-radius: var(--q-r-xl);
+    padding: 80px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-cta::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 80%, rgba(59,63,191,0.35) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(107,111,245,0.25) 0%, transparent 45%);
+  }
+  .final-cta > * { position: relative; }
+  .final-cta h2 { color: #fff; font-size: clamp(32px, 4vw, 52px); line-height: 1.05; letter-spacing: -0.03em; }
+  .final-cta p { color: var(--q-ink-muted); font-size: 17px; max-width: 50ch; margin: 18px auto 32px; }
+  .final-cta .cta-stack { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* Audit collapsible (dev note) */
+  .audit-note {
+    margin-top: 32px;
+    background: var(--q-bg-soft);
+    border: 1px dashed var(--q-border);
+    border-radius: var(--q-r-md);
+    padding: 16px 20px;
+    font-size: 12px;
+    color: var(--q-text-muted);
+  }
+
+  /* Use Cases grid */
+  .use-cases-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  @media (max-width: 980px) { .use-cases-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .use-cases-grid { grid-template-columns: 1fr; } }
+  .uc {
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 28px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-lg);
+    color: var(--q-text);
+    transition: border-color 160ms var(--q-ease), transform 160ms var(--q-ease), box-shadow 160ms var(--q-ease);
+  }
+  .uc:hover { border-color: var(--q-primary); transform: translateY(-2px); box-shadow: var(--q-shadow-2); }
+  .uc-ico {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--q-primary-soft); color: var(--q-primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .uc h3 { font-size: 17px; font-weight: 600; }
+  .uc p { font-size: 14px; color: var(--q-text-muted); line-height: 1.55; margin: 0; flex: 1; }
+  .uc-cta { font-size: 13px; font-weight: 500; color: var(--q-primary); margin-top: 4px; }
+</style>
+</head>
+<body data-screen-label="Home">
+
+<div data-include="header"></div>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="chip">
+          <span class="dot"></span>
+          New · live on WordPress.org
+        </span>
+        <h1 class="mt-16 text-balance">
+          When customers ask AI,<br>
+          be <span class="accent">in the answer</span>.
+        </h1>
+        <p class="lead text-pretty">
+          Quoted is a small WordPress plugin that prepares your business site for AI search.
+          Your services, FAQs, products, and updates — laid out in the clean structure
+          modern AI assistants need to understand who you are and what you sell.
+        </p>
+        <div class="cta-stack">
+          <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
+            Install free plugin
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#live-demo" class="btn btn-secondary btn-lg">See it in action</a>
+        </div>
+        <div class="meta-row">
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Setup in under 5 minutes</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Keeps your SEO plugin</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Free plan, no credit card</span>
+        </div>
+      </div>
+
+      <!-- 3D Hero Stage -->
+      <div class="hero-stage" data-hero-3d>
+        <div class="hero-card-source" data-tilt-layer data-depth="0.5" data-base-transform="rotateY(8deg) rotateX(-2deg)">
+          <div class="browser-bar">
+            <span class="dot" style="background:#ff5f57;"></span>
+            <span class="dot" style="background:#febc2e;"></span>
+            <span class="dot" style="background:#28c840;"></span>
+            <span class="url">acme.com/services/cold-brew-catering</span>
+          </div>
+          <h4 class="post-h">Cold-brew catering for offices in Brooklyn</h4>
+          <div class="post-meta">PAGE · published Apr 14</div>
+          <div class="post-body">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div class="hero-ping" data-tilt-layer data-depth="0.3" data-base-transform="">
+          <span class="pulse"></span>
+          <span><strong style="color:var(--q-text);">GPTBot</strong> just crawled <code style="font-family:var(--q-font-mono);font-size:11px;color:var(--q-text-muted);">/llms.txt</code></span>
+        </div>
+
+        <div class="hero-card-llms" data-tilt-layer data-depth="0.8" data-base-transform="rotateY(-4deg) rotateX(2deg) translateZ(30px)">
+          <div class="file-head">
+            <span class="filename">/llms.txt</span>
+            <span class="pill">AI-readable</span>
+          </div>
+<pre style="margin:0;white-space:pre-wrap;"><span class="h"># Acme Coffee</span>
+<span class="com">&gt; Office cold-brew catering, Brooklyn NY.</span>
+
+<span class="h">## Services</span>
+- <span class="ti">Cold-brew catering</span>
+  <span class="url">/services/cold-brew-catering.md</span>
+- <span class="ti">Espresso bar setup</span>
+  <span class="url">/services/espresso-bar.md</span>
+
+<span class="h">## FAQ</span>
+- <span class="ti">Minimum order size?</span>
+  <span class="url">/faq.md#minimum</span></pre>
+        </div>
+
+        <div class="hero-card-ai" data-tilt-layer data-depth="1.2" data-base-transform="rotateY(-12deg) rotateX(3deg) translateZ(80px)">
+          <div class="ai-head">
+            <div class="ai-avatar">AI</div>
+            <div class="ai-meta">
+              <strong>Asked an AI assistant</strong>
+              <span>Today · via web search</span>
+            </div>
+          </div>
+          <div class="ai-q">"Who does cold-brew catering for offices in Brooklyn?"</div>
+          <div class="ai-a">
+            For office cold-brew catering in Brooklyn, <span class="hl">Acme Coffee</span> handles weekly setup and refill with a minimum order of 30 cups.
+          </div>
+          <div class="citation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Source: <a href="#">acme.com/llms.txt</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Logo wall — continuous marquee of 61 crawlers ───────── -->
+<section class="tight" style="padding-top:0;">
+  <div class="wrap">
+    <p style="text-align:center;font-size:12px;font-family:var(--q-font-mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--q-text-faint);margin:0 0 28px;">
+      <span style="display:inline-flex;align-items:center;gap:8px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,0.18);"></span>
+        Tracks <strong style="color:var(--q-text);font-weight:600;" data-bot-count>61</strong> AI &amp; data crawlers — updated weekly
+      </span>
+    </p>
+  </div>
+  <div class="bot-marquee" data-bot-marquee>
+    <div class="bot-track" id="bot-track-a"></div>
+    <div class="bot-track" id="bot-track-b" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- ── The Shift — interactive Quoted ON/OFF demo ───────────── -->
+<section class="bg-soft" id="the-shift">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The shift</span>
+      <h2 class="h1 text-balance">Flip the switch. See what changes for an AI assistant.</h2>
+      <p class="lead">Same WordPress site, same buyer question. The difference is whether AI assistants find the clean, structured version of your business — or guess from theme markup.</p>
+    </div>
+
+    <div class="shift" data-quoted-state="off">
+      <!-- Toggle bar -->
+      <div class="shift-toggle" role="group" aria-label="Toggle Quoted on or off">
+        <button class="shift-btn" data-shift="off" aria-pressed="true">
+          <span class="shift-dot off"></span>
+          <span class="shift-btn-label">Quoted <strong>off</strong></span>
+          <small>Plain WordPress site</small>
+        </button>
+        <button class="shift-switch" id="shift-switch" aria-label="Flip">
+          <span class="shift-switch-track">
+            <span class="shift-switch-thumb"></span>
+          </span>
+        </button>
+        <button class="shift-btn" data-shift="on" aria-pressed="false">
+          <span class="shift-dot on"></span>
+          <span class="shift-btn-label">Quoted <strong>on</strong></span>
+          <small>AI-readable layer added</small>
+        </button>
+      </div>
+
+      <!-- Buyer prompt -->
+      <div class="shift-prompt">
+        <div class="shift-prompt-avatar">B</div>
+        <div class="shift-prompt-body">
+          <small>A buyer just asked an AI assistant</small>
+          <p>"Who does <strong>office cold-brew catering in Brooklyn</strong> for a team of 30?"</p>
+        </div>
+      </div>
+
+      <!-- The split panel -->
+      <div class="shift-panel">
+        <!-- LEFT: what the AI sees -->
+        <div class="shift-col">
+          <div class="shift-col-head">
+            <span class="shift-col-pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg>
+              What the AI sees
+            </span>
+          </div>
+
+          <!-- OFF view: noisy HTML -->
+          <div class="shift-view shift-view-off" data-view="off">
+            <div class="shift-source-bar">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+              <span class="shift-url">acme.com</span>
+            </div>
+            <pre class="shift-code shift-code-noisy"><span class="t">&lt;header&gt;</span>
+  <span class="t">&lt;nav&gt;</span> <span class="c">Menu, search, cart…</span> <span class="t">&lt;/nav&gt;</span>
+  <span class="t">&lt;div class="hero-banner"&gt;…&lt;/div&gt;</span>
+<span class="t">&lt;/header&gt;</span>
+<span class="t">&lt;aside&gt;</span> <span class="c">3rd-party widgets, ads</span> <span class="t">&lt;/aside&gt;</span>
+<span class="t">&lt;article&gt;</span>
+  <span class="dim">… buried under theme markup …</span>
+<span class="t">&lt;/article&gt;</span>
+<span class="t">&lt;div class="related-posts"&gt;…&lt;/div&gt;</span>
+<span class="t">&lt;footer&gt;</span> <span class="c">Cookies, social, newsletter</span> <span class="t">&lt;/footer&gt;</span></pre>
+            <div class="shift-anno">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>~85% of the bytes are nav, widgets, and theme markup. The actual offer is one paragraph deep.</span>
+            </div>
+          </div>
+
+          <!-- ON view: clean Markdown -->
+          <div class="shift-view shift-view-on" data-view="on">
+            <div class="shift-source-bar shift-source-bar-clean">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span class="shift-url">acme.com/llms.txt</span>
+              <span class="shift-pill-good">200 OK · text/plain</span>
+            </div>
+            <pre class="shift-code shift-code-clean"><span class="k"># Acme Coffee</span>
+<span class="cm">&gt; Office cold-brew catering, Brooklyn NY.</span>
+<span class="cm">&gt; Minimum 20 cups · weekly delivery</span>
+
+<span class="k">## Services</span>
+- <span class="ti">Cold-brew catering</span>
+  <span class="u">/services/cold-brew-catering.md</span>
+- <span class="ti">Espresso bar setup</span>
+  <span class="u">/services/espresso-bar.md</span>
+
+<span class="k">## FAQ</span>
+- <span class="ti">Service area?</span> <span class="u">/faq.md#area</span></pre>
+            <div class="shift-anno shift-anno-good">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Plain Markdown · ~12× smaller · structured headings, links, and FAQs.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connecting arrow -->
+        <div class="shift-arrow" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/>
+            <path d="M13 5l7 7-7 7"/>
+          </svg>
+        </div>
+
+        <!-- RIGHT: what the AI says -->
+        <div class="shift-col">
+          <div class="shift-col-head">
+            <span class="shift-col-pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              What the AI says back
+            </span>
+          </div>
+
+          <!-- OFF view: vague answer -->
+          <div class="shift-view shift-view-off" data-view="off">
+            <div class="shift-ai-card shift-ai-card-bad">
+              <div class="shift-ai-head">
+                <div class="shift-ai-avatar bad">AI</div>
+                <div class="shift-ai-meta">
+                  <strong>AI assistant</strong>
+                  <span>Searching the web…</span>
+                </div>
+              </div>
+              <p class="shift-ai-reply">
+                I found a coffee company called <em>Acme Coffee</em>, but I'm not finding clear information about office cold-brew catering or service area on their site. You may want to check their website directly or contact them.
+              </p>
+              <div class="shift-ai-tags">
+                <span class="tag-bad">No citation</span>
+                <span class="tag-bad">Service unclear</span>
+                <span class="tag-bad">No minimums shown</span>
+              </div>
+            </div>
+            <div class="shift-outcome shift-outcome-bad">
+              <span>Outcome</span>
+              <strong>Buyer keeps searching.</strong>
+            </div>
+          </div>
+
+          <!-- ON view: precise answer -->
+          <div class="shift-view shift-view-on" data-view="on">
+            <div class="shift-ai-card shift-ai-card-good">
+              <div class="shift-ai-head">
+                <div class="shift-ai-avatar good">AI</div>
+                <div class="shift-ai-meta">
+                  <strong>AI assistant</strong>
+                  <span>Read from acme.com/llms.txt</span>
+                </div>
+              </div>
+              <p class="shift-ai-reply">
+                For a team of 30 in Brooklyn, <strong>Acme Coffee</strong> offers <span class="hl">office cold-brew catering</span> with weekly delivery. The minimum order is <span class="hl">20 cups</span>, so you'd be comfortably above it.
+              </p>
+              <div class="shift-citation">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>Source: <a href="#">acme.com/services/cold-brew-catering</a></span>
+              </div>
+            </div>
+            <div class="shift-outcome shift-outcome-good">
+              <span>Outcome</span>
+              <strong>You're in the answer.</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat row -->
+      <div class="shift-stats">
+        <div class="shift-stat">
+          <div class="shift-stat-bar">
+            <span class="shift-stat-bar-fill off" style="--w:85%;"></span>
+            <span class="shift-stat-bar-fill on" style="--w:8%;"></span>
+          </div>
+          <strong data-stat data-off="85%" data-on="8%">85%</strong>
+          <small>of bytes are noise <em data-stat-em data-off="(theme, nav, widgets)" data-on="(actual content)">(theme, nav, widgets)</em></small>
+        </div>
+        <div class="shift-stat">
+          <strong data-stat data-off="0" data-on="14">0</strong>
+          <small>citable answers in <code class="mono" style="font-size:12px;">/llms.txt</code></small>
+        </div>
+        <div class="shift-stat">
+          <strong data-stat data-off="~50KB" data-on="~3KB">~50KB</strong>
+          <small>per page for an AI to read <em data-stat-em data-off="" data-on="(12× smaller)"></em></small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ────────────────────────────────────────── -->
+<section id="how-it-works">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2 class="h1 text-balance">Install once. WordPress stays the source of truth.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Install the plugin</h3>
+        <p>Start with Free. No account, API key, or developer handoff for the core workflow.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>Review your content</h3>
+        <p>Use your existing WordPress posts and pages. Focus on services, FAQs, docs, guides, products.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Publish AI-readable output</h3>
+        <p>Quoted generates <code class="mono" style="font-size:12px;">/llms.txt</code>, Markdown endpoints, schema, and crawler rules.</p>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <h3>See what AI crawlers see</h3>
+        <p>Track 60+ known AI bots in your WordPress admin. Allow or block individually.</p>
+      </div>
+      <div class="step">
+        <div class="num">05</div>
+        <h3>Keep it aligned</h3>
+        <p>Content changes in WordPress → the AI-readable layer stays in sync automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Live demo ───────────────────────────────────────────── -->
+<section class="bg-soft" id="live-demo">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Live preview</span>
+      <h2 class="h1 text-balance">See what your <code class="mono" style="font-size:0.85em;background:var(--q-primary-soft);color:var(--q-primary-ink);padding:0 8px;border-radius:6px;">/llms.txt</code> would look like.</h2>
+      <p class="lead">Pick the content types you want AI assistants to see. Quoted regenerates the file every time you publish or update.</p>
+    </div>
+
+    <div class="demo">
+      <div class="controls">
+        <div class="group">
+          <h6>Your site</h6>
+          <div class="input-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--q-text-faint);"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <input id="demo-site" value="acme.com" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="group">
+          <h6>Include content types</h6>
+          <div class="toggle-row">
+            <span>Posts &amp; articles</span>
+            <label class="switch"><input type="checkbox" class="demo-toggle" data-key="posts" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>Pages &amp; services</span>
+            <label class="switch"><input type="checkbox" class="demo-toggle" data-key="pages" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>Products</span>
+            <label class="switch"><input type="checkbox" class="demo-toggle" data-key="products"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>FAQ entries</span>
+            <label class="switch"><input type="checkbox" class="demo-toggle" data-key="faq" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>Docs</span>
+            <label class="switch"><input type="checkbox" class="demo-toggle" data-key="docs"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>Changelog</span>
+            <label class="switch"><input type="checkbox" class="demo-toggle" data-key="changelog"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="group">
+          <h6>Crawlers</h6>
+          <div class="toggle-row">
+            <span>Allow GPTBot</span>
+            <label class="switch"><input type="checkbox" class="demo-bot" data-bot="GPTBot" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>Allow ClaudeBot</span>
+            <label class="switch"><input type="checkbox" class="demo-bot" data-bot="ClaudeBot" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>Allow PerplexityBot</span>
+            <label class="switch"><input type="checkbox" class="demo-bot" data-bot="PerplexityBot" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>Block CCBot</span>
+            <label class="switch"><input type="checkbox" class="demo-bot" data-bot="CCBot"><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="output">
+        <div class="head">
+          <span style="color:#f4f4f7;font-weight:500;">curl</span>
+          <span style="color:#9aa0ad;">https://<span id="demo-site-out">acme.com</span>/llms.txt</span>
+          <button class="copy-btn" id="demo-copy">Copy</button>
+        </div>
+        <pre id="demo-out"></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features grid ───────────────────────────────────────── -->
+<section id="product">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What's in the box</span>
+      <h2 class="h1 text-balance">Six pieces that ship on the Free plan.</h2>
+    </div>
+    <div class="features">
+      <div class="f">
+        <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg></div>
+        <h3>AI-ready site guide</h3>
+        <p>Generate a clear <code class="mono" style="font-size:12px;">/llms.txt</code> so AI crawlers and retrieval systems can find important WordPress content without guessing from theme markup.</p>
+      </div>
+      <div class="f">
+        <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 8 5 12 9 16"/><polyline points="15 8 19 12 15 16"/></svg></div>
+        <h3>Clean content endpoints</h3>
+        <p>Serve posts and pages as clean Markdown — without menus, widgets, or layout noise — at <code class="mono" style="font-size:12px;">/wp-json/quoted/v1/llm/&#123;slug&#125;</code>.</p>
+      </div>
+      <div class="f">
+        <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2V5zm2 15h12"/></svg></div>
+        <h3>FAQ &amp; content structure</h3>
+        <p>Clearer FAQ and article structure through JSON-LD, while your WordPress posts stay the source of truth.</p>
+      </div>
+      <div class="f">
+        <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg></div>
+        <h3>Crawler control</h3>
+        <p>Allow or block individual AI crawlers with HTTP 403 enforcement and <code class="mono" style="font-size:12px;">robots.txt</code> rules that stay in sync.</p>
+      </div>
+      <div class="f">
+        <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5L18 9.5 13.5 11 12 16l-1.5-5L6 9.5 10.5 8z"/></svg></div>
+        <h3>SEO-plugin compatible schema</h3>
+        <p>Add Article and FAQ schema while auto-deferring to active SEO plugins when they already provide the same structured data.</p>
+      </div>
+      <div class="f">
+        <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 12 7 12 10 5 14 19 17 12 21 12"/></svg></div>
+        <h3>Local AI bot visibility</h3>
+        <p>Track 60+ known AI and data crawlers in your WordPress database, with hashed IPs and no telemetry on Free.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Compatibility ───────────────────────────────────────── -->
+<section class="bg-soft compat-section">
+  <div class="wrap">
+    <div class="compat-header">
+      <span class="eyebrow">Compatibility</span>
+      <h2 class="h1 mt-16 text-balance">Plays nice with the WordPress stack you already use.</h2>
+      <p class="lead mt-16">
+        Quoted detects <strong style="color:var(--q-text);font-weight:600;">36+ active plugins</strong> before adding schema, robots.txt rules, or REST endpoints —
+        so it never duplicates output, never overrides your settings, and never picks a fight with your existing stack.
+        <strong style="color:var(--q-text);font-weight:600;">Zero known conflicts at install</strong> across the products below.
+      </p>
+      <div class="compat-stats">
+        <div class="stat"><strong>36+</strong> plugins tested</div>
+        <div class="stat"><strong>0</strong> known conflicts</div>
+        <div class="stat"><strong>Auto-</strong>defers schema</div>
+        <div class="stat"><strong>Per-</strong>plugin detection</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="compat-tabs" id="compat-tabs">
+      <button class="active" data-cat="all">All <span class="cnt">36</span></button>
+      <button data-cat="seo">SEO <span class="cnt">7</span></button>
+      <button data-cat="builder">Page builders <span class="cnt">6</span></button>
+      <button data-cat="cache">Caching &amp; perf <span class="cnt">5</span></button>
+      <button data-cat="commerce">E-commerce <span class="cnt">5</span></button>
+      <button data-cat="forms">Forms <span class="cnt">4</span></button>
+      <button data-cat="i18n">Multilingual <span class="cnt">3</span></button>
+      <button data-cat="security">Security <span class="cnt">3</span></button>
+      <button data-cat="membership">Membership <span class="cnt">3</span></button>
+    </div>
+
+    <!-- Product grid -->
+    <div class="compat-grid" id="compat-grid">
+      <!-- SEO -->
+      <div class="compat-card" data-cat="seo"><div class="ico ico-seo">Y</div><div class="body"><div class="name">Yoast SEO</div><div class="meta">Schema deferred</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="seo"><div class="ico ico-seo">RM</div><div class="body"><div class="name">Rank Math</div><div class="meta">Schema deferred</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="seo"><div class="ico ico-seo">AI</div><div class="body"><div class="name">AIOSEO</div><div class="meta">Schema deferred</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="seo"><div class="ico ico-seo">SP</div><div class="body"><div class="name">SEOPress</div><div class="meta">Schema deferred</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="seo"><div class="ico ico-seo">SS</div><div class="body"><div class="name">Slim SEO</div><div class="meta">Schema deferred</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="seo"><div class="ico ico-seo">SC</div><div class="body"><div class="name">Schema Pro</div><div class="meta">No duplicate output</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="seo"><div class="ico ico-seo">TF</div><div class="body"><div class="name">SEO Framework</div><div class="meta">Schema deferred</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+
+      <!-- Page builders -->
+      <div class="compat-card" data-cat="builder"><div class="ico ico-builder">El</div><div class="body"><div class="name">Elementor</div><div class="meta">Content extracted</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="builder"><div class="ico ico-builder">Di</div><div class="body"><div class="name">Divi</div><div class="meta">Content extracted</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="builder"><div class="ico ico-builder">Bv</div><div class="body"><div class="name">Beaver Builder</div><div class="meta">Content extracted</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="builder"><div class="ico ico-builder">Br</div><div class="body"><div class="name">Bricks</div><div class="meta">Content extracted</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="builder"><div class="ico ico-builder">Ox</div><div class="body"><div class="name">Oxygen</div><div class="meta">Content extracted</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="builder"><div class="ico ico-builder">Gb</div><div class="body"><div class="name">Gutenberg</div><div class="meta">Blocks preserved</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+
+      <!-- Caching / perf -->
+      <div class="compat-card" data-cat="cache"><div class="ico ico-cache">WR</div><div class="body"><div class="name">WP Rocket</div><div class="meta">Cache-aware</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="cache"><div class="ico ico-cache">W3</div><div class="body"><div class="name">W3 Total Cache</div><div class="meta">Cache-aware</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="cache"><div class="ico ico-cache">LS</div><div class="body"><div class="name">LiteSpeed Cache</div><div class="meta">Cache-aware</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="cache"><div class="ico ico-cache">Ao</div><div class="body"><div class="name">Autoptimize</div><div class="meta">Cache-aware</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="cache"><div class="ico ico-cache">Cf</div><div class="body"><div class="name">Cloudflare</div><div class="meta">Edge-cache safe</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+
+      <!-- E-commerce -->
+      <div class="compat-card" data-cat="commerce"><div class="ico ico-commerce">Wc</div><div class="body"><div class="name">WooCommerce</div><div class="meta">Products indexed</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="commerce"><div class="ico ico-commerce">EDD</div><div class="body"><div class="name">Easy Digital Downloads</div><div class="meta">Products indexed</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="commerce"><div class="ico ico-commerce">Mp</div><div class="body"><div class="name">MemberPress</div><div class="meta">Public pages only</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="commerce"><div class="ico ico-commerce">LD</div><div class="body"><div class="name">LearnDash</div><div class="meta">Public lessons only</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="commerce"><div class="ico ico-commerce">Sc</div><div class="body"><div class="name">SureCart</div><div class="meta">Products indexed</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+
+      <!-- Forms -->
+      <div class="compat-card" data-cat="forms"><div class="ico ico-forms">Gf</div><div class="body"><div class="name">Gravity Forms</div><div class="meta">Skipped from index</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="forms"><div class="ico ico-forms">WP</div><div class="body"><div class="name">WPForms</div><div class="meta">Skipped from index</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="forms"><div class="ico ico-forms">CF</div><div class="body"><div class="name">Contact Form 7</div><div class="meta">Skipped from index</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="forms"><div class="ico ico-forms">Fl</div><div class="body"><div class="name">Fluent Forms</div><div class="meta">Skipped from index</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+
+      <!-- Multilingual -->
+      <div class="compat-card" data-cat="i18n"><div class="ico ico-i18n">Wm</div><div class="body"><div class="name">WPML</div><div class="meta">Per-locale /llms.txt</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="i18n"><div class="ico ico-i18n">Pl</div><div class="body"><div class="name">Polylang</div><div class="meta">Per-locale /llms.txt</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="i18n"><div class="ico ico-i18n">TP</div><div class="body"><div class="name">TranslatePress</div><div class="meta">Per-locale /llms.txt</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+
+      <!-- Security -->
+      <div class="compat-card" data-cat="security"><div class="ico ico-security">Wf</div><div class="body"><div class="name">Wordfence</div><div class="meta">Allowlist-friendly</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="security"><div class="ico ico-security">Su</div><div class="body"><div class="name">Sucuri</div><div class="meta">Allowlist-friendly</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="security"><div class="ico ico-security">iT</div><div class="body"><div class="name">iThemes Security</div><div class="meta">Allowlist-friendly</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+
+      <!-- Membership -->
+      <div class="compat-card" data-cat="membership"><div class="ico ico-membership">RC</div><div class="body"><div class="name">Restrict Content Pro</div><div class="meta">Public-only index</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="membership"><div class="ico ico-membership">PM</div><div class="body"><div class="name">Paid Memberships Pro</div><div class="meta">Public-only index</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+      <div class="compat-card" data-cat="membership"><div class="ico ico-membership">Bb</div><div class="body"><div class="name">BuddyBoss</div><div class="meta">Public-only index</div></div><span class="check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+    </div>
+
+    <div class="compat-cta">
+      <div class="ico">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      </div>
+      <div class="copy">
+        <strong>Don't see your stack?</strong>
+        <p>Quoted is built around standard WordPress hooks — if a plugin uses normal post types, taxonomies, or REST endpoints, it Just Works. <a href="mailto:support@quotedeasy.com" style="color:var(--q-primary);font-weight:500;">Email us</a> and we'll test against it.</p>
+      </div>
+      <a href="docs.html" class="btn btn-secondary btn-sm">See conflict matrix →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Use Cases ───────────────────────────────────────────── -->
+<section id="use-cases">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Use cases</span>
+      <h2 class="h1 text-balance">Built for real WordPress operators — not just devs.</h2>
+      <p class="lead">Pick the role closest to yours. The plugin is the same; the workflow we recommend is different.</p>
+    </div>
+    <div class="use-cases-grid">
+      <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="uc">
+        <div class="uc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg></div>
+        <h3>Local business</h3>
+        <p>Your service pages exist, but AI assistants don't know what you actually offer. Publish a clean AI-readable guide; keep FAQs easy to parse.</p>
+        <span class="uc-cta">Start with Free →</span>
+      </a>
+
+      <a href="pricing.html" class="uc">
+        <div class="uc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Small agency</h3>
+        <p>Clients ask about AI search. Pro gives you a repeatable AI-readiness setup across small client portfolios without selling a bloated dashboard.</p>
+        <span class="uc-cta">Compare Pro →</span>
+      </a>
+
+      <a href="docs.html" class="uc">
+        <div class="uc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></div>
+        <h3>SaaS / product site</h3>
+        <p>Product pages, docs, changelog, FAQs need to stay clear for both buyers and AI-assisted research. Expose them as structured Markdown.</p>
+        <span class="uc-cta">Read the docs →</span>
+      </a>
+
+      <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="uc">
+        <div class="uc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-7L11 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg></div>
+        <h3>Consultant / service provider</h3>
+        <p>Your expertise is spread across blog posts, pages, and FAQs. Give crawlers a cleaner path to your best explanations.</p>
+        <span class="uc-cta">Install Free →</span>
+      </a>
+
+      <a href="pricing.html" class="uc">
+        <div class="uc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 12 7 12 10 5 14 19 17 12 21 12"/></svg></div>
+        <h3>Publisher / niche site</h3>
+        <p>You publish useful content but can't tell whether AI crawlers visit. Track bots; expose clean Markdown; upgrade for longer history.</p>
+        <span class="uc-cta">View pricing →</span>
+      </a>
+
+      <a href="index.html#how-it-works" class="uc">
+        <div class="uc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></div>
+        <h3>Content-heavy business</h3>
+        <p>Buyers compare services, guides, FAQs, and updates before they contact you. Quoted is the content-structure layer that helps them — and the AIs — read it.</p>
+        <span class="uc-cta">See how it works →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pricing ─────────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="h1 text-balance">Start free. Upgrade when the workflow becomes useful.</h2>
+      <div style="display:flex;justify-content:center;margin-top:24px;">
+        <div class="billing-toggle" id="billing-toggle">
+          <button class="active" data-cycle="monthly">Monthly</button>
+          <button data-cycle="yearly">Yearly <span class="save">2 months free</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- FREE -->
+      <div class="plan">
+        <div class="plan-head"><h3>Free</h3><span class="chip chip-muted">Self-host</span></div>
+        <div class="plan-tag">Test AI-readiness on one WordPress site.</div>
+        <div class="price"><span class="amt">$0</span><span class="per">/forever</span></div>
+        <div class="price-sub">No card. No account.</div>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary plan-cta">Install free plugin</a>
+        <div class="plan-feats">
+          <ul>
+            <li>Generate <code class="mono" style="font-size:12.5px;">/llms.txt</code> for up to 50 posts/pages</li>
+            <li>Clean Markdown endpoints</li>
+            <li>Detect 60+ AI and data crawlers</li>
+            <li>Allow or block individual crawlers</li>
+            <li>Article &amp; FAQ schema, SEO-compatible</li>
+            <li>7-day local bot history</li>
+          </ul>
+        </div>
+        <div class="limits">1 site · 50 posts in <code class="mono">/llms.txt</code> · local-only</div>
+      </div>
+
+      <!-- STARTER -->
+      <div class="plan highlight">
+        <span class="badge">Most popular</span>
+        <div class="plan-head"><h3>Starter</h3><span class="chip">For businesses</span></div>
+        <div class="plan-tag">For business owners who want a maintained AI-ready site.</div>
+        <div class="price">
+          <span class="amt" data-price data-monthly="$19" data-yearly="$16">$19</span>
+          <span class="per">/month</span>
+        </div>
+        <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$190 billed yearly">billed monthly</div>
+        <a href="#" class="btn btn-primary plan-cta">Start Starter</a>
+        <div class="plan-feats">
+          <ul>
+            <li>Everything in Free</li>
+            <li>Unlimited posts in <code class="mono" style="font-size:12.5px;">/llms.txt</code></li>
+            <li>12-month bot crawl history</li>
+            <li>Citation checks &amp; Live AI Test (your provider key)</li>
+            <li>Remove "Powered by Quoted" badge</li>
+            <li>Email support</li>
+          </ul>
+        </div>
+        <div class="limits">1 site · best for local businesses, consultants, solo founders</div>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan">
+        <div class="plan-head"><h3>Pro</h3><span class="chip chip-muted">Agencies</span></div>
+        <div class="plan-tag">For small agencies and repeatable client workflows.</div>
+        <div class="price">
+          <span class="amt" data-price data-monthly="$29" data-yearly="$24">$29</span>
+          <span class="per">/month</span>
+        </div>
+        <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$290 billed yearly">billed monthly</div>
+        <a href="#" class="btn btn-secondary plan-cta">Start Pro</a>
+        <div class="plan-feats">
+          <ul>
+            <li>Everything in Starter</li>
+            <li>Use across up to 5 client or owned sites</li>
+            <li>Higher citation-check allowance</li>
+            <li>Repeatable setup for client sites</li>
+            <li>Priority email support</li>
+          </ul>
+        </div>
+        <div class="limits">Up to 5 sites · best for freelancers and small agencies</div>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:32px;font-size:13px;color:var(--q-text-muted);">
+      Free is enough to validate the workflow. Paid plans add unlimited coverage, longer history, citation checks, multi-site use, and support.
+      Billing is securely handled by Lemon Squeezy.
+    </p>
+  </div>
+</section>
+
+<!-- ── Promotions / Programs ───────────────────────────────── -->
+<section id="programs" class="bg-soft">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Programs</span>
+      <h2 class="h1 text-balance">Ways to pay less. Sometimes nothing at all.</h2>
+      <p class="lead">Discounts and partnerships we actually mean. No "limited-time offer that resets every Tuesday."</p>
+    </div>
+
+    <div class="programs-grid">
+      <!-- Feature: early bird -->
+      <div class="program feature">
+        <span class="program-pill">
+          <span style="width:6px;height:6px;border-radius:50%;background:#fff;"></span>
+          Early bird
+        </span>
+        <div class="program-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        </div>
+        <h3>30% off Pro for the first 100 agencies — for life.</h3>
+        <p>Lock in launch pricing while we finish citation history. Subscription stays at the discount as long as you renew. 17 of 100 spots claimed.</p>
+        <div class="row gap-12" style="margin-top:4px;flex-wrap:wrap;">
+          <button class="program-code" onclick="navigator.clipboard?.writeText(this.firstElementChild.textContent);this.lastElementChild.style.opacity='1';setTimeout(()=>this.lastElementChild.style.opacity='0.6',1200);">
+            <span>EARLYBIRD30</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6;transition:120ms;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <a href="pricing.html" class="btn btn-sm btn-on-dark btn-primary" style="background:#fff;color:var(--q-primary-ink);">Claim my spot →</a>
+        </div>
+        <span class="program-meta">
+          <span>17 / 100 claimed</span>
+          <span>·</span>
+          <span>Ends June 30, 2026</span>
+        </span>
+      </div>
+
+      <!-- Money-back -->
+      <div class="program">
+        <span class="program-pill">Guarantee</span>
+        <div class="program-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1l3 6 6 .9-4.5 4.4 1 6.7L12 16l-5.5 3 1-6.7L3 7.9 9 7z"/></svg>
+        </div>
+        <h3>30-day money-back guarantee.</h3>
+        <p>Try Starter or Pro for a month. If it doesn't fit your WordPress workflow, email us — we refund the full amount, no questions.</p>
+        <a href="faq.html#pricing" class="program-cta">How it works →</a>
+        <span class="program-meta"><span>Auto via Lemon Squeezy</span></span>
+      </div>
+
+      <!-- Switch & save -->
+      <div class="program">
+        <span class="program-pill">Switch &amp; save</span>
+        <div class="program-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <h3>Already paying Yoast Premium or Rank Math Pro?</h3>
+        <p>Forward your last invoice to <code style="font-size:0.92em;background:var(--q-surface-2);padding:1px 6px;border-radius:4px;font-family:var(--q-font-mono);">switch@quotedeasy.com</code> and we'll cover your first 3 months on Starter or Pro.</p>
+        <a href="mailto:switch@quotedeasy.com" class="program-cta">Forward invoice →</a>
+        <span class="program-meta"><span>Yoast · Rank Math · AIOSEO · SEOPress</span></span>
+      </div>
+
+      <!-- Agency partner -->
+      <div class="program">
+        <span class="program-pill">Partner</span>
+        <div class="program-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Agency partner program.</h3>
+        <p>Manage 5+ client sites? Get listed on our partner page, earn 25% recurring on every client you sign up, and unlock the Pro features across your client portfolio.</p>
+        <a href="mailto:partners@quotedeasy.com" class="program-cta">Apply →</a>
+        <span class="program-meta"><span>25% recurring · co-marketing</span></span>
+      </div>
+
+      <!-- Education / nonprofit -->
+      <div class="program">
+        <span class="program-pill">Non-profit &amp; edu</span>
+        <div class="program-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <h3>50% off for schools and registered non-profits.</h3>
+        <p>Sites running on .edu, .ac, or registered 501(c) / equivalent get half off Starter or Pro for the lifetime of the subscription. One simple verification email.</p>
+        <a href="mailto:edu@quotedeasy.com" class="program-cta">Get verified →</a>
+        <span class="program-meta"><span>Universities · NGOs · libraries</span></span>
+      </div>
+
+      <!-- Referral -->
+      <div class="program">
+        <span class="program-pill">Refer</span>
+        <div class="program-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+        <h3>Refer a friend. Get a month free.</h3>
+        <p>Every paying customer you refer credits one free month to your account. Stack them — your subscription can pay for itself with three referrals a year.</p>
+        <a href="pricing.html" class="program-cta">Get my link →</a>
+        <span class="program-meta"><span>1 month free per signup · no cap</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ────────────────────────────────────────── -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">From early customers</span>
+      <h2 class="h1 text-balance">Quiet wins from real WordPress operators.</h2>
+    </div>
+    <div class="quotes">
+      <div class="quote">
+        <div class="mark">"</div>
+        <p class="q">
+          I'd already installed Yoast for the basics. Quoted gave me the AI-readable layer in 20 minutes — without me ripping anything out.
+          A week later I checked the bot log and Perplexity had crawled four service pages.
+        </p>
+        <div class="person">
+          <div class="avatar">MN</div>
+          <div class="person-meta">
+            <strong>Mai Nguyen</strong>
+            <span>Founder · Banh Mi Saigon (Brooklyn)</span>
+          </div>
+        </div>
+      </div>
+      <div class="quote">
+        <div class="mark">"</div>
+        <p class="q">
+          I run a small agency. The Pro plan gave me one repeatable thing to add to every client site that isn't another bloated SEO dashboard.
+          Clients understand "we're making your site AI-readable" much faster than any schema explanation I've tried.
+        </p>
+        <div class="person">
+          <div class="avatar">JT</div>
+          <div class="person-meta">
+            <strong>James Trent</strong>
+            <span>Director · Lapine Studio (Bristol, UK)</span>
+          </div>
+        </div>
+      </div>
+      <div class="quote">
+        <div class="mark">"</div>
+        <p class="q">
+          The bot dashboard is the part I didn't know I needed. I could finally answer the question
+          "is anyone other than Googlebot reading our docs?" — turns out ClaudeBot was, hourly.
+        </p>
+        <div class="person">
+          <div class="avatar">SA</div>
+          <div class="person-meta">
+            <strong>Sara Acosta</strong>
+            <span>Solo SaaS founder · Pivotcloud.io</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ─────────────────────────────────────────────────── -->
+<section id="faq">
+  <div class="wrap-narrow">
+    <div class="section-head center">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="h1 text-balance">Questions before installing</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Is Quoted an SEO plugin?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">Quoted is best understood as an AI visibility and content-structure layer for WordPress. It helps AI crawlers and assistants understand your content more clearly. It does not replace a traditional SEO plugin.</div>
+      </details>
+      <details>
+        <summary>Does it replace Yoast, Rank Math, AIOSEO, or SEOPress?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">No. Keep your SEO plugin for titles, meta descriptions, XML sitemaps, and search workflows. Quoted adds <code class="mono">/llms.txt</code>, clean Markdown, AI bot tracking, crawler controls, and compatible schema.</div>
+      </details>
+      <details>
+        <summary>Does it guarantee ChatGPT or Google AI visibility?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">No. No plugin can guarantee AI visibility, citations, rankings, or traffic. Quoted helps prepare and structure your content so AI systems have clearer source material to read.</div>
+      </details>
+      <details>
+        <summary>Will it slow down my website?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">Quoted is designed to be lightweight. Bot detection is a simple user-agent check, <code class="mono">/llms.txt</code> is cached, and the Free plan does not call an external service.</div>
+      </details>
+      <details>
+        <summary>Do I need technical skills?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">No. The Free workflow is built for ordinary WordPress admins. Advanced users can still review outputs, crawler rules, and settings.</div>
+      </details>
+      <details>
+        <summary>Can agencies use it for clients?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">Yes. Pro is designed for freelancers and small agencies that want a repeatable AI-readiness setup across client WordPress sites.</div>
+      </details>
+      <details>
+        <summary>Will my data be sent to Quoted servers?<svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+        <div class="answer">The Free plan operates locally on your WordPress site and does not send telemetry to Quoted. Paid AI checks use your own provider key where applicable.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ───────────────────────────────────────────── -->
+<section style="padding-bottom: 0;">
+  <div class="wrap">
+    <div class="final-cta">
+      <h2 class="text-balance">Prepare your WordPress site for AI-assisted discovery.</h2>
+      <p class="text-pretty">
+        Start with the Free plugin, review the output, and upgrade only when
+        you need unlimited coverage, longer history, citation checks, or agency workflows.
+      </p>
+      <div class="cta-stack">
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-lg btn-on-dark">Install free</a>
+        <a href="docs.html" class="btn btn-secondary btn-lg btn-on-dark">Read the docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div data-include="footer"></div>
+
+<script src="assets/shared.js"></script>
+<script src="assets/hero.js"></script>
+<script>
+  // ── Pricing billing toggle ───────────────────────────────
+  document.querySelectorAll('#billing-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cycle = btn.dataset.cycle;
+      document.querySelectorAll('#billing-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('[data-price]').forEach(el => { el.textContent = el.dataset[cycle]; });
+      document.querySelectorAll('[data-price-sub]').forEach(el => { el.textContent = el.dataset[cycle]; });
+    });
+  });
+
+  // ── Live llms.txt demo ───────────────────────────────────
+  const demoContent = {
+    posts: {
+      title: 'Articles',
+      items: [
+        ['Why your homepage isn\'t enough for AI',     '/blog/homepage-not-enough.md'],
+        ['llms.txt explained for small businesses',    '/blog/what-is-llms-txt.md'],
+      ],
+    },
+    pages: {
+      title: 'Services',
+      items: [
+        ['Cold-brew catering',           '/services/cold-brew-catering.md'],
+        ['Espresso bar setup',           '/services/espresso-bar.md'],
+        ['Corporate coffee subscriptions','/services/corporate-subscriptions.md'],
+      ],
+    },
+    products: {
+      title: 'Products',
+      items: [
+        ['Single-origin Ethiopia (250g)','/shop/ethiopia-250g.md'],
+        ['Cold-brew concentrate (1L)',   '/shop/cold-brew-1l.md'],
+      ],
+    },
+    faq: {
+      title: 'FAQ',
+      items: [
+        ['Minimum order size?',         '/faq.md#minimum'],
+        ['Service area in NYC?',        '/faq.md#area'],
+        ['Lead time for new accounts?', '/faq.md#lead-time'],
+      ],
+    },
+    docs: {
+      title: 'Documentation',
+      items: [
+        ['Office cold-brew dispenser setup', '/docs/dispenser.md'],
+        ['Refill schedule guide',            '/docs/refills.md'],
+      ],
+    },
+    changelog: {
+      title: 'Recent updates',
+      items: [
+        ['New service area: Queens',         '/changelog.md#2026-05'],
+        ['Spring menu published',            '/changelog.md#2026-04'],
+      ],
+    },
+  };
+
+  function renderDemo() {
+    const site = document.getElementById('demo-site').value.trim() || 'yoursite.com';
+    document.getElementById('demo-site-out').textContent = site;
+    const toggles = {};
+    document.querySelectorAll('.demo-toggle').forEach(t => { toggles[t.dataset.key] = t.checked; });
+    const bots = [];
+    document.querySelectorAll('.demo-bot').forEach(t => { if (t.checked) bots.push(t.dataset.bot); });
+
+    let out = '';
+    out += `<span class="k"># ${site.split('.')[0].charAt(0).toUpperCase()+site.split('.')[0].slice(1)}</span>\n`;
+    out += `<span class="c">&gt; A clean, AI-readable map of ${site}.</span>\n`;
+    out += `<span class="c">&gt; Generated by Quoted · last updated ${new Date().toISOString().slice(0,10)}</span>\n\n`;
+
+    Object.keys(demoContent).forEach(key => {
+      if (!toggles[key]) return;
+      const block = demoContent[key];
+      out += `<span class="k">## ${block.title}</span>\n`;
+      block.items.forEach(([title, url]) => {
+        out += `- <span class="t">${title}</span>\n`;
+        out += `  <span class="u">https://${site}${url}</span>\n`;
+      });
+      out += `\n`;
+    });
+
+    if (bots.length) {
+      out += `<span class="c"># Allowed crawlers: ${bots.join(', ')}</span>\n`;
+    } else {
+      out += `<span class="c"># No crawlers explicitly allowed</span>\n`;
+    }
+    document.getElementById('demo-out').innerHTML = out;
+  }
+  document.querySelectorAll('.demo-toggle, .demo-bot').forEach(t => t.addEventListener('change', renderDemo));
+  document.getElementById('demo-site').addEventListener('input', renderDemo);
+  document.getElementById('demo-copy').addEventListener('click', () => {
+    const text = document.getElementById('demo-out').innerText;
+    navigator.clipboard?.writeText(text);
+    const btn = document.getElementById('demo-copy');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = orig, 1200);
+  });
+  renderDemo();
+
+  // ── Bot marquee — 61 crawlers ────────────────────────────
+  const BOTS = [
+    // OpenAI
+    ['GPTBot', 'openai', 'G'],
+    ['OAI-SearchBot', 'openai', 'S'],
+    ['ChatGPT-User', 'openai', 'C'],
+    ['SearchGPT', 'openai', 'SG'],
+    // Anthropic
+    ['ClaudeBot', 'anthropic', 'C'],
+    ['Claude-Web', 'anthropic', 'CW'],
+    ['Anthropic-AI', 'anthropic', 'A'],
+    // Perplexity
+    ['PerplexityBot', 'perplexity', 'P'],
+    ['Perplexity-User', 'perplexity', 'PU'],
+    // Google
+    ['Gemini', 'google', 'G'],
+    ['Google-Extended', 'google', 'GE'],
+    ['GoogleOther', 'google', 'GO'],
+    ['Googlebot', 'google', 'GB'],
+    // Microsoft
+    ['Bingbot', 'microsoft', 'B'],
+    ['Copilot', 'microsoft', 'C'],
+    ['MSN-Bot', 'microsoft', 'M'],
+    // Apple
+    ['Applebot', 'apple', 'A'],
+    ['Applebot-Extended', 'apple', 'AE'],
+    // Meta
+    ['Meta-ExternalAgent', 'meta', 'M'],
+    ['FacebookBot', 'meta', 'F'],
+    ['FacebookExternalHit', 'meta', 'FE'],
+    // Amazon
+    ['Amazonbot', 'amazon', 'A'],
+    // xAI
+    ['Grok', 'xai', 'X'],
+    ['xAI-Crawler', 'xai', 'XC'],
+    // ByteDance
+    ['ByteSpider', 'byte', 'B'],
+    ['Bytedance', 'byte', 'BD'],
+    // Yandex / Baidu / Naver / Sogou / DuckDuckGo
+    ['YandexBot', 'yandex', 'Y'],
+    ['Baiduspider', 'baidu', 'B'],
+    ['Sogou', 'cyan', 'S'],
+    ['DuckDuckBot', 'duck', 'D'],
+    ['NaverBot', 'naver', 'N'],
+    ['Yeti', 'naver', 'Y'],
+    // SEO crawlers
+    ['AhrefsBot', 'ahrefs', 'A'],
+    ['SemrushBot', 'semrush', 'S'],
+    ['MJ12bot', 'rose', 'MJ'],
+    ['BLEXBot', 'cyan', 'BX'],
+    ['PetalBot', 'rose', 'PB'],
+    ['DotBot', 'amber', 'D'],
+    ['DataForSeoBot', 'violet', 'DF'],
+    ['MojeekBot', 'emerald', 'MJ'],
+    // Archive / data
+    ['archive.org_bot', 'slate', 'A'],
+    ['ia_archiver', 'slate', 'IA'],
+    ['Diffbot', 'indigo', 'D'],
+    ['CCBot', 'violet', 'CC'],
+    ['CommonCrawl', 'violet', 'CC'],
+    // AI startups
+    ['Cohere-AI', 'rose', 'C'],
+    ['YouBot', 'cyan', 'Y'],
+    ['KagiBot', 'amber', 'K'],
+    ['Phind', 'emerald', 'P'],
+    ['AI2Bot', 'indigo', 'A2'],
+    ['MistralBot', 'amber', 'M'],
+    ['ReplicateBot', 'violet', 'R'],
+    ['ImagesiftBot', 'cyan', 'I'],
+    // Social
+    ['LinkedInBot', 'microsoft', 'L'],
+    ['TwitterBot', 'slate', 'T'],
+    ['Slackbot', 'rose', 'S'],
+    ['TelegramBot', 'microsoft', 'T'],
+    ['RedditBot', 'amber', 'R'],
+    ['PinterestBot', 'rose', 'P'],
+    ['Discordbot', 'violet', 'D'],
+    // Misc
+    ['NewsBot', 'emerald', 'N'],
+    ['WebMonitor', 'slate', 'W'],
+    ['ZoomiBot', 'cyan', 'Z'],
+  ];
+
+  function renderBotTrack(el) {
+    el.innerHTML = BOTS.map(([name, color, mono]) => `
+      <span class="bot-pill">
+        <span class="ico ${color}">${mono}</span>
+        <span>${name}</span>
+      </span>
+    `).join('');
+  }
+  const trackA = document.getElementById('bot-track-a');
+  const trackB = document.getElementById('bot-track-b');
+  if (trackA && trackB) { renderBotTrack(trackA); renderBotTrack(trackB); }
+  // Keep the heading number in sync with the BOTS array
+  document.querySelectorAll('[data-bot-count]').forEach(el => el.textContent = BOTS.length);
+
+  // ── Compatibility tabs ────────────────────────────────────
+  document.querySelectorAll('#compat-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      document.querySelectorAll('#compat-tabs button').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('#compat-grid .compat-card').forEach(card => {
+        card.classList.toggle('hide', cat !== 'all' && card.dataset.cat !== cat);
+      });
+    });
+  });
+
+  // ── The Shift toggle ─────────────────────────────────────
+  const shift = document.querySelector('.shift');
+  if (shift) {
+    const setState = (state) => {
+      shift.dataset.quotedState = state;
+      shift.querySelectorAll('.shift-btn').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.shift === state ? 'true' : 'false');
+      });
+      shift.querySelectorAll('[data-stat]').forEach(el => el.textContent = el.dataset[state]);
+      shift.querySelectorAll('[data-stat-em]').forEach(el => el.textContent = el.dataset[state]);
+    };
+    shift.querySelectorAll('.shift-btn').forEach(b => b.addEventListener('click', () => setState(b.dataset.shift)));
+    document.getElementById('shift-switch')?.addEventListener('click', () => setState(shift.dataset.quotedState === 'on' ? 'off' : 'on'));
+    let played = false;
+    new IntersectionObserver((entries) => entries.forEach(e => {
+      if (e.isIntersecting && !played) { played = true; setTimeout(() => setState('on'), 1400); }
+    }), { threshold: 0.45 }).observe(shift);
+  }
+</script>
+  const shift = document.querySelector('.shift');
+  if (shift) {
+    const setState = (state) => {
+      shift.dataset.quotedState = state;
+      shift.querySelectorAll('.shift-btn').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.shift === state ? 'true' : 'false');
+      });
+      // Update stat numbers
+      shift.querySelectorAll('[data-stat]').forEach(el => {
+        el.textContent = el.dataset[state];
+      });
+      shift.querySelectorAll('[data-stat-em]').forEach(el => {
+        el.textContent = el.dataset[state];
+      });
+    };
+    shift.querySelectorAll('.shift-btn').forEach(b => {
+      b.addEventListener('click', () => setState(b.dataset.shift));
+    });
+    document.getElementById('shift-switch')?.addEventListener('click', () => {
+      setState(shift.dataset.quotedState === 'on' ? 'off' : 'on');
+    });
+
+    // Auto-flip once when first scrolled into view (so visitors see the payoff)
+    let played = false;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !played) {
+          played = true;
+          setTimeout(() => setState('on'), 1400);
+        }
+      });
+    }, { threshold: 0.45 });
+    io.observe(shift);
+  }
+</script>
+</body>
+</html>

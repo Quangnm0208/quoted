@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Changelog — Quoted</title>
+<meta name="description" content="Release notes for Quoted — security patches, bot signature updates, schema engine improvements, and feature releases.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+  .cl-hero { padding: 64px 0 32px; }
+  .cl-hero h1 { font-size: clamp(36px, 4.4vw, 56px); line-height: 1.02; letter-spacing: -0.03em; }
+  .cl-hero p { font-size: 17px; color: var(--q-text-muted); margin-top: 14px; max-width: 56ch; }
+
+  .feed {
+    padding: 24px 0 96px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 64px;
+  }
+  @media (max-width: 880px) { .feed { grid-template-columns: 1fr; gap: 32px; } .feed-side { display: none; } }
+
+  .feed-side {
+    position: sticky; top: 80px;
+    align-self: start;
+    font-family: var(--q-font-mono);
+    font-size: 13px;
+  }
+  .feed-side h5 {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--q-text-faint); margin: 0 0 14px;
+  }
+  .feed-side ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; border-left: 1px solid var(--q-border); }
+  .feed-side a {
+    display: flex; align-items: center; gap: 12px;
+    padding: 4px 0 4px 16px;
+    color: var(--q-text-muted);
+    position: relative;
+  }
+  .feed-side a::before {
+    content: ""; position: absolute; left: -5px; top: 50%;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--q-surface); border: 1.5px solid var(--q-border);
+    transform: translateY(-50%);
+    transition: 120ms;
+  }
+  .feed-side a:hover, .feed-side a.active { color: var(--q-text); }
+  .feed-side a.active::before { border-color: var(--q-primary); background: var(--q-primary); }
+  .feed-side a small { color: var(--q-text-faint); font-size: 11px; }
+
+  .entry { padding-bottom: 56px; border-bottom: 1px solid var(--q-border); margin-bottom: 56px; }
+  .entry:last-child { border-bottom: 0; margin-bottom: 0; }
+  .entry .head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .entry .ver { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; color: var(--q-text-strong); font-family: var(--q-font-mono); }
+  .entry .date { font-size: 13px; color: var(--q-text-faint); font-family: var(--q-font-mono); }
+  .entry .summary { font-size: 17px; color: var(--q-text); line-height: 1.55; margin-bottom: 32px; max-width: 60ch; }
+
+  .group { margin-bottom: 24px; }
+  .group .label {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: var(--q-r-pill);
+    margin-bottom: 12px;
+    font-family: var(--q-font-mono);
+  }
+  .group .label.improved { background: var(--q-primary-soft); color: var(--q-primary-ink); }
+  .group .label.fixed { background: rgba(16,185,129,0.12); color: #066848; }
+  .group .label.security { background: rgba(220,38,38,0.08); color: #a72020; }
+  [data-theme="dark"] .group .label.fixed { color: #34d399; }
+  [data-theme="dark"] .group .label.security { color: #f87171; }
+  .group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .group li {
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 14.5px; line-height: 1.55; color: var(--q-text);
+  }
+  .group li::before {
+    content: ""; flex: 0 0 auto; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--q-border);
+    margin-top: 9px;
+  }
+  .group.improved li::before { background: var(--q-primary); }
+  .group.fixed li::before { background: #10b981; }
+  .group.security li::before { background: #dc2626; }
+  .group code { font-family: var(--q-font-mono); font-size: 0.92em; background: var(--q-surface-2); border: 1px solid var(--q-border-soft); padding: 1px 6px; border-radius: 4px; }
+
+  .entry .notes {
+    margin-top: 28px;
+    padding: 16px 18px;
+    background: var(--q-bg-soft);
+    border: 1px solid var(--q-border-soft);
+    border-radius: var(--q-r-md);
+    font-size: 13.5px;
+    color: var(--q-text-muted);
+    line-height: 1.55;
+  }
+  .entry .notes strong { color: var(--q-text); font-weight: 600; }
+</style>
+</head>
+<body data-screen-label="Changelog">
+
+<div data-include="header"></div>
+
+<section class="cl-hero">
+  <div class="wrap">
+    <span class="eyebrow">Release notes</span>
+    <h1 class="mt-16 text-balance">Changelog</h1>
+    <p class="text-pretty">
+      The work we do so you don't have to. Curated bot signatures, WordPress compatibility patches,
+      schema conflict matrix, and security hardening — shipped on a predictable cadence.
+    </p>
+    <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;">
+      <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+        WordPress.org plugin
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg>
+      </a>
+      <a href="#" class="btn btn-secondary btn-sm">
+        RSS feed
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="feed">
+    <!-- Sidebar timeline -->
+    <aside class="feed-side">
+      <h5>Versions</h5>
+      <ul>
+        <li><a href="#v0-2-0" class="active">v0.2.0 <small>2026-05-23</small></a></li>
+        <li><a href="#v0-1-0">v0.1.0 <small>2026-04-12</small></a></li>
+      </ul>
+    </aside>
+
+    <!-- Entries -->
+    <div>
+      <article class="entry" id="v0-2-0">
+        <div class="head">
+          <span class="ver">v0.2.0</span>
+          <span class="date">May 23, 2026</span>
+          <span class="chip">Latest</span>
+        </div>
+        <p class="summary text-pretty">
+          First public release on WordPress.org — Free tier shipped fully standalone.
+        </p>
+
+        <div class="group improved">
+          <span class="label improved"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span> Improved</span>
+          <ul>
+            <li>Standalone refactor — license module talks directly to Lemon Squeezy License API; no JWT, no backend hop.</li>
+            <li>AI Crawler Allowlist — allow / block any of 14 supported bots from settings.</li>
+            <li>Schema engine — Article and <code>FAQPage</code> JSON-LD with conflict detection across 15+ SEO plugins.</li>
+            <li>BYO API keys for Pro citation tracking (Perplexity, Tavily).</li>
+            <li>Dashboard reads 100% from local <code>wp_quoted_bot_log</code> — no external calls.</li>
+          </ul>
+        </div>
+
+        <div class="group fixed">
+          <span class="label fixed"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span> Fixed</span>
+          <ul>
+            <li>Serve <code>/llms.txt</code> at <code>template_redirect</code> priority 1 to beat <code>redirect_canonical</code>.</li>
+            <li>Match <code>/llms.txt</code> with or without trailing slash.</li>
+            <li>Invalidate stale markdown transients on <code>save_post</code> / <code>before_delete_post</code>.</li>
+            <li>Guard <code>wp_is_xmlrpc_request()</code> with <code>function_exists()</code>.</li>
+          </ul>
+        </div>
+
+        <div class="group security">
+          <span class="label security"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span> Security</span>
+          <ul>
+            <li>P1 hardening rollup: serializer safety, JS XSS guard, proxy trust, JWT validation, AJAX returns.</li>
+          </ul>
+        </div>
+
+        <div class="notes">
+          <strong>Note —</strong> Pro tier UI auto-appears once the Lemon Squeezy store is configured.
+          Until then the plugin runs Free-only.
+        </div>
+      </article>
+
+      <article class="entry" id="v0-1-0">
+        <div class="head">
+          <span class="ver">v0.1.0</span>
+          <span class="date">April 12, 2026</span>
+        </div>
+        <p class="summary text-pretty">
+          Initial scaffold release. Internal alpha — not yet published to WordPress.org.
+        </p>
+
+        <div class="group improved">
+          <span class="label improved"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span> Improved</span>
+          <ul>
+            <li>8-click onboarding wizard.</li>
+            <li><code>llms.txt</code> generation.</li>
+            <li>Markdown endpoints.</li>
+            <li>14 AI bot user-agents tracked.</li>
+            <li>Free tier with 50-post limit.</li>
+          </ul>
+        </div>
+
+        <div class="notes">
+          <strong>Note —</strong> Internal alpha. Not yet published to WordPress.org.
+        </div>
+      </article>
+
+      <!-- Subscribe nudge -->
+      <div style="margin-top:48px;background:var(--q-bg-soft);border:1px solid var(--q-border);border-radius:var(--q-r-lg);padding:28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+        <div>
+          <h3 style="font-size:17px;font-weight:600;">Get release notes in your inbox</h3>
+          <p style="font-size:14px;color:var(--q-text-muted);margin-top:6px;">One short email per release. Security advisories included. No marketing.</p>
+        </div>
+        <form style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;" onsubmit="event.preventDefault();this.querySelector('button').textContent='Subscribed ✓';">
+          <input type="email" placeholder="you@company.com" required style="height:42px;padding:0 14px;border:1px solid var(--q-border);border-radius:var(--q-r-md);background:var(--q-surface);color:var(--q-text);font:inherit;min-width:220px;">
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div data-include="footer"></div>
+
+<script src="assets/shared.js"></script>
+<script>
+  // Active link on scroll
+  const links = document.querySelectorAll('.feed-side a');
+  const entries = document.querySelectorAll('.entry');
+  function syncActive() {
+    let active = entries[0]?.id;
+    const top = window.scrollY + 120;
+    entries.forEach(e => { if (e.offsetTop <= top) active = e.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active));
+  }
+  window.addEventListener('scroll', syncActive, { passive: true });
+</script>
+</body>
+</html>

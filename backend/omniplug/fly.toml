@@ -1,0 +1,61 @@
+# fly.toml app configuration for OmniPlug CMS Core.
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'omniplug-cms-prod'
+primary_region = 'sin'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[env]
+  DB_PATH = '/app/data/cms.db'
+  NODE_ENV = 'production'
+  PORT = '4000'
+  TENANT_DEFAULT_DOMAIN = 'omniplug-cms-prod.fly.dev'
+  TRUST_PROXY = 'true'
+  UPLOAD_DIR = '/app/uploads'
+  # v1.4.4: telemetry disabled by default. To enable, set to
+  # 'https://telemetry.omniplug.com/v1/heartbeat' or remove this line.
+  TELEMETRY_URL = 'disabled'
+  # v1.4.4: production must fail closed unless a real public key + activated
+  # licenses are provisioned. Use warn only for explicit non-production drills.
+  LICENSE_ENFORCEMENT = 'strict'
+
+[[mounts]]
+  source = 'cms_data'
+  destination = '/app/data'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 4000
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+  [[services.ports]]
+    port = 80
+    handlers = ['http']
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [services.concurrency]
+    type = 'requests'
+    hard_limit = 200
+    soft_limit = 100
+
+  [[services.http_checks]]
+    interval = '30s'
+    timeout = '3s'
+    grace_period = '15s'
+    method = 'GET'
+    path = '/api/health'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'

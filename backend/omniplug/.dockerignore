@@ -1,0 +1,18 @@
+# Don't COPY các thứ này vào image
+node_modules
+npm-debug.log*
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+data/
+uploads/
+*.md
+docs/
+.vscode
+.idea
+.DS_Store
+*.log
+coverage
+.nyc_output

@@ -1,0 +1,103 @@
+/* Quoted — Design tokens
+ * v1.0
+ * Light mode first. Drop into any stylesheet and reference as CSS custom properties.
+ */
+
+:root {
+  /* ── Brand ─────────────────────────────────────────────── */
+  --q-primary:        #3b3fbf;
+  --q-primary-hover:  #2f33a3;
+  --q-primary-soft:   #eef0fb;
+  --q-primary-ink:    #1b1e6b;
+
+  /* ── Neutrals ──────────────────────────────────────────── */
+  --q-bg:             #fafbfc;
+  --q-surface:        #ffffff;
+  --q-border:         #e4e7ec;
+  --q-border-soft:    #eef0f3;
+  --q-text:           #15151b;
+  --q-text-muted:     #5b6678;
+
+  /* ── Status ────────────────────────────────────────────── */
+  --q-success:        #10b981;
+  --q-success-bg:     #e6f4ec;
+  --q-success-fg:     #066848;
+  --q-warning:        #eab308;
+  --q-warning-bg:     #fef4e6;
+  --q-warning-fg:     #92590b;
+  --q-error:          #dc2626;
+  --q-error-bg:       #fdecec;
+  --q-error-fg:       #a72020;
+
+  /* ── Typography ────────────────────────────────────────── */
+  --q-font-sans:      'Inter var', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --q-font-mono:      ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale (px) */
+  --q-text-xs:        11.5px;
+  --q-text-sm:        12.5px;
+  --q-text-base:      13.5px;
+  --q-text-md:        14px;
+  --q-text-lg:        17px;
+  --q-text-h2:        22px;
+  --q-text-h1:        28px;
+  --q-text-display:   44px;
+
+  /* Weights */
+  --q-fw-regular:     400;
+  --q-fw-medium:      500;
+  --q-fw-semibold:    600;
+
+  /* Tracking */
+  --q-track-tight:    -0.025em;
+  --q-track-snug:     -0.018em;
+  --q-track-normal:    0;
+  --q-track-wide:      0.04em;
+  --q-track-wider:     0.06em;
+  --q-track-widest:    0.1em;
+
+  /* ── Spacing (4px base, doubling) ─────────────────────── */
+  --q-space-1:        4px;
+  --q-space-2:        8px;
+  --q-space-3:        12px;
+  --q-space-4:        16px;
+  --q-space-5:        20px;
+  --q-space-6:        24px;
+  --q-space-8:        32px;
+  --q-space-10:       40px;
+  --q-space-12:       48px;
+  --q-space-16:       64px;
+
+  /* ── Radius ────────────────────────────────────────────── */
+  --q-radius-sm:      4px;   /* tags, chips */
+  --q-radius-md:      6px;   /* buttons, inputs */
+  --q-radius-lg:      8px;   /* cards */
+  --q-radius-xl:      10px;  /* hero cards */
+  --q-radius-pill:    999px;
+
+  /* ── Elevation ────────────────────────────────────────── */
+  --q-shadow-1:       0 1px 2px rgba(0,0,0,0.06);
+  --q-shadow-2:       0 4px 12px rgba(0,0,0,0.06);
+  --q-shadow-3:       0 8px 24px rgba(0,0,0,0.08);
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --q-dur-fast:       120ms;
+  --q-dur-base:       150ms;
+  --q-easing:         cubic-bezier(0.2, 0, 0.13, 1.5);
+}
+
+/* ── Dark mode (optional override) ─────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root[data-q-theme="auto"], :root[data-q-theme="dark"] {
+    --q-primary:        #6b6ff5;
+    --q-primary-hover:  #8a8df9;
+    --q-primary-soft:   #1c1e3a;
+    --q-primary-ink:    #c9caf7;
+    --q-bg:             #0d0d12;
+    --q-surface:        #16161d;
+    --q-border:         #2a2a35;
+    --q-border-soft:    #1f1f28;
+    --q-text:           #f0f0f4;
+    --q-text-muted:     #9ba1ad;
+  }
+}

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Documentation — Quoted</title>
+<meta name="description" content="Install Quoted on WordPress, configure crawlers, expose Markdown endpoints, and verify your AI-readable layer.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+  .docs-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr 220px;
+    gap: 56px;
+    padding: 48px 0 96px;
+    align-items: start;
+  }
+  @media (max-width: 1100px) { .docs-shell { grid-template-columns: 240px 1fr; } .toc { display: none; } }
+  @media (max-width: 880px)  { .docs-shell { grid-template-columns: 1fr; } .docs-sidebar { display: none; } }
+
+  /* Sidebar */
+  .docs-sidebar {
+    position: sticky; top: 80px;
+    align-self: start;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 12px;
+    font-size: 14px;
+  }
+  .docs-sidebar h5 {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--q-text-faint); margin: 24px 0 10px;
+    font-family: var(--q-font-mono);
+  }
+  .docs-sidebar h5:first-child { margin-top: 0; }
+  .docs-sidebar ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .docs-sidebar a {
+    display: block; padding: 7px 12px;
+    color: var(--q-text-muted); border-radius: var(--q-r-sm);
+    transition: 120ms;
+  }
+  .docs-sidebar a:hover { color: var(--q-text); background: var(--q-bg-soft); }
+  .docs-sidebar a.active { color: var(--q-primary); background: var(--q-primary-soft); font-weight: 500; }
+
+  /* TOC right */
+  .toc {
+    position: sticky; top: 80px;
+    align-self: start;
+    font-size: 13px;
+    padding-left: 20px;
+    border-left: 1px solid var(--q-border);
+  }
+  .toc h5 { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--q-text-faint); margin: 0 0 12px; font-family: var(--q-font-mono); }
+  .toc ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .toc a { color: var(--q-text-muted); }
+  .toc a:hover { color: var(--q-text); }
+
+  /* Article */
+  .doc { max-width: 720px; }
+  .doc .breadcrumb { font-size: 13px; color: var(--q-text-faint); margin-bottom: 16px; font-family: var(--q-font-mono); }
+  .doc .breadcrumb a { color: var(--q-text-muted); }
+  .doc .breadcrumb a:hover { color: var(--q-text); }
+  .doc h1 { font-size: clamp(32px, 4vw, 44px); line-height: 1.08; letter-spacing: -0.028em; margin: 0 0 16px; }
+  .doc .doc-lead { font-size: 17px; color: var(--q-text-muted); line-height: 1.55; margin-bottom: 40px; }
+  .doc h2 { font-size: 24px; line-height: 1.2; letter-spacing: -0.02em; margin: 56px 0 20px; }
+  .doc h3 { font-size: 18px; line-height: 1.3; margin: 36px 0 12px; }
+  .doc p { font-size: 15px; line-height: 1.65; margin: 0 0 18px; color: var(--q-text); }
+  .doc ul, .doc ol { font-size: 15px; line-height: 1.7; margin: 0 0 20px; padding-left: 22px; color: var(--q-text); }
+  .doc li { margin: 4px 0; }
+  .doc code { font-family: var(--q-font-mono); font-size: 0.9em; background: var(--q-surface-2); border: 1px solid var(--q-border-soft); padding: 1px 6px; border-radius: 4px; }
+  .doc pre {
+    background: #0c0c12; color: #e9eaf0;
+    border-radius: var(--q-r-md);
+    padding: 18px 20px;
+    overflow: auto;
+    font-family: var(--q-font-mono); font-size: 13px; line-height: 1.6;
+    margin: 0 0 24px;
+  }
+  .doc pre code { background: transparent; border: 0; padding: 0; color: inherit; font-size: inherit; }
+  .doc strong { font-weight: 600; color: var(--q-text-strong); }
+  .doc a { color: var(--q-primary); }
+  .doc a:hover { text-decoration: underline; }
+  .doc .callout {
+    border-left: 3px solid var(--q-primary);
+    background: var(--q-primary-soft);
+    padding: 16px 18px;
+    border-radius: 0 var(--q-r-md) var(--q-r-md) 0;
+    color: var(--q-primary-ink);
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+  .doc .callout strong { color: var(--q-primary-ink); }
+
+  /* Next / prev */
+  .doc-nav {
+    margin-top: 64px; padding-top: 32px;
+    border-top: 1px solid var(--q-border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .doc-nav a {
+    border: 1px solid var(--q-border); border-radius: var(--q-r-md);
+    padding: 16px 20px;
+    transition: 160ms;
+  }
+  .doc-nav a:hover { border-color: var(--q-primary); }
+  .doc-nav a small { display: block; font-size: 11px; color: var(--q-text-faint); font-family: var(--q-font-mono); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .doc-nav a strong { display: block; font-size: 15px; color: var(--q-text); }
+  .doc-nav .next { text-align: right; }
+
+  /* Search-y header */
+  .docs-top {
+    border-bottom: 1px solid var(--q-border);
+    background: var(--q-bg-soft);
+    padding: 24px 0;
+  }
+  .docs-top .row { gap: 16px; flex-wrap: wrap; }
+  .docs-top h1 { font-size: 22px; }
+  .docs-top .search {
+    flex: 1; min-width: 240px; max-width: 480px;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--q-surface);
+    border: 1px solid var(--q-border);
+    border-radius: var(--q-r-md);
+    padding: 10px 14px;
+    color: var(--q-text-muted);
+    font-size: 14px;
+  }
+  .docs-top .search input { flex: 1; border: 0; outline: 0; background: transparent; font: inherit; color: var(--q-text); }
+  .docs-top kbd {
+    font-family: var(--q-font-mono); font-size: 11px;
+    padding: 2px 6px; border-radius: 4px;
+    background: var(--q-surface-2); border: 1px solid var(--q-border);
+    color: var(--q-text-muted);
+  }
+</style>
+</head>
+<body data-screen-label="Docs">
+
+<div data-include="header"></div>
+
+<div class="docs-top">
+  <div class="wrap row spread">
+    <div class="row gap-12">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--q-primary);"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2V5zm2 15h12"/></svg>
+      <h1 style="font-size:22px;">Documentation</h1>
+      <span class="chip chip-muted">v0.2</span>
+    </div>
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input placeholder="Search the docs…">
+      <kbd>⌘K</kbd>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="docs-shell">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar">
+      <h5>Get started</h5>
+      <ul>
+        <li><a href="#getting-started" class="active">Getting Started</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#plugin-setup">Plugin setup</a></li>
+      </ul>
+      <h5>Core workflows</h5>
+      <ul>
+        <li><a href="#seo-content-workflow">SEO content workflow</a></li>
+        <li><a href="#faq-setup">FAQ setup</a></li>
+        <li><a href="#documentation-setup">Documentation setup</a></li>
+        <li><a href="#changelog-setup">Changelog setup</a></li>
+      </ul>
+      <h5>Operate</h5>
+      <ul>
+        <li><a href="#billing-license">Billing &amp; license</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#support">Support</a></li>
+      </ul>
+    </aside>
+
+    <!-- Article -->
+    <article class="doc">
+      <div class="breadcrumb">
+        <a href="#">Docs</a> <span style="margin:0 6px;">/</span> <a href="#">Get started</a> <span style="margin:0 6px;">/</span> Getting started
+      </div>
+      <h1>Getting Started</h1>
+      <p class="doc-lead">
+        Quoted is a WordPress plugin that makes your site readable by AI search engines like ChatGPT, Claude,
+        Perplexity, and Google AI Overviews. This guide walks you through the first install in under a minute.
+      </p>
+
+      <h2 id="what-you-get">What you get out of the box</h2>
+      <p>The Free tier ships fully functional. Activate the plugin and these become available immediately:</p>
+      <ul>
+        <li>Auto-generated <code>/llms.txt</code> (up to 50 posts on Free, unlimited on paid).</li>
+        <li>Markdown endpoint per post at <code>/wp-json/quoted/v1/llm/{slug}</code>.</li>
+        <li>Detection of 60+ AI bot signatures.</li>
+        <li>Per-bot allowlist with HTTP 403 enforcement + <code>robots.txt</code> sync.</li>
+        <li>Article and FAQPage JSON-LD schema (defers to active SEO plugins).</li>
+        <li>Local dashboard with bot activity feed and AI Distribution Score.</li>
+      </ul>
+
+      <h2 id="requirements">Requirements</h2>
+      <ul>
+        <li>WordPress 6.0 or higher</li>
+        <li>PHP 7.4 or higher</li>
+        <li>Pretty permalinks enabled (<strong>Settings → Permalinks</strong>, anything other than "Plain")</li>
+      </ul>
+
+      <h2 id="install">Install via WordPress.org</h2>
+      <ol>
+        <li>In WordPress Admin, go to <strong>Plugins → Add New</strong>.</li>
+        <li>Search for <strong>Quoted</strong>.</li>
+        <li>Click <strong>Install Now</strong>, then <strong>Activate</strong>.</li>
+      </ol>
+
+      <h3 id="install-zip">Or upload the .zip directly</h3>
+<pre><code>cd wp-content/plugins
+# unzip your download here, or:
+wget https://wordpress.org/plugin/quoted/latest.zip
+unzip latest.zip</code></pre>
+
+      <div class="callout">
+        <strong>Multisite note:</strong> Quoted is built for per-site activation. Network-wide activation is intentionally blocked because each site needs its own <code>wp_quoted_bot_log</code> table and license.
+      </div>
+
+      <h2 id="verify">Verify the install</h2>
+      <p>After activation, Quoted runs immediately with sensible defaults. Visit:</p>
+<pre><code>https://your-site.com/llms.txt</code></pre>
+      <p>If you see a 404, double-check that <strong>Settings → Permalinks</strong> is set to anything other than "Plain", and click <strong>Save Changes</strong> once to flush rewrite rules.</p>
+
+      <h2 id="next-steps">Next steps</h2>
+      <ul>
+        <li><a href="#installation">Installation</a> — install via WordPress.org or upload</li>
+        <li><a href="#plugin-setup">Plugin setup</a> — what runs automatically, what you can customize</li>
+        <li><a href="#seo-content-workflow">SEO content workflow</a> — how to publish for AI search</li>
+      </ul>
+
+      <!-- Next / prev -->
+      <nav class="doc-nav">
+        <a href="#">
+          <small>← Previous</small>
+          <strong>Quoted overview</strong>
+        </a>
+        <a href="#installation" class="next">
+          <small>Next →</small>
+          <strong>Installation</strong>
+        </a>
+      </nav>
+    </article>
+
+    <!-- Right TOC -->
+    <aside class="toc">
+      <h5>On this page</h5>
+      <ul>
+        <li><a href="#what-you-get">What you get</a></li>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#install">Install via WordPress.org</a></li>
+        <li><a href="#install-zip">Upload the .zip</a></li>
+        <li><a href="#verify">Verify the install</a></li>
+        <li><a href="#next-steps">Next steps</a></li>
+      </ul>
+    </aside>
+
+  </div>
+</div>
+
+<div data-include="footer"></div>
+
+<script src="assets/shared.js"></script>
+<script>
+  // Active sidebar link on click
+  document.querySelectorAll('.docs-sidebar a').forEach(a => {
+    a.addEventListener('click', (e) => {
+      document.querySelectorAll('.docs-sidebar a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "name": "omniplug-cms-core",
+  "version": "1.4.4",
+  "description": "OmniPlug CMS Core — lightweight multi-tenant CMS/API engine",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "author": "OmniPlug <licensing@omniplug.com>",
+  "type": "module",
+  "main": "src/backend/server.js",
+  "scripts": {
+    "start": "node src/core/db/migrate.js && node scripts/verify-schema.js && node src/backend/server.js",
+    "dev": "NODE_ENV=development node --watch src/backend/server.js",
+    "migrate": "node src/core/db/migrate.js",
+    "migrate:data": "node scripts/migrate-json-to-tables.js",
+    "seed": "node scripts/seed.js",
+    "test:smoke": "node scripts/smoke.js",
+    "test:isolation": "node scripts/test-tenant-isolation.js",
+    "test:all": "npm run lint && npm run test:migration && npm run test:smoke && npm run test:isolation",
+    "backup": "bash scripts/backup.sh",
+    "restore": "bash scripts/restore.sh",
+    "lint:sql": "node scripts/check-sql-patterns.mjs",
+    "lint": "npm run lint:sql",
+    "verify:schema": "node scripts/verify-schema.js",
+    "test:migration": "node scripts/test-migration-idempotency.js",
+    "preflight": "node scripts/preflight-strict.mjs",
+    "key:generate": "node scripts/op-key-generate.js"
+  },
+  "engines": {
+    "node": ">=22 <24"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "file-type": "^22.0.1",
+    "helmet": "^8.0.0",
+    "jsdom": "^27.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.1.1",
+    "sanitize-html": "^2.13.1",
+    "sharp": "^0.33.5",
+    "zod": "^3.23.8"
+  }
+}

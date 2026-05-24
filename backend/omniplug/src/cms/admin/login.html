@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Đăng nhập - OmniPlug CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/assets/admin.css">
+  <script src="/admin/assets/theme-init.js"></script>
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <div class="login-logo" id="loginLogo"></div>
+    <h1>OmniPlug CMS</h1>
+    <p class="login-sub">Đăng nhập để quản trị nội dung</p>
+    <form id="loginForm" class="grid" autocomplete="on">
+      <div class="field">
+        <label>Email</label>
+        <input name="email" type="email" placeholder="admin@vinhomes.vn" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>Mật khẩu</label>
+        <div class="password-wrap">
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+          <button class="icon-btn eye-btn" id="togglePassword" type="button" aria-label="Hiện mật khẩu"></button>
+        </div>
+      </div>
+      <button class="btn-primary" type="submit" style="width:100%;">Đăng nhập</button>
+    </form>
+    <div class="divider">Giao diện</div>
+    <div id="themeMount"></div>
+    <p class="muted mono" style="text-align:center;margin:20px 0 0;">v1.4.4 · omniplug.vn</p>
+  </main>
+  <script type="module" src="/admin/assets/login-init.js"></script>
+</body>
+</html>

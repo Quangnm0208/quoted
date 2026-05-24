@@ -1,0 +1,25 @@
+node_modules/
+data/
+uploads/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+.idea/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+
+# v1.4.4 license private keys — NEVER commit these
+*.priv.pem
+*.private.pem
+op-license*.priv*
+keys/*.priv*
+keys/*.private*
+crls/
+
+# v1.4.4 working files
+.test-data/
