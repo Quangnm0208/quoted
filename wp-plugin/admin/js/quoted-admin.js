@@ -226,14 +226,23 @@
 				$('#quoted-top-bots').html('<p class="quoted-empty">No data yet.</p>');
 			}
 
-			// Quota
+			// Quota — backend returns quota=0 to mean unlimited (paid tier).
+			// Render "X (unlimited)" then; bar + warning only when there's
+			// a finite cap to compare against.
 			var posts = d.posts || {};
-			var pct = (posts.quota > 0) ? Math.round((posts.synced / posts.quota) * 100) : 0;
+			var synced = posts.synced || 0;
+			var quota  = posts.quota  || 0;
+			var unlimited = (quota === 0);
+			var pct = unlimited ? 0 : Math.round((synced / quota) * 100);
 			var fillClass = pct >= 90 ? 'full' : (pct >= 70 ? 'warn' : '');
+			var label = unlimited
+				? ('<strong>' + synced + '</strong> posts synced (unlimited)')
+				: ('<strong>' + synced + ' / ' + quota + '</strong> posts synced');
 			$('#quoted-quota').html(
-				'<p><strong>' + (posts.synced || 0) + ' / ' + (posts.quota || 0) + '</strong> posts synced</p>' +
-				'<div class="quoted-quota-bar"><div class="quoted-quota-fill ' + fillClass + '" style="width: ' + pct + '%"></div></div>' +
-				(pct >= 90 ? '<p style="color:#d63638;font-size:13px;margin-top:8px">Approaching free tier limit.</p>' : '')
+				'<p>' + label + '</p>' +
+				(unlimited ? '' :
+					'<div class="quoted-quota-bar"><div class="quoted-quota-fill ' + fillClass + '" style="width: ' + pct + '%"></div></div>') +
+				(!unlimited && pct >= 90 ? '<p style="color:#d63638;font-size:13px;margin-top:8px">Approaching free tier limit.</p>' : '')
 			);
 		}
 

@@ -5,7 +5,7 @@ Tags: ai, llms.txt, chatgpt, claude, perplexity
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.3.0
+Stable tag: 0.3.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,7 +27,7 @@ It runs **alongside** your existing SEO plugin (Yoast, Rank Math, AIOSEO, SEOPre
 * **AI Crawler Allowlist** — allow or block any of those 60+ bots one by one. Blocked bots get HTTP 403 + a `Disallow` rule in your robots.txt.
 * **Schema engine** — Article (or BlogPosting) and FAQPage JSON-LD on single posts. Auto-detects FAQ from `[faq_item]` shortcodes and H2/H3 question patterns. Defers to Yoast / Rank Math / AIOSEO / SEOPress when they're active.
 * **Local-first dashboard** — AI Distribution Score, top crawling bots, recent crawls feed, posts synced quota. Reads from your own database. Nothing sent to external servers.
-* **Privacy by default** — visitor IPs are SHA-256 hashed before storage. Toggle off entirely if you prefer. GDPR/CCPA-friendly.
+* **Privacy by default** — visitor IPs are SHA-256 hashed before storage. Toggling off "Hash IPs" stores the raw IP (prefixed `raw:`) instead, for operators who need the original value. To not store any IP information at all, toggle "Disable bot logging" in Settings → Privacy.
 * **< 2 ms overhead** per pageview — one substring scan on the User-Agent header.
 * **Multi-language** — UTF-8 safe; tested with French accents, Vietnamese diacritics, Japanese kanji, CJK characters.
 
@@ -143,6 +143,15 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 
 == Changelog ==
 
+= 0.3.1 =
+* **Fix:** Free badge now renders deterministically. The previous logic returned early when no license was connected — but Free users by definition aren't connected, so the "Powered by Quoted" badge never appeared on the Free tier (where it's mandatory). Badge logic is centralised in a single function: Free → always render, Paid → respect `quoted_show_badge`, expired/revoked license → reverts to Free behaviour.
+* **Fix:** Dashboard quota card no longer shows "X / 0 posts synced" for unlimited (paid) plans. When `posts.quota === 0` the UI renders "X posts synced (unlimited)" and hides the progress bar entirely.
+* **Fix:** README privacy bullet was misleading — said "Toggle off entirely if you prefer" for the Hash IPs setting. The code actually stores a `raw:<ip>` value when hashing is disabled. Wording updated to match real behaviour, plus a pointer to the "Disable bot logging" kill-switch for operators who want to store nothing.
+* **Fix:** Added a runtime admin notice when the PHP `libxml` extension (DOMDocument class) is missing. Activation already wp_die()s on missing libxml, but a host can disable php-xml AFTER install — the notice surfaces the issue before the Markdown serializer fatals.
+* **Doc:** `Quoted_Billing::is_configured()` docblock corrected — code uses OR (one tier is enough to show the Upgrade page), comment previously said "both tier variants".
+* **Perf:** FAQ extraction transients (`quoted_faqs_<hash>`) are now invalidated on `save_post` alongside the markdown cache, instead of orphaning in `wp_options` for up to 12 hours. Same `_quoted_faqs_cache_key` post-meta tracker pattern as the existing markdown cleanup.
+* No new features, no schema migration, no public API changes.
+
 = 0.3.0 =
 * **Bot catalog expanded from 14 → 60+ signatures.** Now covers Anthropic Claude-User + Claude-SearchBot, OpenAI Operator, Google GoogleOther + GoogleOther-Image, Microsoft Bingbot/MSNBot, Mistral, xAI Grok, DeepSeek, Amazon, Alibaba, Baidu (Baiduspider + Baidu-AI), Naver Yeti + NaverGPT, Yandex, Sogou, Huawei PetalBot, AI2Bot (Allen Institute), Hive ImagesiftBot, LAION FriendlyCrawler, Semantic Scholar, omgilibot, TimpiBot, PleiasBot, img2dataset, and the SEO crawlers (Ahrefs, Semrush, DataForSEO, MJ12) that resell data to LLM training pipelines. Also Internet Archive's ia_archiver — historically the largest single training-data source.
 * Refactor: bot detector now has a single `bot_catalog()` source of truth. `bot_signatures()` and `bot_metadata()` derive from it, so adding a new bot is a one-line edit.
@@ -174,6 +183,9 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 * Free tier with 50-post limit
 
 == Upgrade Notice ==
+
+= 0.3.1 =
+Bug-fix release. Free badge now renders for Free users. Unlimited quota no longer displays as "/ 0". README privacy wording matches code. Runtime DOMDocument check added. Safe drop-in upgrade.
 
 = 0.3.0 =
 Major bot-catalog expansion (14 → 60+ signatures). Performance improvements on the bot log and FAQ schema extraction. Removed the unused "niche" onboarding step. Safe drop-in upgrade.

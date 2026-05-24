@@ -73,22 +73,30 @@ class Quoted_Public {
 	}
 
 	/**
-	 * Render "Powered by Quoted" badge in footer (free tier only).
+	 * Render the "Powered by Quoted" badge in the site footer.
+	 *
+	 * Deterministic rules — single source of truth, do not duplicate in templates:
+	 *
+	 *   1. Free / unlicensed plan      → ALWAYS render (badge is mandatory on Free).
+	 *   2. Paid plan + quoted_show_badge=true  → render.
+	 *   3. Paid plan + quoted_show_badge=false → hide (operator opted out).
+	 *
+	 * An expired or revoked license is treated as Free, because
+	 * Quoted_License::current_plan() returns 'free' in that case. So a
+	 * lapsed Pro automatically reverts to Free badge behaviour — no hidden
+	 * "badge stays gone because the seat used to be paid" trap.
 	 */
 	public function render_powered_by_badge() {
-		$plan = get_option( 'quoted_plan', 'free' );
-		$show = get_option( 'quoted_show_badge', true );
+		$plan = Quoted_License::current_plan();
 
-		// On free tier, badge is mandatory.
-		if ( $plan !== 'free' && ! $show ) {
-			return;
+		if ( $plan !== 'free' ) {
+			// Paid: respect the show-badge toggle.
+			if ( ! get_option( 'quoted_show_badge', true ) ) {
+				return;
+			}
 		}
-
-		// Only render if connected.
-		$license = new Quoted_License();
-		if ( ! $license->is_connected() ) {
-			return;
-		}
+		// Free: always render. No early return on license state — Free users
+		// are by definition not connected, that must NOT hide the badge.
 
 		echo '<div style="text-align:center;padding:10px;font-size:11px;color:#999;">';
 		echo 'AI-readable via ';

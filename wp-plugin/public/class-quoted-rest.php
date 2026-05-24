@@ -94,11 +94,23 @@ class Quoted_Rest {
 		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return;
 		}
-		$prev_key = get_post_meta( $post_id, '_quoted_md_cache_key', true );
-		if ( ! empty( $prev_key ) ) {
-			delete_transient( $prev_key );
+
+		// Markdown per-post transient (cache key embeds post_modified_gmt).
+		$prev_md_key = get_post_meta( $post_id, '_quoted_md_cache_key', true );
+		if ( ! empty( $prev_md_key ) ) {
+			delete_transient( $prev_md_key );
 			delete_post_meta( $post_id, '_quoted_md_cache_key' );
 		}
+
+		// FAQ extraction transient (same key shape, tracked by Quoted_Schema).
+		// Mirrors the markdown invalidation — both are post-modified-gmt-keyed
+		// and would otherwise orphan in wp_options until 12h expiry.
+		$prev_faq_key = get_post_meta( $post_id, '_quoted_faqs_cache_key', true );
+		if ( ! empty( $prev_faq_key ) ) {
+			delete_transient( $prev_faq_key );
+			delete_post_meta( $post_id, '_quoted_faqs_cache_key' );
+		}
+
 		// Also flush the llms.txt sitemap so newly-published posts appear.
 		if ( class_exists( 'Quoted_Llms_Txt' ) ) {
 			Quoted_Llms_Txt::flush_cache();

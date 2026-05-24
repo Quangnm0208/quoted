@@ -63,7 +63,7 @@ $wpdb->query(
 
 // Delete per-post markdown cache-key tracking meta.
 $wpdb->query(
-	"DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_quoted_md_cache_key'"
+	"DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ('_quoted_md_cache_key', '_quoted_faqs_cache_key')"
 );
 
 // Clear any scheduled crons (defensive — deactivation should already have).

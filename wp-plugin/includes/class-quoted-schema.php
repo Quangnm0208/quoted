@@ -259,8 +259,12 @@ class Quoted_Schema {
 			$pairs = array_slice( $pairs, 0, 20 );
 		}
 
-		// Cache for 12h. The save_post hook will short-circuit it sooner.
+		// Cache for 12h. Track the current key in post_meta so the save_post
+		// hook (Quoted_Rest::invalidate_post_cache) can delete the previous
+		// transient when post_modified_gmt changes — otherwise old transients
+		// orphan in wp_options until they expire naturally.
 		set_transient( $cache_key, $pairs, 12 * HOUR_IN_SECONDS );
+		update_post_meta( $post->ID, '_quoted_faqs_cache_key', $cache_key );
 		$request_cache[ $post->ID ] = $pairs;
 		return $pairs;
 	}

@@ -3,7 +3,7 @@
  * Plugin Name:       Quoted — Make your WordPress site AI-readable
  * Plugin URI:        https://quotedeasy.com
  * Description:       Make your WordPress site readable by ChatGPT, Claude, Perplexity, and Google AI. Auto-generates llms.txt, serves clean Markdown per post, detects AI bot crawls, and lets you allow/block bots one by one.
- * Version:           0.3.0
+ * Version:           0.3.1
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      7.4
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'QUOTED_VERSION', '0.3.0' );
+define( 'QUOTED_VERSION', '0.3.1' );
 define( 'QUOTED_PLUGIN_FILE', __FILE__ );
 define( 'QUOTED_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QUOTED_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -151,6 +151,32 @@ add_action( 'admin_notices', function () {
 				'<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">' . esc_html__( 'Go to Settings → Permalinks', 'quoted' ) . '</a>'
 			);
 			?>
+		</p>
+	</div>
+	<?php
+} );
+
+/**
+ * Admin notice when the PHP libxml extension (DOMDocument) is missing at runtime.
+ *
+ * Activation already wp_die()s on this — but a hosting provider can disable
+ * php-xml AFTER the plugin is installed. Without this notice the operator
+ * would just see fatal errors the next time the Markdown serializer runs.
+ * The activation guard in Quoted_Activator::activate() handles the initial
+ * install path; this surfaces the post-install case.
+ */
+add_action( 'admin_notices', function () {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	if ( class_exists( 'DOMDocument' ) ) {
+		return; // extension present, nothing to surface
+	}
+	?>
+	<div class="notice notice-error" data-quoted-notice="domdocument">
+		<p>
+			<strong><?php esc_html_e( 'Quoted — missing PHP extension', 'quoted' ); ?></strong> —
+			<?php esc_html_e( 'the libxml extension (DOMDocument class) is not available on this server. Quoted needs it to parse post HTML into clean Markdown for AI bots. Ask your host to enable php-xml. Until then the Markdown endpoints will return empty bodies.', 'quoted' ); ?>
 		</p>
 	</div>
 	<?php

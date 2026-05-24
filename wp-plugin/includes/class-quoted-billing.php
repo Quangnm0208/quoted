@@ -73,8 +73,12 @@ class Quoted_Billing {
 	}
 
 	/**
-	 * True when both tier variants are configured. Used to hide the
-	 * Upgrade page entirely on a partially-configured install.
+	 * True when AT LEAST ONE tier variant is configured (Solo OR Pro+).
+	 *
+	 * A partially-configured install (e.g. only Solo wired in Lemon Squeezy
+	 * during a soft launch) still shows the Upgrade page so customers can
+	 * buy what's available. The pricing partial individually disables any
+	 * tier whose buy URL is still the placeholder.
 	 */
 	public static function is_configured() {
 		return self::buy_url( 'solo' ) !== '' || self::buy_url( 'pro_plus' ) !== '';
