@@ -1,4 +1,5 @@
 import { CtaButton } from "./CtaButton";
+import { Badge } from "./Badge";
 import { resolveCheckoutUrl } from "@/lib/checkout";
 
 export type PricingPlan = {
@@ -23,37 +24,38 @@ type Props = {
 
 export function PricingCard({ plan, cycle }: Props) {
   const price = cycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
-  const period = cycle === "monthly" ? "/month" : "/year";
+  const period = cycle === "monthly" ? "/ month" : "/ year";
 
   const resolved = plan.ctaHref ?? resolveCheckoutUrl(plan.checkoutEnv, cycle);
   const disabled = !resolved;
-  const label = disabled && plan.checkoutEnv ? "Checkout link not configured" : plan.ctaLabel;
+  const label =
+    disabled && plan.checkoutEnv ? "Checkout link not configured" : plan.ctaLabel;
 
   return (
     <div
-      className={`relative rounded-xl border bg-white p-6 flex flex-col ${
+      className={`relative flex flex-col rounded-xl border bg-white p-6 ${
         plan.highlight
-          ? "border-brand-600 ring-2 ring-brand-600/20 shadow-sm"
-          : "border-slate-200"
+          ? "border-brand-500 shadow-card ring-1 ring-brand-500/15"
+          : "border-line"
       }`}
     >
       {plan.badge ? (
-        <span className="absolute -top-3 left-6 inline-flex items-center rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white">
-          {plan.badge}
+        <span className="absolute -top-3 left-6">
+          <Badge tone="info" dot>{plan.badge}</Badge>
         </span>
       ) : null}
 
-      <h3 className="text-lg font-semibold text-slate-900">{plan.name}</h3>
-      <p className="mt-1 text-sm text-slate-600">{plan.tagline}</p>
+      <h3 className="text-lg font-semibold text-ink">{plan.name}</h3>
+      <p className="mt-1 text-sm text-ink-muted">{plan.tagline}</p>
 
-      <div className="mt-5 flex items-baseline gap-1">
-        <span className="text-4xl font-bold tracking-tight text-slate-900">
+      <div className="mt-5 flex items-baseline gap-1.5">
+        <span className="text-4xl font-bold tracking-tight text-ink">
           ${price}
         </span>
-        <span className="text-sm text-slate-500">{period}</span>
+        <span className="text-xs text-ink-muted">{period}</span>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5">
         <CtaButton
           href={resolved}
           variant={plan.highlight ? "primary" : "secondary"}
@@ -65,18 +67,20 @@ export function PricingCard({ plan, cycle }: Props) {
         </CtaButton>
       </div>
 
-      <ul className="mt-6 space-y-2.5 text-sm text-slate-700 flex-1">
+      <ul className="mt-6 flex-1 space-y-2 text-sm text-ink">
         {plan.features.map((feat) => (
           <li key={feat} className="flex gap-2">
-            <span className="mt-0.5 text-brand-600" aria-hidden="true">
-              ✓
+            <span className="mt-[3px] flex-shrink-0 text-brand-500" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="5 12 10 17 19 7" />
+              </svg>
             </span>
             <span>{feat}</span>
           </li>
         ))}
       </ul>
 
-      <p className="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-500">
+      <p className="mt-6 border-t border-line-soft pt-4 text-xs text-ink-muted">
         {plan.limits}
       </p>
     </div>

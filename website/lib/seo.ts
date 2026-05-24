@@ -15,13 +15,21 @@ export function buildMetadata({
   title,
   description,
   path = "/",
-  image = "/og-default.png",
+  image,
   type = "website",
   publishedTime,
   modifiedTime,
 }: BuildMetadataInput): Metadata {
   const canonical = `${siteUrl}${path}`;
   const fullTitle = path === "/" ? title : `${title} | ${site.name}`;
+
+  // When no image is passed, omit the openGraph.images entry so that the
+  // file-based /opengraph-image.tsx (Next.js convention) is picked up
+  // automatically by routes that don't override.
+  const ogImages = image
+    ? [{ url: image, width: 1200, height: 630, alt: fullTitle }]
+    : undefined;
+  const twImages = image ? [image] : undefined;
 
   return {
     title: fullTitle,
@@ -34,7 +42,7 @@ export function buildMetadata({
       url: canonical,
       siteName: site.name,
       type,
-      images: [{ url: image, width: 1200, height: 630, alt: fullTitle }],
+      ...(ogImages ? { images: ogImages } : {}),
       ...(publishedTime ? { publishedTime } : {}),
       ...(modifiedTime ? { modifiedTime } : {}),
     },
@@ -42,7 +50,7 @@ export function buildMetadata({
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [image],
+      ...(twImages ? { images: twImages } : {}),
       creator: site.twitter,
     },
     robots: { index: true, follow: true },

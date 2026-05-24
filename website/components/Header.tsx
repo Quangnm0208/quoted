@@ -1,56 +1,54 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { Logo } from "./Logo";
+import { CtaButton } from "./CtaButton";
 
 export function Header() {
   return (
-    <header className="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-40">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-brand-600 text-white text-sm font-bold">
-            Q
-          </span>
-          <span>{site.name}</span>
+    <header className="sticky top-0 z-40 border-b border-line bg-white/85 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center" aria-label={`${site.name} home`}>
+          <Logo size={26} />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
+        <nav className="hidden items-center gap-6 text-sm text-ink-muted md:flex">
           {site.nav.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="hover:text-slate-900 transition-colors"
+              className="transition-colors hover:text-ink"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href={site.wordpressPluginUrl}
-            className="hidden sm:inline-flex text-sm text-slate-600 hover:text-slate-900"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden text-sm text-ink-muted transition-colors hover:text-ink sm:inline-flex"
           >
             Install Free
           </Link>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center rounded-md bg-brand-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors"
-          >
+          <CtaButton href="/pricing" variant="primary" size="md">
             View pricing
-          </Link>
+          </CtaButton>
         </div>
       </div>
 
-      <details className="md:hidden border-t border-slate-200">
-        <summary className="px-4 py-3 text-sm text-slate-700 cursor-pointer select-none">
+      <details className="border-t border-line md:hidden">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm text-ink">
           Menu
         </summary>
-        <nav className="px-4 pb-4 flex flex-col gap-3 text-sm">
+        <nav className="flex flex-col gap-3 px-4 pb-4 text-sm">
           {site.nav.map((link) => (
-            <Link key={link.href} href={link.href} className="text-slate-700">
+            <Link key={link.href} href={link.href} className="text-ink">
               {link.label}
             </Link>
           ))}
-          <Link href={site.wordpressPluginUrl} className="text-slate-700">
+          <Link href={site.wordpressPluginUrl} className="text-ink" target="_blank" rel="noopener noreferrer">
             Install Free
           </Link>
         </nav>

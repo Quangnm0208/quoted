@@ -5,17 +5,17 @@ import { getAllDocs } from "@/lib/content";
 export function DocLayout({ slug, children }: { slug: string; children: ReactNode }) {
   const docs = getAllDocs();
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-[220px_1fr] gap-10">
+    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[230px_1fr] lg:px-8">
       <aside className="md:sticky md:top-20 md:self-start">
-        <nav className="space-y-1 text-sm">
+        <nav className="space-y-0.5 text-sm">
           {docs.map((d) => (
             <Link
               key={d.slug}
               href={`/docs/${d.slug}`}
-              className={`block rounded-md px-3 py-2 ${
+              className={`block rounded-md px-3 py-2 transition-colors ${
                 d.slug === slug
-                  ? "bg-brand-50 text-brand-700 font-medium"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-brand-50 font-semibold text-brand-900"
+                  : "text-ink-muted hover:bg-slate-50 hover:text-ink"
               }`}
             >
               {d.frontmatter.title}
@@ -23,7 +23,7 @@ export function DocLayout({ slug, children }: { slug: string; children: ReactNod
           ))}
         </nav>
       </aside>
-      <article className="prose prose-slate max-w-none prose-headings:scroll-mt-24 prose-a:text-brand-700 prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
+      <article className="prose prose-slate max-w-none prose-headings:scroll-mt-24 prose-headings:tracking-tight prose-h1:text-3xl prose-h2:text-xl prose-h3:text-lg prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline prose-strong:text-ink prose-code:text-ink prose-code:before:content-none prose-code:after:content-none">
         {children}
       </article>
     </div>

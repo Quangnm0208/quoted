@@ -43,7 +43,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<Para
   };
 
   return (
-    <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
       <nav className="mb-6 text-sm">
         <Link href="/blog" className="text-brand-700 hover:text-brand-800">
           ← All articles
@@ -51,23 +51,23 @@ export default async function BlogArticlePage({ params }: { params: Promise<Para
       </nav>
 
       <header>
-        <time className="text-xs uppercase tracking-wide text-slate-500" dateTime={article.frontmatter.date}>
+        <time className="text-2xs uppercase tracking-wide text-ink-muted" dateTime={article.frontmatter.date}>
           {new Date(article.frontmatter.date).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",
           })}
         </time>
-        <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
+        <h1 className="mt-2 text-4xl font-bold tracking-tight text-ink md:text-5xl">
           {article.frontmatter.title}
         </h1>
-        <p className="mt-4 text-lg text-slate-600">{article.frontmatter.description}</p>
+        <p className="mt-4 text-lg text-ink-muted">{article.frontmatter.description}</p>
         {article.frontmatter.author ? (
-          <p className="mt-4 text-sm text-slate-500">By {article.frontmatter.author}</p>
+          <p className="mt-4 text-xs text-ink-muted">By {article.frontmatter.author}</p>
         ) : null}
       </header>
 
-      <div className="prose prose-slate mt-10 max-w-none prose-headings:scroll-mt-24 prose-a:text-brand-700 prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
+      <div className="prose prose-slate mt-10 max-w-none prose-headings:scroll-mt-24 prose-headings:tracking-tight prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline prose-strong:text-ink prose-code:text-ink prose-code:before:content-none prose-code:after:content-none">
         <MDXRemote source={article.content} />
       </div>
 

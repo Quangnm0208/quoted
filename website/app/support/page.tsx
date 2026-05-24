@@ -33,32 +33,32 @@ const channels = [
 
 export default function SupportPage() {
   return (
-    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
       <header className="text-center">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-4xl font-bold tracking-tight text-ink md:text-5xl">
           Support
         </h1>
-        <p className="mt-4 text-slate-600">
+        <p className="mt-4 text-sm text-ink-muted">
           Four ways to get help. Pick whichever fits the question.
         </p>
       </header>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {channels.map((c) => (
-          <div key={c.title} className="rounded-lg border border-slate-200 bg-white p-6">
-            <h2 className="text-base font-semibold text-slate-900">{c.title}</h2>
-            <p className="mt-2 text-sm text-slate-600">{c.body}</p>
+          <div key={c.title} className="rounded-lg border border-line bg-white p-5">
+            <h2 className="text-base font-semibold text-ink">{c.title}</h2>
+            <p className="mt-2 text-sm text-ink-muted">{c.body}</p>
             {c.cta.href.startsWith("http") || c.cta.href.startsWith("mailto:") ? (
               <a
                 href={c.cta.href}
-                className="mt-4 inline-block text-sm font-medium text-brand-700 hover:text-brand-800"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:text-brand-800"
               >
                 {c.cta.label} →
               </a>
             ) : (
               <Link
                 href={c.cta.href}
-                className="mt-4 inline-block text-sm font-medium text-brand-700 hover:text-brand-800"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:text-brand-800"
               >
                 {c.cta.label} →
               </Link>
@@ -67,7 +67,7 @@ export default function SupportPage() {
         ))}
       </div>
 
-      <p className="mt-10 text-xs text-slate-500 text-center">
+      <p className="mt-10 text-center text-xs text-ink-muted">
         For security reports, please email <a className="underline" href={`mailto:${supportEmail}`}>{supportEmail}</a> directly. Do not file public issues for security vulnerabilities.
       </p>
     </section>

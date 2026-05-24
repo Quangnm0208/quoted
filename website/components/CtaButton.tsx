@@ -1,45 +1,64 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "soft";
+type Size = "sm" | "md" | "lg";
+
+const sizes: Record<Size, string> = {
+  sm: "h-7 px-2.5 text-xs",
+  md: "h-9 px-3.5 text-sm",
+  lg: "h-11 px-5 text-base",
+};
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-brand-600 text-white hover:bg-brand-700 focus-visible:ring-brand-600",
+    "bg-brand-500 text-white hover:bg-brand-600 border border-brand-500 hover:border-brand-600",
   secondary:
-    "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50 focus-visible:ring-brand-600",
-  ghost: "bg-transparent text-slate-700 hover:text-slate-900",
+    "bg-white text-ink border border-line hover:bg-surface-bg",
+  ghost:
+    "bg-transparent text-ink-muted hover:text-ink hover:bg-black/[0.04] border border-transparent",
+  soft:
+    "bg-brand-50 text-brand-900 hover:bg-brand-100 border border-transparent",
 };
 
 type Props = {
   href?: string | null;
   children: ReactNode;
   variant?: Variant;
+  size?: Size;
   disabled?: boolean;
   external?: boolean;
   className?: string;
-  size?: "md" | "lg";
+  icon?: ReactNode;
 };
 
 export function CtaButton({
   href,
   children,
   variant = "primary",
+  size = "md",
   disabled = false,
   external = false,
   className = "",
-  size = "md",
+  icon,
 }: Props) {
-  const sizeCls = size === "lg" ? "px-5 py-3 text-base" : "px-4 py-2.5 text-sm";
-  const base = `inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${sizeCls}`;
+  const base =
+    "inline-flex items-center justify-center gap-1.5 font-medium leading-none rounded-md transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2";
+
+  const inner = (
+    <>
+      {icon}
+      {children}
+    </>
+  );
 
   if (disabled || !href) {
     return (
       <span
-        className={`${base} bg-slate-100 text-slate-400 cursor-not-allowed ${className}`}
         aria-disabled="true"
+        className={`${base} ${sizes[size]} bg-slate-100 text-slate-400 border border-line cursor-not-allowed ${className}`}
       >
-        {children}
+        {inner}
       </span>
     );
   }
@@ -50,16 +69,16 @@ export function CtaButton({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={`${base} ${variants[variant]} ${className}`}
+        className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}
       >
-        {children}
+        {inner}
       </a>
     );
   }
 
   return (
-    <Link href={href} className={`${base} ${variants[variant]} ${className}`}>
-      {children}
+    <Link href={href} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>
+      {inner}
     </Link>
   );
 }

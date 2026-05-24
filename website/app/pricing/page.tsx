@@ -40,32 +40,32 @@ export default function PricingPage() {
 
   return (
     <>
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-        <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h1 className="text-4xl font-bold tracking-tight text-ink md:text-5xl">
             Pricing
           </h1>
-          <p className="mt-4 text-slate-600">
+          <p className="mt-4 text-sm text-ink-muted md:text-base">
             Free forever for the core features. Pro adds citation tracking and Live AI Test for a fraction of the price of enterprise tools.
           </p>
-          <p className="mt-2 text-xs text-slate-500">{pricingData.yearlyDiscountNote}</p>
+          <p className="mt-2 text-xs text-ink-muted">{pricingData.yearlyDiscountNote}</p>
         </div>
 
         <div className="mt-10">
           <PricingGrid plans={plans} />
         </div>
 
-        <p className="mt-8 text-center text-sm text-slate-500">
+        <p className="mt-8 text-center text-sm text-ink-muted">
           {pricingData.compareNote}
         </p>
-        <p className="mt-2 text-center text-xs text-slate-500">
+        <p className="mt-2 text-center text-xs text-ink-muted">
           Billing is securely handled by Lemon Squeezy. VAT/sales tax is calculated automatically for your region.
         </p>
       </section>
 
-      <section className="bg-slate-50 border-t border-slate-200">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 text-center">
+      <section className="border-t border-line bg-white">
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+          <h2 className="text-center text-xl font-bold tracking-tight text-ink md:text-2xl">
             Billing questions
           </h2>
           <div className="mt-6 space-y-3">

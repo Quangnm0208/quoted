@@ -11,12 +11,12 @@ export const metadata = buildMetadata({
 
 export default function ChangelogPage() {
   return (
-    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
       <header>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-4xl font-bold tracking-tight text-ink md:text-5xl">
           Changelog
         </h1>
-        <p className="mt-4 text-slate-600">
+        <p className="mt-4 text-sm text-ink-muted">
           The work we do so you don&apos;t have to. Curated bot signatures, WordPress
           compatibility patches, schema conflict matrix, and security hardening — shipped on a
           predictable cadence.

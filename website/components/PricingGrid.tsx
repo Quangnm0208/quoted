@@ -9,18 +9,22 @@ export function PricingGrid({ plans }: { plans: PricingPlan[] }) {
   return (
     <>
       <div className="flex justify-center">
-        <div role="tablist" aria-label="Billing cycle" className="inline-flex rounded-full border border-slate-200 bg-white p-1 text-sm">
+        <div
+          role="tablist"
+          aria-label="Billing cycle"
+          className="inline-flex gap-0.5 rounded-md bg-slate-100 p-0.5 text-xs"
+        >
           {(["monthly", "yearly"] as const).map((c) => (
             <button
               key={c}
-              role="tab"
               type="button"
+              role="tab"
               aria-selected={cycle === c}
               onClick={() => setCycle(c)}
-              className={`rounded-full px-4 py-1.5 transition-colors ${
+              className={`rounded px-3.5 py-1.5 font-medium transition-colors ${
                 cycle === c
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white text-ink shadow-soft"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
               {c === "monthly" ? "Monthly" : "Yearly"}
@@ -29,7 +33,7 @@ export function PricingGrid({ plans }: { plans: PricingPlan[] }) {
         </div>
       </div>
 
-      <div className="mt-10 grid md:grid-cols-3 gap-5">
+      <div className="mt-10 grid gap-5 md:grid-cols-3">
         {plans.map((plan) => (
           <PricingCard key={plan.id} plan={plan} cycle={cycle} />
         ))}
