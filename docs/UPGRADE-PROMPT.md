@@ -32,12 +32,13 @@ Câu hỏi đó **đúng**. Free tier của Quoted (llms.txt + bot detector + ma
 
 Quoted reposition từ "**Make WordPress AI-readable**" (commodity) sang:
 
-> **"Track AI citations cho WordPress — 1/20 giá Profound, không phải tự maintain"**
+> **"AI-ready WordPress trong 30 giây — track citations với 1/20 giá Profound, không tự maintain"**
 
 Thứ tự ưu tiên mới của value prop:
-1. **Hero**: Citation tracking với BYO API key ($19/mo vs Profound $399/mo)
-2. **Moat thầm lặng**: Hợp đồng maintenance (bot list curated, WP compat, schema conflict matrix 15 plugin, security patch) — thứ AI 2-click không ship
-3. **Table stakes**: llms.txt + markdown + schema (vẫn có, nhưng nhắc sau cùng)
+1. **🥇 Hero**: **Zero-click onboarding** (< 30s, 0 setup click) — cạnh tranh với *thời gian* của user, không phải feature của đối thủ. Claude/Codex tốn 30 phút prompt; Yoast tốn 20 phút wizard; Quoted = 0 click sau activate.
+2. **Pro hook**: Citation tracking với BYO API key ($19/mo vs Profound $399/mo)
+3. **Moat thầm lặng**: Hợp đồng maintenance (bot list curated, WP compat, schema conflict matrix 15 plugin, security patch) — thứ AI 2-click không ship
+4. **Table stakes**: llms.txt + markdown + schema (vẫn có, nhắc sau cùng)
 
 ### Deliverables — ship hết trong session này
 
@@ -80,6 +81,49 @@ Thứ tự ưu tiên mới của value prop:
 - Wire `Quoted_License::has_feature($feature)` cho 3 feature: `live_ai_test`, `citation_tracking`, `unlimited_posts`.
 - Tất cả paywall teaser hiện tại trỏ về `why-quoted.php` thay vì link external.
 
+#### F. 🥇 Zero-click onboarding — hero feature (ưu tiên CAO NHẤT, ~40% effort, tăng tổng budget)
+
+**Nguyên tắc P0**: required click sau khi activate = **0**. Mọi tính năng tự bật, niche tự detect. Wizard cũ 8-click chuyển thành "Customize" link tùy chọn.
+
+**Sub-deliverables:**
+
+- **F1. Activator zero-config**:
+  - Sửa `wp-plugin/includes/class-quoted-activator.php`: set tất cả default sensible (allow all 14 bot, schema Auto, IP hash ON, badge OFF, logging ON).
+  - Schedule async niche auto-detect chạy 5s sau activate (`wp_schedule_single_event`).
+  - Set option `quoted_first_value_at = current_time('timestamp')` lần đầu /llms.txt được serve (theo dõi metric < 30s).
+
+- **F2. Niche auto-detector** (không LLM, pure PHP):
+  - File mới: `wp-plugin/includes/class-quoted-niche-detector.php` (~150 LOC).
+  - Bundle: `wp-plugin/includes/data/niche-keywords.json` — 32 niche × 30–50 keyword/niche (EN + Vietnamese). Ví dụ outdoor-gear: `["hiking", "boots", "trail", "running", "shoes", "leo núi", "giày", ...]`.
+  - Algorithm: pull 50 published post (title + categories + tags), tokenize (strip stopword EN+VI), match keyword dictionary với TF-IDF đơn giản, pick top niche + confidence (0–1). Fallback "general" nếu confidence < 0.3.
+  - Performance: < 50ms tổng, chạy 1 lần sau activate, cache trong option `quoted_detected_niche`.
+
+- **F3. Default ON cho mọi tính năng theo môi trường**:
+  - WooCommerce active → `quoted_schema_product = 1` (Sprint 3 sẽ build engine; tạm set flag).
+  - Recipe post type tồn tại → `quoted_schema_recipe = 1` (flag).
+  - WPML/Polylang active → `quoted_llms_per_language = 1` (flag).
+  - Yoast/RankMath/AIOSEO/SEOPress active → đã có logic Auto-defer, OK.
+
+- **F4. Dashboard "What's working" panel** (thay wizard):
+  - First admin visit sau activate → redirect tới Dashboard (KHÔNG tới Onboarding).
+  - Top of dashboard: panel **5 green check** + link "Customize" mỗi dòng:
+    - ✅ `/llms.txt` is live at `<your-site>/llms.txt` → [Preview]
+    - ✅ Markdown endpoints active for **47 posts** → [Test sample]
+    - ✅ Bot detection running for **14 AI bots** (0 crawls yet — check back in 24h) → [Allowlist]
+    - ✅ Schema JSON-LD active (deferring to **Yoast SEO**) → [Override]
+    - ✅ Niche detected: **Outdoor gear** (confidence 87%) → [Change]
+  - Footer of panel: badge **"Setup time: 1 click. Industry avg: 23 min (Yoast), 47 min (Claude DIY)."**
+  - Trên panel này mới tới "What Quoted maintains for you" (deliverable C).
+
+- **F5. Onboarding wizard cũ → optional**:
+  - Giữ `admin/partials/onboarding.php` nhưng đổi route: chỉ access qua link "Customize" trong dashboard panel, không auto-redirect.
+  - Header onboarding đổi: *"Optional setup — Quoted đã chạy. Customize nếu muốn."*
+  - Bỏ progress bar (vì đã không phải required flow).
+
+- **F6. Comparison page row mới** (cập nhật deliverable D):
+  - Thêm row đầu tiên trong bảng `why-quoted.php`: **"Setup time"** với 4 cột: DIY Claude (30 phút – 4h), citelayer (5 min, 5 click), Yoast (20 min, 12 settings), **Quoted (< 30s, 0 click)**.
+  - Highlight đỏ chữ "30 phút" của Claude — để marketer thấy ngay cost-of-time.
+
 ### KHÔNG được làm (chống scope creep)
 
 - ❌ Polish UI llms.txt — đã là commodity.
@@ -93,12 +137,14 @@ Thứ tự ưu tiên mới của value prop:
 
 ### Acceptance gate — kiểm thử trước khi commit
 
-Tự diễn vai 3 lần:
+Tự diễn vai 5 lần:
 
-1. **Marketer mới install plugin**: trong 60 giây từ activate, họ có trả lời được "vì sao trả $19/mo thay vì để Claude build" không? Nếu chưa → iterate copy.
-2. **Mở dashboard mới**: "AI citations" có phải con số TO NHẤT? Card maintenance có above-the-fold không?
-3. **Click Upgrade**: có landing trên trang so sánh thẳng thắn với DIY (không né tránh) không?
-4. **Mở `readme.txt`**: "Track AI citations" có nằm trong 50 từ đầu không? "llms.txt generator" có bị đẩy xuống dưới fold không?
+1. **🥇 Zero-click test (quan trọng nhất)**: Activate plugin → KHÔNG click bất kỳ Continue/Next/Save nào → vào `<site>/llms.txt` → file có content thật từ 50 post của site. Niche option đã có giá trị auto-detect, không phải "Select…". Nếu fail → F1/F2 chưa đúng.
+2. **Time-to-value < 30s**: dùng đồng hồ bấm giờ. Từ click "Activate" → /llms.txt serve content đầu tiên ≤ 30s trên test site có 50 post.
+3. **Marketer 60s test**: marketer mới install, trong 60s từ activate, có trả lời được "vì sao trả $19/mo thay vì để Claude build" không? Dashboard "What's working" panel phải hiển thị ngay setup time badge "1 click vs Claude 47 min".
+4. **Hierarchy test**: con số TO NHẤT trên dashboard = "AI citations this month". "What's working" panel ngay trên đó. Maintenance card above-the-fold. Distribution Score chỉ là card phụ.
+5. **Comparison page test**: click Upgrade → landing trang `why-quoted.php` → row đầu tiên trong bảng là "Setup time" với Quoted = 0 click highlighted.
+6. **Readme test**: `readme.txt` 50 từ đầu phải có "30 seconds" hoặc "1 click" hoặc "zero-config". "llms.txt generator" bị đẩy xuống dưới fold.
 
 Nếu bất kỳ câu nào "no" → quay lại fix, không commit vội.
 

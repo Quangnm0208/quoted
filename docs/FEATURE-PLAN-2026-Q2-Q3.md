@@ -53,13 +53,25 @@
 | **Otterly.AI** | SaaS | $29/mo | N/A | **Có (6 platforms)** | Tier rẻ nhất segment citation |
 | **Profound** | SaaS | $399+/mo | N/A | Có (5 LLMs) | Enterprise leader ($96M Series C @ $1B, 2/2026) |
 
-### 2.2 Năm khoảng trống Quoted có thể chiếm
+### 2.2 Sáu khoảng trống Quoted có thể chiếm
 
-1. **Per-bot HTTP 403 + robots.txt sync ở Free tier** — chỉ Quoted có (citelayer/VigIA không có HTTP 403; Cloudflare có nhưng yêu cầu dùng Cloudflare).
-2. **Schema JSON-LD conflict-aware với 15 SEO plugin** — switching-cost killer, không đối thủ nào nhấn mạnh.
-3. **Citation tracking BYO API key, giá $9–19/mo** — toàn bộ SaaS bundle API cost (Otterly $29 rẻ nhất). BYO key = $0 marginal cost cho Quoted, lời ngay từ user đầu tiên.
-4. **GDPR-friendly + local-only + SHA-256 IP hash** — segment EU/healthcare/legal underserved bởi SaaS Mỹ.
-5. **Niche benchmark theo industry** (Pro) — Profound/AthenaHQ chỉ phục vụ enterprise. SMB hoàn toàn trống.
+1. **🥇 Zero-click onboarding** — đây là moat **mạnh nhất** vì cạnh tranh với *thời gian* của user. Bảng setup time:
+
+   | Giải pháp | Setup time | Click required |
+   |---|---|---|
+   | Claude/Codex DIY | 30 phút – 4h | ~30 prompt + deploy |
+   | Yoast wizard | 15–20 phút | 12 tab settings |
+   | citelayer | ~5 phút | 5–8 click |
+   | VigIA | ~5 phút | 5 click |
+   | **Quoted target** | **< 30 giây** | **0 click** (auto-detect niche, auto-enable theo môi trường, default sensible mọi setting) |
+
+   Đây không chỉ là tiện lợi — đây là **lý do mua** đối với marketer/business owner không muốn tốn 30 phút prompt Claude.
+
+2. **Per-bot HTTP 403 + robots.txt sync ở Free tier** — chỉ Quoted có (citelayer/VigIA không có HTTP 403; Cloudflare có nhưng yêu cầu dùng Cloudflare).
+3. **Schema JSON-LD conflict-aware với 15 SEO plugin** — switching-cost killer, không đối thủ nào nhấn mạnh.
+4. **Citation tracking BYO API key, giá $9–19/mo** — toàn bộ SaaS bundle API cost (Otterly $29 rẻ nhất). BYO key = $0 marginal cost cho Quoted, lời ngay từ user đầu tiên.
+5. **GDPR-friendly + local-only + SHA-256 IP hash** — segment EU/healthcare/legal underserved bởi SaaS Mỹ.
+6. **Niche benchmark theo industry** (Pro) — Profound/AthenaHQ chỉ phục vụ enterprise. SMB hoàn toàn trống.
 
 ### 2.3 Ba mối đe doạ chiến lược cần phản ứng nhanh
 
@@ -75,7 +87,19 @@
 
 **North star metric:** số WordPress site có ≥1 citation Pro trong 30 ngày sau khi upgrade.
 
-**Three pillars:**
+**P0 — nguyên tắc nền tảng (áp dụng mọi sprint, không thương lượng):**
+
+> **Time-to-value < 30 giây. Required clicks sau khi activate = 0.**
+
+Đối thủ thực sự không phải citelayer/VigIA — là **thời gian** của user. Marketer cân nhắc:
+- Claude/Codex DIY: 30 phút – 4 tiếng (prompt + debug + deploy)
+- Yoast wizard: 20 phút (12 tab settings)
+- citelayer/VigIA: 5–8 click setup
+- **Quoted target: 0 click sau khi activate** — mọi tính năng tự bật, niche tự detect, schema tự enable
+
+Mọi feature mới phải đáp ứng test: "*Marketer có dùng được mà không đọc doc, không click setting nào không?*" Nếu không → auto-detect, hoặc default sensible, hoặc bỏ.
+
+**Three pillars (đặt trên nền P0):**
 - **P1 (Defense)**: Parity bot count + verified-bot detection (đáp Cloudflare/DarkVisitors)
 - **P2 (Pro launch)**: Live AI Test + Citation tracking BYO key — đẩy LTV
 - **P3 (Moat)**: Niche benchmark opt-in (network effect tăng theo user count)
@@ -102,6 +126,13 @@
 - Thêm **verified bot tier**: reverse DNS lookup chạy **async** (sau khi response gửi đi), cache kết quả 30 ngày. Đánh dấu `verified=true` trong `wp_quoted_bot_log` để dashboard phân biệt thật/giả.
 - Bot list move sang `bot-signatures.json` để update không cần release plugin (load từ CDN, fallback bundled).
 
+**Quyết định 5: Zero-click onboarding (P0 enforcement)**
+- Activate → mọi default ON, mọi tính năng chạy ngay. Wizard cũ chuyển thành "Customize" link tùy chọn ở sidebar.
+- **Niche auto-detect** chạy async trong 5s sau activate: pull 50 post gần nhất, match keyword dictionary 32 niche (bundled `niche-keywords.json`, không cần LLM, ~10ms tổng). Lưu kết quả + confidence; fallback "general".
+- **Auto-enable theo môi trường**: WooCommerce active → Product schema ON; recipe post type → Recipe ON; WPML/Polylang → llms.txt per language ON; multisite → per-site activate notice rõ.
+- First admin page sau activate = Dashboard "What's working" panel (5 green check), KHÔNG phải wizard. Mỗi check kèm link "Customize" cho user muốn tweak.
+- Đo lường: thêm event `quoted_first_value_at` (timestamp khi /llms.txt được serve lần đầu sau activate). Target p50 < 30s.
+
 ### 3.3 CTO view — vận hành & rủi ro
 
 - **Release cadence**: 2 tuần/lần, mỗi sprint là 1 minor version (`0.3.0`, `0.4.0`…). wp.org review 2–4 tuần → cần overlap (ship 0.3 trong khi 0.4 đang dev).
@@ -117,6 +148,15 @@
 ## 4. Roadmap 16 tuần — 8 sprint × 2 tuần
 
 Mỗi sprint có: **Mục tiêu sprint**, **Deliverables**, **Tech notes (Architect)**, **Risk (CTO)**, **Acceptance gate**.
+
+---
+
+### Sprint 0 (1 session ~3–5h, trước Sprint 1) — Reframe + Zero-click onboarding
+**Version target:** 0.3.0-alpha
+**Theme:** Trả lời câu hỏi "vì sao mua thay vì AI 2-click?" bằng product, không slogan.
+**Driver:** prompt `docs/UPGRADE-PROMPT.md` (paste vào session Claude/Codex mới).
+**Deliverables tóm tắt:** zero-click onboarding (niche auto-detect + dashboard "What's working" panel), positioning rewrite (citation-first), hero demo (Live AI Test mock), comparison page (`why-quoted.php`), Pro path wire-up test mode.
+**Acceptance:** time-to-first-llms.txt ≤ 30s, 0 click sau activate, marketer 60s test pass.
 
 ---
 
@@ -337,6 +377,7 @@ Mỗi sprint có: **Mục tiêu sprint**, **Deliverables**, **Tech notes (Archit
 
 | Sprint | Tuần | Version | Theme | Outcome chính |
 |---|---|---|---|---|
+| **0** | **trước S1** | **0.3.0-alpha** | **🥇 Zero-click onboarding + reframe positioning** | **Time-to-value < 30s, 0 click sau activate** |
 | 1 | 1–2 | 0.3.0 | Foundation cleanup + bot parity | 55+ bots, dọn tech debt |
 | 2 | 3–4 | 0.4.0 | Verified bot + content negotiation | Khác biệt hoá bot tracking |
 | 3 | 5–6 | 0.5.0 | Schema v2 + llms-full.txt | Coverage WooCommerce/recipe |
