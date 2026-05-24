@@ -1,196 +1,305 @@
 /**
- * Quoted Admin Styles
+ * Quoted Admin Styles — Brand v1.0
  *
- * Lean and dependency-free. Follows WP admin design language.
+ * Indigo #3b3fbf primary, Inter typography, tight spacing.
+ * Dependency-free. Respects WordPress admin design language while
+ * carrying brand identity into header, cards, badges, and buttons.
  */
+
+/* ─── Design tokens (scoped to plugin pages) ─────────────── */
+.wrap.quoted-dashboard,
+.wrap.quoted-onboarding,
+.wrap.quoted-settings,
+.wrap.quoted-billing-page {
+	--q-primary: #3b3fbf;
+	--q-primary-hover: #2f33a3;
+	--q-primary-soft: #eef0fb;
+	--q-primary-ink: #1b1e6b;
+	--q-text: #15151b;
+	--q-text-muted: #5b6678;
+	--q-border: #e4e7ec;
+	--q-border-soft: #eef0f3;
+	--q-surface: #ffffff;
+	--q-success: #10b981;
+	--q-success-bg: #e6f4ec;
+	--q-success-fg: #066848;
+	--q-warning: #eab308;
+	--q-warning-bg: #fef4e6;
+	--q-warning-fg: #92590b;
+	--q-danger: #dc2626;
+	--q-danger-bg: #fdecec;
+	--q-danger-fg: #a72020;
+	--q-radius-sm: 4px;
+	--q-radius-md: 6px;
+	--q-radius-lg: 8px;
+	--q-shadow-soft: 0 1px 2px rgba(0,0,0,0.06);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+	color: var(--q-text);
+}
 
 /* ─── Header ─────────────────────────────────────────────── */
 .quoted-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin: 20px 0 30px;
-	padding-bottom: 20px;
-	border-bottom: 1px solid #e0e0e0;
+	gap: 16px;
+	margin: 20px 0 24px;
+	padding: 0 0 18px;
+	border-bottom: 1px solid var(--q-border);
+}
+.quoted-header-brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.quoted-header-brand .quoted-logo-mark {
+	width: 32px;
+	height: 32px;
+	flex-shrink: 0;
 }
 .quoted-header h1 {
 	margin: 0;
-	font-size: 28px;
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.018em;
+	color: var(--q-text);
+	line-height: 1.2;
 }
 .quoted-header .subtitle {
-	margin: 8px 0 0;
-	color: #50575e;
-	font-size: 16px;
+	margin: 4px 0 0;
+	color: var(--q-text-muted);
+	font-size: 13.5px;
+	line-height: 1.5;
 }
 
 /* ─── Plan badge ─────────────────────────────────────────── */
 .quoted-plan-badge {
-	padding: 6px 14px;
-	border-radius: 4px;
-	font-weight: 600;
-	font-size: 11px;
-	letter-spacing: 0.5px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-weight: 500;
+	font-size: 11.5px;
+	letter-spacing: 0;
+	line-height: 1.4;
+}
+.quoted-plan-badge::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: currentColor;
+	opacity: 0.7;
 }
 .quoted-plan-badge.plan-free {
-	background: #f0f0f1;
-	color: #50575e;
+	background: #f3f4f6;
+	color: #384151;
 }
-.quoted-plan-badge.plan-pro {
-	background: #2271b1;
-	color: #fff;
+.quoted-plan-badge.plan-pro,
+.quoted-plan-badge.plan-pro_plus {
+	background: var(--q-primary-soft);
+	color: var(--q-primary-ink);
 }
 .quoted-plan-badge.plan-agency {
-	background: #674ea7;
-	color: #fff;
+	background: #eaf3ee;
+	color: #066848;
 }
 
 /* ─── Onboarding progress ────────────────────────────────── */
 .quoted-progress {
-	margin: 30px 0;
+	margin: 24px 0 28px;
 }
 .quoted-progress ol {
 	display: flex;
 	list-style: none;
 	padding: 0;
 	margin: 0;
-	gap: 0;
+	gap: 4px;
 	counter-reset: step;
 }
 .quoted-progress li {
 	flex: 1;
-	padding: 12px 16px;
-	background: #f0f0f1;
-	color: #999;
+	padding: 10px 14px;
+	background: #f3f4f6;
+	color: var(--q-text-muted);
 	text-align: center;
 	font-weight: 500;
+	font-size: 12.5px;
 	position: relative;
 	counter-increment: step;
+	border-radius: var(--q-radius-md);
 }
 .quoted-progress li::before {
 	content: counter(step) ". ";
+	opacity: 0.6;
 }
 .quoted-progress li.active {
-	background: #2271b1;
+	background: var(--q-primary);
 	color: #fff;
 }
+.quoted-progress li.active::before { opacity: 0.85; }
 .quoted-progress li.done {
-	background: #00a32a;
-	color: #fff;
+	background: var(--q-success-bg);
+	color: var(--q-success-fg);
 }
 
 /* ─── Onboarding steps ───────────────────────────────────── */
 .quoted-step {
-	background: #fff;
-	padding: 30px;
-	border: 1px solid #c3c4c7;
-	border-radius: 4px;
+	background: var(--q-surface);
+	padding: 28px;
+	border: 1px solid var(--q-border);
+	border-radius: var(--q-radius-lg);
 	max-width: 720px;
+	box-shadow: var(--q-shadow-soft);
 }
 .quoted-step h2 {
-	margin-top: 0;
-	font-size: 22px;
+	margin: 0 0 6px;
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.015em;
+	color: var(--q-text);
 }
 .quoted-step .description {
-	color: #50575e;
-	font-size: 14px;
-	margin-bottom: 20px;
+	color: var(--q-text-muted);
+	font-size: 13.5px;
+	line-height: 1.55;
+	margin-bottom: 18px;
 }
 .quoted-step .submit {
 	margin-top: 20px;
 }
 .button-hero {
-	font-size: 16px !important;
-	padding: 8px 24px !important;
+	font-size: 14px !important;
+	padding: 7px 18px !important;
 	height: auto !important;
+	border-radius: var(--q-radius-md) !important;
+}
+
+/* WordPress button overrides — keep brand color on primary CTAs */
+.wrap.quoted-dashboard .button-primary,
+.wrap.quoted-onboarding .button-primary,
+.wrap.quoted-settings .button-primary,
+.wrap.quoted-billing-page .button-primary {
+	background: var(--q-primary);
+	border-color: var(--q-primary);
+	box-shadow: none;
+	text-shadow: none;
+	border-radius: var(--q-radius-md);
+}
+.wrap.quoted-dashboard .button-primary:hover,
+.wrap.quoted-onboarding .button-primary:hover,
+.wrap.quoted-settings .button-primary:hover,
+.wrap.quoted-billing-page .button-primary:hover {
+	background: var(--q-primary-hover);
+	border-color: var(--q-primary-hover);
+}
+.wrap.quoted-dashboard .button-primary:focus,
+.wrap.quoted-onboarding .button-primary:focus,
+.wrap.quoted-settings .button-primary:focus,
+.wrap.quoted-billing-page .button-primary:focus {
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--q-primary);
 }
 
 .quoted-status {
-	margin-left: 12px;
-	color: #50575e;
+	margin-left: 10px;
+	color: var(--q-text-muted);
 	font-style: italic;
+	font-size: 12.5px;
 }
 .quoted-status.error {
-	color: #d63638;
+	color: var(--q-danger);
 	font-style: normal;
 	font-weight: 500;
 }
 
 .quoted-help {
-	margin-top: 30px;
-	padding-top: 20px;
-	border-top: 1px solid #e0e0e0;
-	color: #50575e;
+	margin-top: 24px;
+	padding-top: 18px;
+	border-top: 1px solid var(--q-border-soft);
+	color: var(--q-text-muted);
+	font-size: 12.5px;
 }
 
 .quoted-scan-box,
 .quoted-test-box,
 .quoted-done-box {
 	text-align: center;
-	padding: 40px 0;
+	padding: 32px 0;
 }
 
 .quoted-scan-result,
 .quoted-test-result {
-	margin-top: 20px;
-	padding: 20px;
-	background: #f6f7f7;
-	border-radius: 4px;
+	margin-top: 16px;
+	padding: 16px 18px;
+	background: var(--q-primary-soft);
+	border-radius: var(--q-radius-md);
 	text-align: left;
+	color: var(--q-primary-ink);
+	font-size: 13px;
+	line-height: 1.55;
 }
 
 .quoted-test-placeholder {
-	color: #50575e;
+	color: var(--q-text-muted);
 }
 
 .quoted-next-tips {
-	margin-top: 30px;
-	padding: 20px;
-	background: #f0f6fc;
-	border-left: 4px solid #2271b1;
-	border-radius: 0 4px 4px 0;
+	margin-top: 24px;
+	padding: 16px 18px;
+	background: var(--q-primary-soft);
+	border-left: 3px solid var(--q-primary);
+	border-radius: 0 var(--q-radius-md) var(--q-radius-md) 0;
+	color: var(--q-primary-ink);
 }
 .quoted-next-tips h3 {
-	margin-top: 0;
+	margin: 0 0 6px;
+	font-size: 13.5px;
+	font-weight: 600;
+	color: var(--q-primary-ink);
 }
 .quoted-next-tips ul {
 	margin: 0;
 	padding-left: 20px;
+	font-size: 13px;
+	color: var(--q-text);
 }
 
 /* ─── Dashboard grid ─────────────────────────────────────── */
 .quoted-dashboard-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-	gap: 20px;
-	margin: 20px 0;
+	gap: 16px;
+	margin: 16px 0 24px;
 }
 
 .quoted-card {
-	background: #fff;
-	border: 1px solid #c3c4c7;
-	border-radius: 4px;
-	padding: 24px;
+	background: var(--q-surface);
+	border: 1px solid var(--q-border);
+	border-radius: var(--q-radius-lg);
+	padding: 20px;
 }
 .quoted-card h2 {
-	margin: 0 0 16px;
-	font-size: 16px;
+	margin: 0 0 14px;
+	font-size: 14px;
 	font-weight: 600;
-	color: #1d2327;
+	color: var(--q-text);
+	letter-spacing: -0.005em;
 }
 .quoted-card .quoted-period {
-	font-size: 12px;
-	color: #8c8f94;
+	font-size: 11.5px;
+	color: var(--q-text-muted);
 	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
 }
 
 /* Score gauge */
-.quoted-score-card {
-	text-align: center;
-}
+.quoted-score-card { text-align: center; }
 .quoted-score-gauge {
 	position: relative;
-	width: 240px;
-	height: 240px;
+	width: 200px;
+	height: 200px;
 	margin: 0 auto;
 }
 .quoted-score-number {
@@ -198,24 +307,21 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	font-size: 48px;
-	font-weight: 700;
-	color: #1d2327;
+	font-size: 44px;
+	font-weight: 600;
+	color: var(--q-text);
+	letter-spacing: -0.025em;
 }
 .quoted-score-delta {
 	margin: 10px 0 0;
-	color: #50575e;
-	font-size: 14px;
+	color: var(--q-text-muted);
+	font-size: 13px;
 }
-.quoted-score-delta.positive {
-	color: #00a32a;
-}
-.quoted-score-delta.negative {
-	color: #d63638;
-}
+.quoted-score-delta.positive { color: var(--q-success-fg); }
+.quoted-score-delta.negative { color: var(--q-danger-fg); }
 .quoted-score-explainer {
-	margin: 10px 0 0;
-	color: #8c8f94;
+	margin: 6px 0 0;
+	color: var(--q-text-muted);
 	font-size: 12px;
 }
 
@@ -224,29 +330,29 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 10px 0;
-	border-bottom: 1px solid #f0f0f1;
+	padding: 9px 0;
+	border-bottom: 1px solid var(--q-border-soft);
 	gap: 10px;
 }
-.quoted-bot-event:last-child {
-	border-bottom: none;
-}
+.quoted-bot-event:last-child { border-bottom: none; }
 .quoted-bot-event .bot-name {
-	font-weight: 600;
-	color: #2271b1;
+	font-weight: 500;
+	color: var(--q-primary);
 	white-space: nowrap;
+	font-size: 12.5px;
 }
 .quoted-bot-event .bot-url {
 	flex: 1;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	color: #50575e;
-	font-size: 13px;
+	color: var(--q-text);
+	font-size: 12.5px;
+	font-family: ui-monospace, 'SF Mono', Menlo, monospace;
 }
 .quoted-bot-event .bot-time {
-	color: #8c8f94;
-	font-size: 12px;
+	color: var(--q-text-muted);
+	font-size: 11.5px;
 	white-space: nowrap;
 }
 
@@ -254,96 +360,126 @@
 .quoted-top-bot-row {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	padding: 6px 0;
+	font-size: 13px;
 }
 .quoted-top-bot-row .bar {
 	flex: 1;
-	height: 8px;
-	background: #f0f0f1;
-	border-radius: 4px;
-	margin: 6px 12px;
+	height: 6px;
+	background: var(--q-border-soft);
+	border-radius: 999px;
+	margin: 0 12px;
 	overflow: hidden;
 }
 .quoted-top-bot-row .bar-fill {
 	height: 100%;
-	background: #2271b1;
-	border-radius: 4px;
+	background: var(--q-primary);
+	border-radius: 999px;
 }
 
 /* Paywall teaser */
 .quoted-paywall-teaser {
 	text-align: center;
-	padding: 20px 0;
+	padding: 24px 0;
 }
 .quoted-locked-icon {
-	font-size: 48px;
-	margin: 0;
+	font-size: 32px;
+	margin: 0 0 6px;
+	opacity: 0.4;
 }
 .quoted-paywall-teaser p {
-	color: #50575e;
+	color: var(--q-text-muted);
+	font-size: 13px;
 }
 
 /* Quota */
 .quoted-quota-bar {
-	height: 12px;
-	background: #f0f0f1;
-	border-radius: 6px;
+	height: 8px;
+	background: var(--q-border-soft);
+	border-radius: 999px;
 	overflow: hidden;
-	margin: 10px 0;
+	margin: 8px 0;
 }
 .quoted-quota-fill {
 	height: 100%;
-	background: #2271b1;
+	background: var(--q-primary);
 	transition: width 0.3s;
+	border-radius: 999px;
 }
-.quoted-quota-fill.warn {
-	background: #dba617;
-}
-.quoted-quota-fill.full {
-	background: #d63638;
-}
+.quoted-quota-fill.warn { background: var(--q-warning); }
+.quoted-quota-fill.full { background: var(--q-danger); }
 
 /* Next action card */
 .quoted-next-action-item {
-	padding: 16px;
-	background: #f0f6fc;
-	border-left: 4px solid #2271b1;
-	border-radius: 0 4px 4px 0;
+	padding: 14px 16px;
+	background: var(--q-primary-soft);
+	border-left: 3px solid var(--q-primary);
+	border-radius: 0 var(--q-radius-md) var(--q-radius-md) 0;
+	color: var(--q-primary-ink);
 }
 .quoted-next-action-item h3 {
-	margin-top: 0;
-	font-size: 14px;
+	margin: 0 0 6px;
+	font-size: 13px;
+	font-weight: 600;
 }
 .quoted-next-action-item a.button {
-	margin-top: 10px;
+	margin-top: 8px;
 }
 
 /* Footer */
 .quoted-footer {
-	margin-top: 30px;
-	padding-top: 20px;
-	border-top: 1px solid #e0e0e0;
-	color: #8c8f94;
-	font-size: 13px;
+	margin-top: 28px;
+	padding-top: 16px;
+	border-top: 1px solid var(--q-border-soft);
+	color: var(--q-text-muted);
+	font-size: 12.5px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
+.quoted-footer .quoted-logo-mark { width: 16px; height: 16px; opacity: 0.6; }
 
 /* Loading state */
 .quoted-loading {
-	color: #8c8f94;
+	color: var(--q-text-muted);
 	font-style: italic;
+	font-size: 13px;
 }
 
 /* Empty state */
 .quoted-empty {
-	color: #8c8f94;
+	color: var(--q-text-muted);
 	text-align: center;
-	padding: 30px 0;
+	padding: 24px 0;
+	font-size: 13px;
 }
-.quoted-empty p {
-	margin: 0;
-}
+.quoted-empty p { margin: 0; }
 
-/* Settings */
+/* Settings form table polish */
 .quoted-settings .form-table th {
 	width: 220px;
+	font-size: 13.5px;
+	font-weight: 500;
+	color: var(--q-text);
+}
+.quoted-settings .form-table td {
+	font-size: 13.5px;
+}
+.quoted-settings .form-table input[type="text"],
+.quoted-settings .form-table input[type="password"],
+.quoted-settings .form-table input[type="url"],
+.quoted-settings .form-table select {
+	border-radius: var(--q-radius-md);
+	border-color: var(--q-border);
+}
+.quoted-settings .description {
+	color: var(--q-text-muted);
+	font-size: 12.5px;
+}
+
+/* ─── Inline brand mark utility ──────────────────────────── */
+.quoted-logo-mark {
+	display: inline-block;
+	vertical-align: middle;
 }

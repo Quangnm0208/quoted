@@ -9,7 +9,7 @@
 /* Current plan card */
 .quoted-current-plan-card {
 	background: #fff;
-	border: 1px solid #c3c4c7;
+	border: 1px solid var(--q-border, #e4e7ec);
 	border-radius: 4px;
 	padding: 20px 24px;
 	margin: 20px 0 30px;
@@ -19,7 +19,7 @@
 	gap: 20px;
 }
 .quoted-current-plan-label {
-	color: #50575e;
+	color: var(--q-text-muted, #5b6678);
 	font-size: 14px;
 }
 .quoted-current-plan-value .quoted-plan-badge {
@@ -30,15 +30,15 @@
 	letter-spacing: 1px;
 }
 .quoted-plan-badge.plan-free {
-	background: #f0f0f1;
-	color: #50575e;
+	background: #f3f4f6;
+	color: var(--q-text-muted, #5b6678);
 }
 .quoted-plan-badge.plan-solo {
-	background: #2271b1;
+	background: var(--q-primary, #3b3fbf);
 	color: #fff;
 }
 .quoted-plan-badge.plan-pro_plus {
-	background: #674ea7;
+	background: var(--q-primary-ink, #1b1e6b);
 	color: #fff;
 }
 .quoted-current-plan-actions {
@@ -48,7 +48,7 @@
 	gap: 12px;
 }
 .quoted-current-plan-actions .description {
-	color: #8c8f94;
+	color: var(--q-text-muted, #5b6678);
 	font-size: 13px;
 }
 
@@ -71,7 +71,7 @@
 }
 
 .quoted-pricing-card.featured {
-	border-color: #2271b1;
+	border-color: var(--q-primary, #3b3fbf);
 	box-shadow: 0 4px 20px rgba(34, 113, 177, 0.15);
 	transform: scale(1.02);
 }
@@ -86,7 +86,7 @@
 	top: -12px;
 	left: 50%;
 	transform: translateX(-50%);
-	background: #2271b1;
+	background: var(--q-primary, #3b3fbf);
 	color: #fff;
 	padding: 4px 16px;
 	border-radius: 20px;
@@ -104,7 +104,7 @@
 .quoted-pricing-header h2 {
 	margin: 0 0 12px;
 	font-size: 24px;
-	color: #1d2327;
+	color: var(--q-text, #15151b);
 }
 
 .quoted-price {
@@ -113,16 +113,16 @@
 .quoted-price .amount {
 	font-size: 48px;
 	font-weight: 700;
-	color: #1d2327;
+	color: var(--q-text, #15151b);
 }
 .quoted-price .period {
 	font-size: 16px;
-	color: #50575e;
+	color: var(--q-text-muted, #5b6678);
 	margin-left: 4px;
 }
 .quoted-billed {
 	font-size: 12px;
-	color: #8c8f94;
+	color: var(--q-text-muted, #5b6678);
 	margin: 0;
 }
 
@@ -135,10 +135,10 @@
 .quoted-features li {
 	padding: 8px 0;
 	font-size: 14px;
-	color: #1d2327;
+	color: var(--q-text, #15151b);
 }
 .quoted-features li.muted {
-	color: #8c8f94;
+	color: var(--q-text-muted, #5b6678);
 	font-size: 13px;
 }
 
@@ -177,10 +177,10 @@
 }
 .quoted-trust-item strong {
 	font-size: 14px;
-	color: #1d2327;
+	color: var(--q-text, #15151b);
 }
 .quoted-trust-item small {
-	color: #50575e;
+	color: var(--q-text-muted, #5b6678);
 	font-size: 12px;
 }
 
@@ -202,7 +202,7 @@
 .quoted-faq details summary {
 	font-weight: 600;
 	cursor: pointer;
-	color: #1d2327;
+	color: var(--q-text, #15151b);
 	list-style: none;
 	padding-left: 24px;
 	position: relative;
@@ -213,7 +213,7 @@
 	left: 0;
 	top: 0;
 	font-size: 20px;
-	color: #2271b1;
+	color: var(--q-primary, #3b3fbf);
 	transition: transform 0.2s;
 }
 .quoted-faq details[open] summary::before {
@@ -221,7 +221,7 @@
 }
 .quoted-faq details p {
 	margin-top: 12px;
-	color: #50575e;
+	color: var(--q-text-muted, #5b6678);
 	line-height: 1.6;
 }
 
@@ -230,9 +230,9 @@
 	margin-top: 40px;
 	padding: 20px;
 	text-align: center;
-	color: #8c8f94;
+	color: var(--q-text-muted, #5b6678);
 	font-size: 13px;
 }
 .quoted-footer-info a {
-	color: #2271b1;
+	color: var(--q-primary, #3b3fbf);
 }

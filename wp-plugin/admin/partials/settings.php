@@ -39,7 +39,21 @@ settings_errors( 'quoted' );
 ?>
 <div class="wrap quoted-settings">
 
-	<h1><?php esc_html_e( 'Quoted Settings', 'quoted' ); ?></h1>
+	<div class="quoted-header">
+		<div class="quoted-header-brand">
+			<img
+				src="<?php echo esc_url( plugin_dir_url( QUOTED_PLUGIN_FILE ) . 'admin/images/logo-mark.svg' ); ?>"
+				alt=""
+				class="quoted-logo-mark"
+				width="32"
+				height="32"
+			/>
+			<div>
+				<h1><?php esc_html_e( 'Quoted Settings', 'quoted' ); ?></h1>
+				<p class="subtitle"><?php esc_html_e( 'License, AI crawler controls, schema engine, and privacy.', 'quoted' ); ?></p>
+			</div>
+		</div>
+	</div>
 
 	<?php if ( $pro_available ) : ?>
 	<!-- ────────────── License section (separate form for activate/deactivate) ────────────── -->

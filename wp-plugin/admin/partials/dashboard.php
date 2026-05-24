@@ -17,9 +17,23 @@ $tenant_id = get_option( 'quoted_tenant_id', '' );
 <div class="wrap quoted-dashboard">
 
 	<div class="quoted-header">
-		<h1><?php esc_html_e( 'Quoted Dashboard', 'quoted' ); ?></h1>
+		<div class="quoted-header-brand">
+			<img
+				src="<?php echo esc_url( plugin_dir_url( QUOTED_PLUGIN_FILE ) . 'admin/images/logo-mark.svg' ); ?>"
+				alt=""
+				class="quoted-logo-mark"
+				width="32"
+				height="32"
+			/>
+			<div>
+				<h1><?php esc_html_e( 'Quoted Dashboard', 'quoted' ); ?></h1>
+				<p class="subtitle">
+					<?php esc_html_e( 'How AI crawlers see your site. All data lives locally on this WordPress install.', 'quoted' ); ?>
+				</p>
+			</div>
+		</div>
 		<div class="quoted-plan-badge plan-<?php echo esc_attr( $plan ); ?>">
-			<?php echo esc_html( strtoupper( $plan ) ); ?>
+			<?php echo esc_html( ucfirst( str_replace( '_', ' ', $plan ) ) ); ?>
 		</div>
 	</div>
 
@@ -99,7 +113,14 @@ $tenant_id = get_option( 'quoted_tenant_id', '' );
 	</div>
 
 	<div class="quoted-footer">
-		<p>
+		<img
+			src="<?php echo esc_url( plugin_dir_url( QUOTED_PLUGIN_FILE ) . 'admin/images/logo-mark.svg' ); ?>"
+			alt=""
+			class="quoted-logo-mark"
+			width="16"
+			height="16"
+		/>
+		<p style="margin:0;">
 			<?php
 			$llms_url = esc_url( home_url( '/llms.txt' ) );
 			printf(

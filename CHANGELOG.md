@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-24
+
+### Brand identity refresh — admin UI
+
+**Maintainer:** Nguyễn Mạnh Quang &lt;quangnm0208@gmail.com&gt;
+
+Applies the official Quoted brand v1.0 (indigo `#3b3fbf` primary, Inter
+typography fallback, refined spacing and radii) to every admin page.
+
+#### Added
+
+- `admin/images/logo-mark.svg` — primary brand mark (Q-quote)
+- `admin/images/favicon.svg` — favicon variant
+- `.quoted-header-brand` wrapper renders logo + title + subtitle in
+  dashboard / onboarding / settings / upgrade pages
+
+#### Changed
+
+- `admin/css/quoted-admin.css` — full repaint to brand tokens:
+  - Primary `#2271b1` → indigo `#3b3fbf` with hover `#2f33a3`
+  - Radii: 4px → 6px (buttons) / 8px (cards)
+  - Typography: 16/28px → 14/22px with `-0.018em` heading tracking
+  - Pill-shaped `.quoted-plan-badge` with status dot
+  - Brand-soft callouts for tips / next-action / scan results
+- `admin/css/billing.css` — same palette swap via CSS vars + fallbacks
+- Settings form table polish: smaller font, 6px input radii
+- `.button-primary` inside Quoted pages adopts brand indigo (scoped, does
+  not affect WP core or other plugins)
+- Onboarding progress bar — flex with gap, active step in brand, done
+  step in success-bg
+
+#### Notes
+
+No functional changes from 0.2.0 — same 14-bot allowlist, /llms.txt
+pipeline, schema engine, Lemon Squeezy direct license flow. This release
+is visual-only and safe to update from any 0.2.x version.
+
+The broader admin UX restructure (sidebar layout, dashboard cards per
+the new mockups, sectioned settings) is scheduled for Sprint 3 in
+`docs/FEATURE-PLAN-2026-Q2-Q3.md`.
+
+## [0.2.0] — 2026-05-23
+
+### Public WordPress.org release
+
+See `wp-plugin/readme.txt` for the canonical wp.org changelog.
+Highlights: standalone refactor (drop OmniPlug backend), AI Crawler
+Allowlist with HTTP 403, Schema engine with 15+ SEO-plugin coexistence,
+direct Lemon Squeezy License API integration, P1 security hardening.
+
 ## [0.1.0] — 2026-05-23
 
 ### Initial Phase 0 Scaffold

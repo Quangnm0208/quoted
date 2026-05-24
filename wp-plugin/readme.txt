@@ -5,7 +5,7 @@ Tags: ai, llms.txt, chatgpt, claude, perplexity
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -143,6 +143,14 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 
 == Changelog ==
 
+= 0.3.0 =
+* **Brand identity refresh.** Admin pages adopt the official Quoted brand v1.0 — indigo `#3b3fbf` primary, refined typography, brand logo in dashboard / onboarding / settings / upgrade headers.
+* Polished `.quoted-card`, `.quoted-plan-badge`, progress bar, and bot activity feed with brand tokens and smaller, tighter spacing.
+* Scoped CSS custom properties to plugin pages only — no leakage into other admin pages.
+* `button-primary` inside Quoted pages now uses brand indigo (other plugins / WP core unaffected).
+* New brand SVG assets in `admin/images/` (mark + favicon).
+* No functional changes — same 14-bot allowlist, same /llms.txt + Markdown pipeline, same Lemon Squeezy direct flow.
+
 = 0.2.0 =
 * **First public release — Free tier.** The plugin ships fully self-contained: no backend, no SaaS proxy, no required external service.
 * Paid Pro tier is in development at quotedeasy.com — the Pro UI auto-appears once the operator's Lemon Squeezy store is wired up. Until then the plugin runs Free-only.
@@ -166,6 +174,9 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 * Free tier with 50-post limit
 
 == Upgrade Notice ==
+
+= 0.3.0 =
+Brand refresh — admin pages adopt Quoted brand v1.0 (indigo primary, refined typography). No functional changes, safe to update from 0.2.x.
 
 = 0.2.0 =
 First public release. Free tier — no account needed, no data leaves your server. Pro features coming soon.

@@ -57,8 +57,19 @@ $niches = array(
 <div class="wrap quoted-onboarding">
 
 	<div class="quoted-header">
-		<h1><?php esc_html_e( 'Welcome to Quoted', 'quoted' ); ?></h1>
-		<p class="subtitle"><?php esc_html_e( 'Make your site AI-readable. See when ChatGPT, Claude, and Perplexity quote you.', 'quoted' ); ?></p>
+		<div class="quoted-header-brand">
+			<img
+				src="<?php echo esc_url( plugin_dir_url( QUOTED_PLUGIN_FILE ) . 'admin/images/logo-mark.svg' ); ?>"
+				alt=""
+				class="quoted-logo-mark"
+				width="32"
+				height="32"
+			/>
+			<div>
+				<h1><?php esc_html_e( 'Welcome to Quoted', 'quoted' ); ?></h1>
+				<p class="subtitle"><?php esc_html_e( 'Make your site AI-readable. See when ChatGPT, Claude, and Perplexity quote you.', 'quoted' ); ?></p>
+			</div>
+		</div>
 	</div>
 
 	<div class="quoted-progress">

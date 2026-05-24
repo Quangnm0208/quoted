@@ -17,11 +17,22 @@ $solo_url     = Quoted_Billing::buy_url( 'solo' );
 $pro_plus_url = Quoted_Billing::buy_url( 'pro_plus' );
 $portal_url   = Quoted_Billing::customer_portal_url();
 ?>
-<div class="wrap quoted-billing">
+<div class="wrap quoted-billing-page quoted-billing">
 
 	<div class="quoted-header">
-		<h1><?php esc_html_e( 'Upgrade Quoted', 'quoted' ); ?></h1>
-		<p class="subtitle"><?php esc_html_e( 'Pick the plan that fits your site.', 'quoted' ); ?></p>
+		<div class="quoted-header-brand">
+			<img
+				src="<?php echo esc_url( plugin_dir_url( QUOTED_PLUGIN_FILE ) . 'admin/images/logo-mark.svg' ); ?>"
+				alt=""
+				class="quoted-logo-mark"
+				width="32"
+				height="32"
+			/>
+			<div>
+				<h1><?php esc_html_e( 'Upgrade Quoted', 'quoted' ); ?></h1>
+				<p class="subtitle"><?php esc_html_e( 'Pick the plan that fits your site. Billing handled securely by Lemon Squeezy.', 'quoted' ); ?></p>
+			</div>
+		</div>
 	</div>
 
 	<?php if ( ! Quoted_Billing::is_configured() ) : ?>
