@@ -5,7 +5,7 @@ Tags: ai, llms.txt, chatgpt, claude, perplexity
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,7 +27,7 @@ It runs **alongside** your existing SEO plugin (Yoast, Rank Math, AIOSEO, SEOPre
 * **AI Crawler Allowlist** — allow or block any of the 14 bots one by one. Blocked bots get HTTP 403 + a `Disallow` rule in your robots.txt.
 * **Schema engine** — Article (or BlogPosting) and FAQPage JSON-LD on single posts. Auto-detects FAQ from `[faq_item]` shortcodes and H2/H3 question patterns. Defers to Yoast / Rank Math / AIOSEO / SEOPress when they're active.
 * **Local-first dashboard** — AI Distribution Score, top crawling bots, recent crawls feed, posts synced quota. Reads from your own database. Nothing sent to external servers.
-* **Privacy by default** — visitor IPs are SHA-256 hashed before storage. Toggle off entirely if you prefer. GDPR/CCPA-friendly.
+* **Privacy by default** — visitor IPs from AI crawlers are SHA-256 hashed (with a per-site salt) before being stored locally. Switch off hashing and IPs are stored raw — handy for debugging, but you become the data controller for those IPs. Switch off "Log bot visits" entirely to record nothing. GDPR/CCPA-friendly defaults.
 * **< 2 ms overhead** per pageview — one substring scan on the User-Agent header.
 * **Multi-language** — UTF-8 safe; tested with French accents, Vietnamese diacritics, Japanese kanji, CJK characters.
 
@@ -143,6 +143,22 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 
 == Changelog ==
 
+= 0.4.0 =
+* **New admin UI matching the brand spec.** 8 dedicated pages — Dashboard, Setup, llms.txt, Crawler controls, Schema, Privacy, Plans & billing, Brand identity — replace the old single Settings page.
+* Sub-nav tab strip on every Quoted page (logo + version + Docs/Support shortcut + 8 tabs).
+* Dashboard redesigned: AI Distribution Score gauge + stat strip, 5 status cards (llms.txt / Markdown endpoints / Schema / Crawlers / Privacy), Top AI crawlers list with bar visualisation, Recent crawls feed, contextual Next-action callout.
+* New **llms.txt** page with Settings / Preview / Excluded URLs tabs, Generate toggle, content type filter (Posts / Pages / WooCommerce Products), custom site summary, copy-to-clipboard public URL.
+* New **Crawler controls** page with stats, filter tabs (All / Allowed / Blocked), Copy robots.txt button, full bot table (operator avatar + Purpose column + per-bot Allow/Block toggle).
+* New **Schema** page with conflict-detection panel that lists detected SEO plugins and explains the deferral decision.
+* New **Privacy** page with data-flow card, retention dropdown (7 / 30 / 90 days), "Clear bot log now" action, and uninstall purge toggle.
+* New **Brand identity** page showcasing the official Quoted color palette and logo variants.
+* Setup wizard simplified to 4 steps (Welcome / Generate llms.txt / Markdown endpoints / Done) and is now optional polish, not blocking.
+* Self-contained PHP component library (`q-*` CSS prefix) — Badge, Alert, Toggle, SegRadio, CopyField, Card, StatusCard, PageHeader — scoped to plugin pages, no leakage into other admin screens.
+* Dashboard quota correctly displays "Unlimited" for paid plans (was rendering `47 / 0`).
+* Free-tier "Powered by Quoted" badge is now deterministic — always renders on Free, honors toggle only on paid.
+* Activation error for missing `DOMDocument` is now a friendly admin-style message with package install hints.
+* Bot metadata extended with a `purpose` field used by the Crawler controls table.
+
 = 0.3.0 =
 * **Brand identity refresh.** Admin pages adopt the official Quoted brand v1.0 — indigo `#3b3fbf` primary, refined typography, brand logo in dashboard / onboarding / settings / upgrade headers.
 * Polished `.quoted-card`, `.quoted-plan-badge`, progress bar, and bot activity feed with brand tokens and smaller, tighter spacing.
@@ -174,6 +190,9 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 * Free tier with 50-post limit
 
 == Upgrade Notice ==
+
+= 0.4.0 =
+Major admin UI refresh per Quoted brand spec — 8 dedicated pages with sub-nav. All options preserved; safe to update from any 0.3.x.
 
 = 0.3.0 =
 Brand refresh — admin pages adopt Quoted brand v1.0 (indigo primary, refined typography). No functional changes, safe to update from 0.2.x.

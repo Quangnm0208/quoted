@@ -44,25 +44,25 @@ class Quoted_Bot_Detector {
 	}
 
 	/**
-	 * Friendly display name for a bot identifier, plus its operator.
-	 * Used in the Settings → AI Crawler Allowlist UI.
+	 * Per-bot display metadata: [display_name, operator, purpose].
+	 * Used by the Crawler controls page table.
 	 */
 	public static function bot_metadata() {
 		return array(
-			'ClaudeBot'         => array( 'Claude',         'Anthropic' ),
-			'GPTBot'            => array( 'GPTBot',         'OpenAI (training)' ),
-			'ChatGPT-User'      => array( 'ChatGPT-User',   'OpenAI (user browses)' ),
-			'OAI-SearchBot'     => array( 'OAI-SearchBot',  'OpenAI (search)' ),
-			'PerplexityBot'     => array( 'PerplexityBot',  'Perplexity (training)' ),
-			'Perplexity-User'   => array( 'Perplexity-User','Perplexity (user query)' ),
-			'GoogleExtended'    => array( 'Google-Extended','Google (Gemini, AI Overviews)' ),
-			'Applebot-Extended' => array( 'Applebot-Extended', 'Apple Intelligence' ),
-			'Bytespider'        => array( 'Bytespider',     'ByteDance / TikTok' ),
-			'FacebookBot'       => array( 'Meta-ExternalAgent', 'Meta AI / LLaMA' ),
-			'CCBot'             => array( 'CCBot',          'Common Crawl' ),
-			'DiffBot'           => array( 'DiffBot',        'Diffbot' ),
-			'Cohere'            => array( 'cohere-ai',      'Cohere' ),
-			'YouBot'            => array( 'YouBot',         'You.com' ),
+			'ClaudeBot'         => array( 'ClaudeBot',         'Anthropic',     __( 'Training data for Claude',                'quoted' ) ),
+			'GPTBot'            => array( 'GPTBot',            'OpenAI',        __( 'Training data for ChatGPT',               'quoted' ) ),
+			'ChatGPT-User'      => array( 'ChatGPT-User',      'OpenAI',        __( 'Live fetches during ChatGPT conversations', 'quoted' ) ),
+			'OAI-SearchBot'     => array( 'OAI-SearchBot',     'OpenAI',        __( 'SearchGPT index',                          'quoted' ) ),
+			'PerplexityBot'     => array( 'PerplexityBot',     'Perplexity',    __( 'Search index',                             'quoted' ) ),
+			'Perplexity-User'   => array( 'Perplexity-User',   'Perplexity',    __( 'Live fetch during user query',             'quoted' ) ),
+			'GoogleExtended'    => array( 'Google-Extended',   'Google',        __( 'Gemini training & AI products',            'quoted' ) ),
+			'Applebot-Extended' => array( 'Applebot-Extended', 'Apple',         __( 'Apple Intelligence training',              'quoted' ) ),
+			'Bytespider'        => array( 'Bytespider',        'ByteDance',     __( 'AI model training (TikTok parent)',         'quoted' ) ),
+			'FacebookBot'       => array( 'Meta-ExternalAgent', 'Meta',         __( 'Meta AI / LLaMA model training',           'quoted' ) ),
+			'CCBot'             => array( 'CCBot',             'Common Crawl', __( 'Open-data web crawl used for training',    'quoted' ) ),
+			'DiffBot'           => array( 'DiffBot',            'Diffbot',     __( 'Structured-data crawler',                 'quoted' ) ),
+			'Cohere'            => array( 'cohere-ai',          'Cohere',      __( 'Cohere model training',                   'quoted' ) ),
+			'YouBot'            => array( 'YouBot',             'You.com',     __( 'You.com search and AI assistant',         'quoted' ) ),
 		);
 	}
 

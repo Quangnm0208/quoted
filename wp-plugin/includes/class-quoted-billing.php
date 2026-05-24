@@ -73,8 +73,11 @@ class Quoted_Billing {
 	}
 
 	/**
-	 * True when both tier variants are configured. Used to hide the
-	 * Upgrade page entirely on a partially-configured install.
+	 * True when at least one tier variant is configured. Used to enable
+	 * the Upgrade page once the operator has wired any real Lemon Squeezy
+	 * variant. A partial config (only Solo or only Pro+ ready) is still
+	 * good enough to show the Plans page — disabled buttons handle the
+	 * unconfigured tier gracefully at render time.
 	 */
 	public static function is_configured() {
 		return self::buy_url( 'solo' ) !== '' || self::buy_url( 'pro_plus' ) !== '';

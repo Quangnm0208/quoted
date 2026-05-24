@@ -28,13 +28,23 @@ class Quoted_Activator {
 		}
 
 		// Hard requirement: DOMDocument (libxml). Used by the Markdown
-		// serializer. Some minimal Docker WP images skip libxml.
+		// serializer to clean HTML on the per-post REST endpoint. Some
+		// minimal Docker WP images / hardened hosts skip libxml entirely;
+		// without it the plugin would 500 on any /wp-json/quoted/v1/llm/*
+		// request. Bail out of activation with a clear, actionable error.
 		if ( ! class_exists( 'DOMDocument' ) ) {
 			deactivate_plugins( plugin_basename( QUOTED_PLUGIN_FILE ) );
 			wp_die(
-				esc_html__( 'Quoted requires the PHP libxml extension (the DOMDocument class). Your server is missing it. Ask your host to enable libxml-dom or install the php-xml package.', 'quoted' ),
+				wp_kses(
+					sprintf(
+						/* translators: %s: PHP extension package name */
+						__( '<strong>Quoted cannot be activated.</strong> The plugin requires the PHP libxml extension (the <code>DOMDocument</code> class) to render clean Markdown for AI crawlers. Your server is missing it. Ask your host to enable <code>%s</code>, or install the <code>php-xml</code> package on a self-hosted server, then try activating again.', 'quoted' ),
+						'libxml-dom'
+					),
+					array( 'strong' => array(), 'code' => array() )
+				),
 				esc_html__( 'Quoted — missing PHP extension', 'quoted' ),
-				array( 'back_link' => true )
+				array( 'back_link' => true, 'response' => 200 )
 			);
 		}
 
@@ -95,23 +105,34 @@ class Quoted_Activator {
 			'quoted_plan'                 => 'free',
 			'quoted_variant_name'         => '',
 			'quoted_customer_email'       => '',
-			// Onboarding state.
-			'quoted_onboarded'            => false,
+			// Onboarding state — start "onboarded" since v0.4.0 ships
+			// zero-click defaults; the Setup wizard becomes optional polish.
+			'quoted_onboarded'            => true,
 			// BYO API keys for Pro features.
 			'quoted_perplexity_api_key'   => '',
 			'quoted_tavily_api_key'       => '',
 			// AI Crawler Allowlist — empty means "all bots allowed", which is
 			// the only safe default. Operator opts into blocks explicitly.
 			'quoted_bot_allowlist'        => array(),
+			// llms.txt — enabled by default, posts + pages included, no excludes.
+			'quoted_llmstxt_enabled'          => true,
+			'quoted_llmstxt_include_posts'    => true,
+			'quoted_llmstxt_include_pages'    => true,
+			'quoted_llmstxt_include_products' => false,
+			'quoted_llmstxt_summary'          => '',
+			'quoted_llmstxt_excluded'         => array(),
 			// Schema engine — on by default; mode 'auto' defers Article to
 			// any active SEO plugin to avoid duplicate JSON-LD.
 			'quoted_schema_enabled'       => true,
+			'quoted_schema_faq'           => true,
 			'quoted_schema_mode'          => 'auto', // 'auto' | 'always' | 'never'
 			// Privacy / behaviour toggles.
 			'quoted_hash_ips'             => true,
 			'quoted_disable_logging'      => false,
 			'quoted_show_badge'           => true,
 			'quoted_trust_proxy'          => false,
+			'quoted_uninstall_purge'      => false,
+			'quoted_retention_days'       => 7,
 		);
 
 		foreach ( $defaults as $key => $value ) {

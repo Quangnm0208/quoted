@@ -73,20 +73,18 @@ class Quoted_Public {
 	}
 
 	/**
-	 * Render "Powered by Quoted" badge in footer (free tier only).
+	 * Render "Powered by Quoted" badge in footer.
+	 *
+	 * Rules (deterministic — single source of truth for badge visibility):
+	 *   - Free / unlicensed install   -> ALWAYS render. Badge is mandatory
+	 *                                    for the Free tier, regardless of any
+	 *                                    quoted_show_badge value.
+	 *   - Paid plan + show toggle ON  -> render.
+	 *   - Paid plan + show toggle OFF -> hide (removing the badge is a
+	 *                                    Pro perk).
 	 */
 	public function render_powered_by_badge() {
-		$plan = get_option( 'quoted_plan', 'free' );
-		$show = get_option( 'quoted_show_badge', true );
-
-		// On free tier, badge is mandatory.
-		if ( $plan !== 'free' && ! $show ) {
-			return;
-		}
-
-		// Only render if connected.
-		$license = new Quoted_License();
-		if ( ! $license->is_connected() ) {
+		if ( ! self::should_render_badge() ) {
 			return;
 		}
 
@@ -94,6 +92,25 @@ class Quoted_Public {
 		echo 'AI-readable via ';
 		echo '<a href="https://quotedeasy.com" target="_blank" rel="noopener" style="color:#666;">Quoted</a>';
 		echo '</div>';
+	}
+
+	/**
+	 * Centralized badge-visibility decision.
+	 *
+	 * Kept as a public static so any caller (REST endpoint, future block,
+	 * preview tooling) can ask the same question without re-implementing
+	 * the rules above.
+	 */
+	public static function should_render_badge() {
+		$plan = Quoted_License::current_plan(); // never trusts a stale option
+		$show = (bool) get_option( 'quoted_show_badge', true );
+
+		// Free / unlicensed sites must show the badge.
+		if ( $plan === 'free' ) {
+			return true;
+		}
+		// Paid sites honor the toggle.
+		return $show;
 	}
 
 	/**

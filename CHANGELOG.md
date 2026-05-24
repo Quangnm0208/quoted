@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-24
+
+### Admin UI restructure — match Quoted brand spec v1.0
+
+**Maintainer:** Nguyễn Mạnh Quang &lt;quangnm0208@gmail.com&gt;
+
+Ships the 8-page admin matching the official mockups: Dashboard, Setup,
+llms.txt, Crawler controls, Schema, Privacy, Plans & billing, and a new
+Brand identity page. Sub-nav tab strip on every page (logo + version +
+Docs/Support shortcuts). Self-contained `q-*` CSS component library
+scoped to plugin pages — no leakage into WP core or other plugins.
+
+#### Added — Pages
+
+- `admin/partials/setup.php` — 4-step optional wizard (Welcome → Generate llms.txt → Markdown endpoints → Done)
+- `admin/partials/llmstxt.php` — Settings / Preview / Excluded URLs tabs
+- `admin/partials/crawlers.php` — stats + filter + per-bot table with Operator + Purpose columns and Allow/Block toggle, "Copy robots.txt"
+- `admin/partials/schema.php` — Article mode radio cards + Conflict detection panel + FAQ toggle
+- `admin/partials/privacy.php` — bot tracking toggles + data flow card + retention dropdown + "Clear bot log now" + uninstall purge toggle
+- `admin/partials/brand-identity.php` — color palette swatches + logo files + type scale + component samples
+
+#### Changed
+
+- `admin/partials/dashboard.php` rewritten: AI Distribution Score gauge + 3-stat strip; 5 status cards (llms.txt / Markdown / Schema / Crawlers / Privacy); Top crawlers list with bar viz; Recent crawls feed with pulse-dot for newest; conditional Next-action callout
+- `admin/partials/billing-page.php` rewritten: Free / Solo / Agency tier cards, monthly/yearly toggle, Lemon Squeezy direct buy URLs with disabled state when not configured
+- `admin/class-quoted-admin.php` — 8 submenu registrations, sub-nav helper, icon set (24 stroke icons), split save handlers
+- `admin/css/quoted-admin.css` — full repaint as `q-*` component library (Btn / Badge / Alert / Card / Toggle / SegRadio / CopyField / StatusCard / PageHeader / Field), all tokens scoped to `.quoted-page`
+- `admin/js/quoted-admin.js` — new dashboard data renderer, tab switcher, copy field, segmented filter, score gauge canvas
+- `includes/class-quoted-bot-detector.php::bot_metadata()` — extended to `[name, operator, purpose]` for the Crawler controls table
+- `includes/class-quoted-llms-txt.php` — honors new options: content type filter (posts / pages / WooCommerce products), custom site summary, excluded URLs list
+- `includes/class-quoted-activator.php` — defaults set for new options; defaults `quoted_onboarded` to `true` for zero-click setup
+- `includes/class-quoted-billing.php` — comment fixed to match `OR` semantics of `is_configured()`
+- `public/class-quoted-public.php` — `should_render_badge()` centralized; Free/unlicensed sites always show the badge (deterministic)
+- `wp-plugin/readme.txt` — privacy wording corrected to accurately describe raw-IP behavior when hashing is off
+- `wp-plugin/quoted.php` — Version 0.3.0 → 0.4.0; QUOTED_VERSION bumped
+
+#### Removed
+
+- `admin/partials/onboarding.php` — superseded by `setup.php`
+- `admin/partials/settings.php` — superseded by separate pages; legacy URL redirects to `?page=quoted-crawlers`
+
+#### Notes
+
+The Setup wizard is now optional polish — defaults are sensible and the
+plugin works out-of-box. Brand identity is a reference page (read-only)
+intended for documentation purposes.
+
 ## [0.3.0] — 2026-05-24
 
 ### Brand identity refresh — admin UI

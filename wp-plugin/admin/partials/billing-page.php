@@ -1,6 +1,7 @@
 <?php
 /**
- * Upgrade / Billing page — 3 pricing tiers + direct Lemon Squeezy buy URLs.
+ * Plans & billing — Free / Solo / Agency tiers per Quoted brand spec.
+ * Direct Lemon Squeezy hosted checkout URLs (no AJAX).
  *
  * @package Quoted
  */
@@ -13,213 +14,190 @@ $current_plan = Quoted_License::current_plan();
 $license      = new Quoted_License();
 $is_connected = $license->is_connected();
 
+$cycle = isset( $_GET['cycle'] ) && $_GET['cycle'] === 'monthly' ? 'monthly' : 'yearly';
+
 $solo_url     = Quoted_Billing::buy_url( 'solo' );
 $pro_plus_url = Quoted_Billing::buy_url( 'pro_plus' );
 $portal_url   = Quoted_Billing::customer_portal_url();
+$configured   = Quoted_Billing::is_configured();
+
+$plans = array(
+	array(
+		'key'      => 'free',
+		'name'     => __( 'Free', 'quoted' ),
+		'tagline'  => __( 'For starting sites.', 'quoted' ),
+		'monthly'  => 0,
+		'yearly'   => 0,
+		'features' => array(
+			__( 'AI bot tracking',                    'quoted' ),
+			__( 'llms.txt up to 50 posts',            'quoted' ),
+			__( 'Markdown endpoints',                 'quoted' ),
+			__( 'Basic Article + FAQ schema',         'quoted' ),
+			__( 'AI crawler controls',                'quoted' ),
+			__( '7 days local bot history',           'quoted' ),
+		),
+		'cta'      => __( 'Current plan', 'quoted' ),
+		'highlight'=> false,
+		'is_current' => $current_plan === 'free',
+		'url'      => null,
+	),
+	array(
+		'key'      => 'solo',
+		'name'     => __( 'Solo', 'quoted' ),
+		'tagline'  => __( 'For one site you care about.', 'quoted' ),
+		'monthly'  => 12,
+		'yearly'   => 9,
+		'features' => array(
+			__( 'Everything in Free',                 'quoted' ),
+			__( 'Unlimited posts in llms.txt',        'quoted' ),
+			__( '30 days local bot history',          'quoted' ),
+			__( 'Citation testing (Pro feature)',     'quoted' ),
+			__( 'Live AI test (Pro feature)',         'quoted' ),
+			__( 'BYO API key',                        'quoted' ),
+			__( 'Remove footer badge',                'quoted' ),
+			__( 'Up to 5 sites',                      'quoted' ),
+		),
+		'cta'      => __( 'Upgrade to Solo', 'quoted' ),
+		'highlight'=> true,
+		'is_current' => $current_plan === 'solo',
+		'url'      => $solo_url,
+	),
+	array(
+		'key'      => 'pro_plus',
+		'name'     => __( 'Agency', 'quoted' ),
+		'tagline'  => __( 'For teams managing many sites.', 'quoted' ),
+		'monthly'  => 39,
+		'yearly'   => 29,
+		'features' => array(
+			__( 'Everything in Solo',                 'quoted' ),
+			__( 'Multi-site usage',                   'quoted' ),
+			__( 'Client reports',                     'quoted' ),
+			__( 'CSV export',                         'quoted' ),
+			__( '90 days local bot history',          'quoted' ),
+			__( 'Priority support',                   'quoted' ),
+			__( 'Agency dashboard (coming)',          'quoted' ),
+		),
+		'cta'      => __( 'Upgrade to Agency', 'quoted' ),
+		'highlight'=> false,
+		'is_current' => $current_plan === 'pro_plus',
+		'url'      => $pro_plus_url,
+	),
+);
 ?>
-<div class="wrap quoted-billing-page quoted-billing">
+<div class="wrap quoted-page quoted-billing-page">
+	<?php Quoted_Admin::render_subnav( 'quoted-billing' ); ?>
 
-	<div class="quoted-header">
-		<div class="quoted-header-brand">
-			<img
-				src="<?php echo esc_url( plugin_dir_url( QUOTED_PLUGIN_FILE ) . 'admin/images/logo-mark.svg' ); ?>"
-				alt=""
-				class="quoted-logo-mark"
-				width="32"
-				height="32"
-			/>
-			<div>
-				<h1><?php esc_html_e( 'Upgrade Quoted', 'quoted' ); ?></h1>
-				<p class="subtitle"><?php esc_html_e( 'Pick the plan that fits your site. Billing handled securely by Lemon Squeezy.', 'quoted' ); ?></p>
-			</div>
-		</div>
-	</div>
+	<div class="q-page-body">
+		<div class="q-page-inner">
 
-	<?php if ( ! Quoted_Billing::is_configured() ) : ?>
-		<div class="notice notice-warning">
-			<p>
-				<strong><?php esc_html_e( 'Plugin not fully configured.', 'quoted' ); ?></strong>
-				<?php esc_html_e( 'The Lemon Squeezy store / variant IDs in quoted.php still hold placeholder values. Buy buttons are disabled until those constants are updated.', 'quoted' ); ?>
-			</p>
-		</div>
-	<?php endif; ?>
-
-	<!-- Current plan badge -->
-	<div class="quoted-current-plan-card">
-		<div class="quoted-current-plan-label">
-			<?php esc_html_e( 'Your current plan:', 'quoted' ); ?>
-		</div>
-		<div class="quoted-current-plan-value">
-			<span class="quoted-plan-badge plan-<?php echo esc_attr( $current_plan ); ?>">
-				<?php echo esc_html( strtoupper( str_replace( '_', ' ', $current_plan ) ) ); ?>
-			</span>
-		</div>
-
-		<?php if ( $current_plan !== 'free' && $is_connected ) : ?>
-			<div class="quoted-current-plan-actions">
-				<a href="<?php echo esc_url( $portal_url ); ?>" target="_blank" rel="noopener" class="button">
-					<?php esc_html_e( 'Manage subscription on Lemon Squeezy ↗', 'quoted' ); ?>
-				</a>
-				<span class="description">
-					<?php esc_html_e( '(Update card, cancel, view invoices)', 'quoted' ); ?>
-				</span>
-			</div>
-		<?php endif; ?>
-	</div>
-
-	<!-- Pricing tiers -->
-	<div class="quoted-pricing-grid">
-
-		<!-- FREE -->
-		<div class="quoted-pricing-card <?php echo $current_plan === 'free' ? 'current' : ''; ?>">
-			<div class="quoted-pricing-header">
-				<h2><?php esc_html_e( 'Free', 'quoted' ); ?></h2>
-				<div class="quoted-price">
-					<span class="amount">$0</span>
-					<span class="period">/<?php esc_html_e( 'forever', 'quoted' ); ?></span>
+			<div class="q-page-header">
+				<div class="q-page-header__text">
+					<h1><?php esc_html_e( 'Plans & billing', 'quoted' ); ?></h1>
+					<p class="lede"><?php esc_html_e( 'Quoted is free to install. Pro plans unlock unlimited content, longer history, and future citation testing.', 'quoted' ); ?></p>
+				</div>
+				<div class="q-page-header__actions">
+					<div class="q-seg">
+						<a href="<?php echo esc_url( add_query_arg( 'cycle', 'monthly', admin_url( 'admin.php?page=quoted-billing' ) ) ); ?>" class="q-seg__btn <?php echo $cycle === 'monthly' ? 'is-active' : ''; ?>" style="text-decoration:none;"><?php esc_html_e( 'Monthly', 'quoted' ); ?></a>
+						<a href="<?php echo esc_url( add_query_arg( 'cycle', 'yearly', admin_url( 'admin.php?page=quoted-billing' ) ) ); ?>" class="q-seg__btn <?php echo $cycle === 'yearly' ? 'is-active' : ''; ?>" style="text-decoration:none;"><?php esc_html_e( 'Yearly · save 25%', 'quoted' ); ?></a>
+					</div>
 				</div>
 			</div>
-			<ul class="quoted-features">
-				<li>✓ <?php esc_html_e( 'Up to 50 posts in llms.txt', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( '7 days of local bot history', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'AI Distribution Score (local)', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'llms.txt auto-generation', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'Markdown endpoint per post', 'quoted' ); ?></li>
-				<li class="muted">— <?php esc_html_e( '"Powered by Quoted" badge in footer', 'quoted' ); ?></li>
-			</ul>
-			<div class="quoted-pricing-cta">
-				<?php if ( $current_plan === 'free' ) : ?>
-					<span class="quoted-current-label"><?php esc_html_e( 'Current plan', 'quoted' ); ?></span>
-				<?php else : ?>
-					<span class="description"><?php esc_html_e( 'Cancel your paid plan to revert to Free.', 'quoted' ); ?></span>
-				<?php endif; ?>
-			</div>
-		</div>
 
-		<!-- SOLO $19 -->
-		<div class="quoted-pricing-card featured <?php echo $current_plan === 'solo' ? 'current' : ''; ?>">
-			<div class="quoted-pricing-badge"><?php esc_html_e( 'MOST POPULAR', 'quoted' ); ?></div>
-			<div class="quoted-pricing-header">
-				<h2><?php esc_html_e( 'Solo', 'quoted' ); ?></h2>
-				<div class="quoted-price">
-					<span class="amount">$19</span>
-					<span class="period">/<?php esc_html_e( 'month', 'quoted' ); ?></span>
+			<?php settings_errors( 'quoted' ); ?>
+
+			<?php if ( ! $configured ) : ?>
+				<div class="q-alert q-alert--warning">
+					<div class="q-alert__body">
+						<strong class="q-alert__title"><?php esc_html_e( 'Plugin not yet configured for paid plans.', 'quoted' ); ?></strong>
+						<?php esc_html_e( 'The Lemon Squeezy store and variant IDs in quoted.php still hold placeholder values. Buy buttons are disabled until those constants are updated.', 'quoted' ); ?>
+					</div>
 				</div>
-				<p class="quoted-billed">
-					<?php esc_html_e( 'Billed monthly · Cancel anytime', 'quoted' ); ?>
-				</p>
-			</div>
-			<ul class="quoted-features">
-				<li>✓ <strong><?php esc_html_e( 'Unlimited posts in llms.txt', 'quoted' ); ?></strong></li>
-				<li>✓ <strong><?php esc_html_e( '12 months of bot history', 'quoted' ); ?></strong></li>
-				<li>✓ <strong><?php esc_html_e( 'Citation tracking', 'quoted' ); ?></strong> <?php esc_html_e( '(BYO Perplexity key)', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'Live AI Test', 'quoted' ); ?> <?php esc_html_e( '(BYO key)', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'Per-category configuration', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'Up to 5 sites per license', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'No badge in footer', 'quoted' ); ?></li>
-			</ul>
-			<div class="quoted-pricing-cta">
-				<?php if ( $current_plan === 'solo' ) : ?>
-					<span class="quoted-current-label"><?php esc_html_e( 'Current plan', 'quoted' ); ?></span>
-				<?php elseif ( ! empty( $solo_url ) ) : ?>
-					<a href="<?php echo esc_url( $solo_url ); ?>"
-					   class="button button-primary button-hero"
-					   target="_blank"
-					   rel="noopener">
+			<?php endif; ?>
+
+			<!-- License activate / deactivate form (only when configured) -->
+			<?php if ( $configured ) : ?>
+				<div class="q-card" style="margin-bottom:16px;">
+					<div class="q-section-title">
+						<h2><?php esc_html_e( 'License', 'quoted' ); ?></h2>
+						<p class="hint">
+							<?php
+							if ( $is_connected ) {
+								printf(
+									/* translators: %s: plan name */
+									esc_html__( 'Current plan: %s. Manage seats and billing in the Lemon Squeezy portal.', 'quoted' ),
+									'<strong>' . esc_html( ucfirst( str_replace( '_', ' ', $current_plan ) ) ) . '</strong>'
+								);
+							} else {
+								esc_html_e( 'Paste a license key from your Lemon Squeezy purchase email.', 'quoted' );
+							}
+							?>
+						</p>
+					</div>
+					<form method="post" action="" style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+						<?php wp_nonce_field( 'quoted_license_action' ); ?>
+						<?php if ( $is_connected ) : ?>
+							<a href="<?php echo esc_url( $portal_url ); ?>" target="_blank" rel="noopener noreferrer" class="q-btn q-btn--secondary"><?php esc_html_e( 'Open customer portal', 'quoted' ); ?></a>
+							<button type="submit" name="quoted_license_deactivate" class="q-btn q-btn--ghost"><?php esc_html_e( 'Deactivate license', 'quoted' ); ?></button>
+						<?php else : ?>
+							<input type="text" name="quoted_license_key" class="q-input q-input--mono" placeholder="qtd_live_..." style="max-width:340px;" required />
+							<button type="submit" name="quoted_license_activate" class="q-btn q-btn--primary"><?php esc_html_e( 'Activate', 'quoted' ); ?></button>
+						<?php endif; ?>
+					</form>
+				</div>
+			<?php endif; ?>
+
+			<div class="q-grid q-grid--3">
+				<?php foreach ( $plans as $p ) : ?>
+					<div class="q-plan-card <?php echo $p['highlight'] ? 'is-highlight' : ''; ?>">
+						<?php if ( $p['highlight'] ) : ?>
+							<div class="q-plan-card__pop"><?php esc_html_e( 'Most popular', 'quoted' ); ?></div>
+						<?php endif; ?>
+
+						<div class="q-plan-card__name"><?php echo esc_html( $p['name'] ); ?></div>
+						<div class="q-plan-card__tagline"><?php echo esc_html( $p['tagline'] ); ?></div>
+
+						<div class="q-plan-card__price">
+							<span class="num">$<?php echo (int) $p[ $cycle ]; ?></span>
+							<span class="unit"><?php echo $p['monthly'] === 0 ? esc_html__( 'forever', 'quoted' ) : esc_html__( '/ site / mo', 'quoted' ); ?></span>
+						</div>
+
 						<?php
-						echo $current_plan === 'pro_plus'
-							? esc_html__( 'Switch to Solo ↗', 'quoted' )
-							: esc_html__( 'Upgrade to Solo ↗', 'quoted' );
+						$disabled = $p['is_current'] || ( $p['key'] !== 'free' && empty( $p['url'] ) );
+						$btn_class = $p['highlight'] ? 'q-btn--primary' : 'q-btn--secondary';
+						$btn_label = $p['is_current'] ? __( 'Current plan', 'quoted' ) : $p['cta'];
+						if ( ! $disabled && $p['url'] ) :
 						?>
-					</a>
-				<?php else : ?>
-					<button class="button button-primary" disabled>
-						<?php esc_html_e( 'Not configured', 'quoted' ); ?>
-					</button>
-				<?php endif; ?>
-			</div>
-		</div>
+							<a href="<?php echo esc_url( $p['url'] ); ?>" target="_blank" rel="noopener noreferrer" class="q-btn <?php echo esc_attr( $btn_class ); ?> q-btn--full">
+								<?php echo esc_html( $btn_label ); ?>
+							</a>
+						<?php else : ?>
+							<span class="q-btn <?php echo esc_attr( $btn_class ); ?> q-btn--full is-disabled">
+								<?php echo esc_html( $disabled && $p['key'] !== 'free' && ! $p['is_current'] ? __( 'Not configured', 'quoted' ) : $btn_label ); ?>
+							</span>
+						<?php endif; ?>
 
-		<!-- PRO+ $39 -->
-		<div class="quoted-pricing-card <?php echo $current_plan === 'pro_plus' ? 'current' : ''; ?>">
-			<div class="quoted-pricing-header">
-				<h2><?php esc_html_e( 'Pro+', 'quoted' ); ?></h2>
-				<div class="quoted-price">
-					<span class="amount">$39</span>
-					<span class="period">/<?php esc_html_e( 'month', 'quoted' ); ?></span>
+						<ul class="q-plan-card__features">
+							<?php foreach ( $p['features'] as $f ) : ?>
+								<li><?php Quoted_Admin::icon( 'check', 14 ); ?><span><?php echo esc_html( $f ); ?></span></li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="q-mt-4">
+				<div class="q-alert q-alert--neutral">
+					<div class="q-alert__icon"><?php Quoted_Admin::icon( 'lock', 15 ); ?></div>
+					<div class="q-alert__body">
+						<?php
+						echo wp_kses(
+							__( 'Billing is handled by <strong>Lemon Squeezy</strong>. Citation testing and Live AI test will use <strong>your own API keys</strong> — Quoted does not proxy your queries.', 'quoted' ),
+							array( 'strong' => array() )
+						);
+						?>
+					</div>
 				</div>
-				<p class="quoted-billed">
-					<?php esc_html_e( 'Billed monthly · Cancel anytime', 'quoted' ); ?>
-				</p>
-			</div>
-			<ul class="quoted-features">
-				<li>✓ <?php esc_html_e( 'Everything in Solo', 'quoted' ); ?></li>
-				<li>✓ <strong><?php esc_html_e( 'Niche benchmark', 'quoted' ); ?></strong> <?php esc_html_e( '(BYO key)', 'quoted' ); ?></li>
-				<li>✓ <strong><?php esc_html_e( 'Priority support (24h SLA)', 'quoted' ); ?></strong></li>
-				<li>✓ <?php esc_html_e( 'Custom citation prompts', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'Bot whitelist / blocklist', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'Up to 30 sites per license', 'quoted' ); ?></li>
-				<li>✓ <?php esc_html_e( 'White-label option', 'quoted' ); ?></li>
-			</ul>
-			<div class="quoted-pricing-cta">
-				<?php if ( $current_plan === 'pro_plus' ) : ?>
-					<span class="quoted-current-label"><?php esc_html_e( 'Current plan', 'quoted' ); ?></span>
-				<?php elseif ( ! empty( $pro_plus_url ) ) : ?>
-					<a href="<?php echo esc_url( $pro_plus_url ); ?>"
-					   class="button button-primary button-hero"
-					   target="_blank"
-					   rel="noopener">
-						<?php esc_html_e( 'Upgrade to Pro+ ↗', 'quoted' ); ?>
-					</a>
-				<?php else : ?>
-					<button class="button button-primary" disabled>
-						<?php esc_html_e( 'Not configured', 'quoted' ); ?>
-					</button>
-				<?php endif; ?>
 			</div>
 		</div>
-
 	</div>
-
-	<!-- License key entry — for customers who already bought -->
-	<div class="quoted-license-entry">
-		<h2><?php esc_html_e( 'Already have a license key?', 'quoted' ); ?></h2>
-		<p class="description">
-			<?php esc_html_e( 'After completing checkout, Lemon Squeezy sent you a license key by email. Paste it into Settings → Connection → License key.', 'quoted' ); ?>
-		</p>
-		<p>
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=quoted-settings' ) ); ?>" class="button">
-				<?php esc_html_e( 'Go to Settings →', 'quoted' ); ?>
-			</a>
-		</p>
-	</div>
-
-	<!-- Trust signals -->
-	<div class="quoted-trust">
-		<div class="quoted-trust-item">
-			<strong>🔒 <?php esc_html_e( 'Secure payment', 'quoted' ); ?></strong>
-			<small><?php esc_html_e( 'Powered by Lemon Squeezy. SSL encrypted. PCI compliant.', 'quoted' ); ?></small>
-		</div>
-		<div class="quoted-trust-item">
-			<strong>💸 <?php esc_html_e( '14-day money-back', 'quoted' ); ?></strong>
-			<small><?php esc_html_e( 'Not satisfied? Full refund within 14 days. No questions asked.', 'quoted' ); ?></small>
-		</div>
-		<div class="quoted-trust-item">
-			<strong>📄 <?php esc_html_e( 'No commitment', 'quoted' ); ?></strong>
-			<small><?php esc_html_e( 'Cancel anytime. Keep access until end of paid period.', 'quoted' ); ?></small>
-		</div>
-		<div class="quoted-trust-item">
-			<strong>🌍 <?php esc_html_e( 'Global tax handled', 'quoted' ); ?></strong>
-			<small><?php esc_html_e( 'VAT, GST, sales tax — all calculated and remitted for you.', 'quoted' ); ?></small>
-		</div>
-	</div>
-
-	<div class="quoted-footer-info">
-		<p>
-			<?php esc_html_e( 'Payments processed by', 'quoted' ); ?>
-			<a href="https://lemonsqueezy.com" target="_blank" rel="noopener">Lemon Squeezy</a>
-			(<?php esc_html_e( 'Merchant of Record', 'quoted' ); ?>).
-		</p>
-	</div>
-
 </div>
