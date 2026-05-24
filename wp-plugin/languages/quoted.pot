@@ -2,9 +2,9 @@
 # This file is distributed under the GPL-2.0-or-later license.
 msgid ""
 msgstr ""
-"Project-Id-Version: Quoted 0.2.0\n"
+"Project-Id-Version: Quoted 0.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/quoted\n"
-"POT-Creation-Date: 2026-05-23T00:00:00+00:00\n"
+"POT-Creation-Date: 2026-05-24T00:00:00+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -36,46 +36,61 @@ msgctxt ""
 msgid "Nguyễn Mạnh Quang"
 msgstr ""
 
+#: admin/class-quoted-admin.php:101
+msgid "Activating..."
+msgstr ""
+
+#: admin/class-quoted-admin.php:102
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+#: admin/class-quoted-admin.php:103
+msgid "Done!"
+msgstr ""
+
 #: admin/class-quoted-admin.php:16
 #: admin/class-quoted-admin.php:17
 msgid "Quoted"
 msgstr ""
 
-#: admin/class-quoted-admin.php:178
+#: admin/class-quoted-admin.php:186
 msgid "License deactivated. This seat has been freed."
 msgstr ""
 
-#: admin/class-quoted-admin.php:196
+#: admin/class-quoted-admin.php:204
 msgid "License activated. Plan: %s."
 msgstr ""
 
-#: admin/class-quoted-admin.php:253
+#: admin/class-quoted-admin.php:261
 msgid "Settings saved."
 msgstr ""
 
 #: admin/class-quoted-admin.php:27
 #: admin/class-quoted-admin.php:28
-#: admin/class-quoted-admin.php:260
+#: admin/class-quoted-admin.php:268
 msgid "Dashboard"
 msgstr ""
 
-#: admin/class-quoted-admin.php:279
-#: admin/class-quoted-admin.php:307
-#: admin/class-quoted-admin.php:327
-#: admin/class-quoted-admin.php:356
+#: admin/class-quoted-admin.php:287
+#: admin/class-quoted-admin.php:315
+#: admin/class-quoted-admin.php:344
 #: admin/class-quoted-admin.php:471
 msgid "Unauthorized."
 msgstr ""
 
-#: admin/class-quoted-admin.php:314
-msgid "Please select a niche."
-msgstr ""
-
 #: admin/class-quoted-admin.php:36
 #: admin/class-quoted-admin.php:37
-#: admin/class-quoted-admin.php:261
-#: admin/partials/dashboard.php:108
+#: admin/class-quoted-admin.php:269
+#: admin/partials/dashboard.php:113
 msgid "Settings"
+msgstr ""
+
+#: admin/class-quoted-admin.php:432
+msgid "No AI bot visits in 7+ days — check your firewall"
+msgstr ""
+
+#: admin/class-quoted-admin.php:433
+msgid "ClaudeBot and GPTBot should have discovered /llms.txt by now. If you run Wordfence, Sucuri, or iThemes Security, their default WAF rules often block AI bot user-agents. Whitelist ClaudeBot, GPTBot, PerplexityBot, Google-Extended in your security plugin, or ask your host to allow them at the server level."
 msgstr ""
 
 #: admin/class-quoted-admin.php:438
@@ -94,35 +109,19 @@ msgstr ""
 msgid "Your llms.txt will only include the 50 most-recent posts on the Free tier. Upgrade to Solo for unlimited."
 msgstr ""
 
-#: admin/class-quoted-admin.php:45
-#: admin/class-quoted-admin.php:46
-msgid "Upgrade"
-msgstr ""
-
 #: admin/class-quoted-admin.php:478
 msgid "License deactivated."
 msgstr ""
 
-#: admin/class-quoted-admin.php:55
-#: admin/class-quoted-admin.php:137
-#: admin/class-quoted-admin.php:152
+#: admin/class-quoted-admin.php:49
+#: admin/class-quoted-admin.php:50
+msgid "Upgrade"
+msgstr ""
+
+#: admin/class-quoted-admin.php:60
+#: admin/class-quoted-admin.php:142
+#: admin/class-quoted-admin.php:157
 msgid "You do not have permission to access this page."
-msgstr ""
-
-#: admin/class-quoted-admin.php:96
-msgid "Connecting..."
-msgstr ""
-
-#: admin/class-quoted-admin.php:97
-msgid "Syncing posts..."
-msgstr ""
-
-#: admin/class-quoted-admin.php:98
-msgid "Something went wrong. Please try again."
-msgstr ""
-
-#: admin/class-quoted-admin.php:99
-msgid "Done!"
 msgstr ""
 
 #: admin/partials/billing-page.php:102
@@ -351,7 +350,7 @@ msgstr ""
 msgid "Billed monthly · Cancel anytime"
 msgstr ""
 
-#: admin/partials/dashboard.php:102
+#: admin/partials/dashboard.php:107
 msgid "AI sitemap: <a href=\"%1$s\" target=\"_blank\"><code>%1$s</code></a>"
 msgstr ""
 
@@ -374,8 +373,8 @@ msgstr ""
 #: admin/partials/dashboard.php:45
 #: admin/partials/dashboard.php:56
 #: admin/partials/dashboard.php:64
-#: admin/partials/dashboard.php:81
-#: admin/partials/dashboard.php:90
+#: admin/partials/dashboard.php:86
+#: admin/partials/dashboard.php:95
 msgid "Loading..."
 msgstr ""
 
@@ -395,495 +394,383 @@ msgstr ""
 msgid "Citations"
 msgstr ""
 
-#: admin/partials/dashboard.php:74
+#: admin/partials/dashboard.php:75
 msgid "Citation tracking arrives in the Solo plan. See exactly when ChatGPT, Claude, and Perplexity quote your content."
 msgstr ""
 
-#: admin/partials/dashboard.php:76
+#: admin/partials/dashboard.php:77
 msgid "Upgrade to Solo"
 msgstr ""
 
-#: admin/partials/dashboard.php:88
+#: admin/partials/dashboard.php:80
+msgid "Pro features coming soon."
+msgstr ""
+
+#: admin/partials/dashboard.php:81
+msgid "Citation tracking, Live AI Test, and Niche Benchmark are in active development. The Free tier (llms.txt, Markdown endpoints, bot detection, allowlist, schema) is fully functional."
+msgstr ""
+
+#: admin/partials/dashboard.php:93
 msgid "Posts synced"
 msgstr ""
 
-#: admin/partials/onboarding.php:109
-msgid "Activate"
+#: admin/partials/onboarding.php:102
+msgid "Step 3 — Preview what comes next"
 msgstr ""
 
-#: admin/partials/onboarding.php:114
-msgid "Or skip this step — Quoted Free works without a license. You can activate later in Settings."
+#: admin/partials/onboarding.php:103
+msgid "Once your site has been crawled, Pro will let you ask an AI a question about your content and see whether it cites you."
 msgstr ""
 
-#: admin/partials/onboarding.php:116
-msgid "Continue on the Free plan →"
-msgstr ""
-
-#: admin/partials/onboarding.php:124
-msgid "Don't have a license key yet? <a href='%s' target='_blank'>Get one free</a>."
-msgstr ""
-
-#: admin/partials/onboarding.php:133
-msgid "Step 2 — What does your site cover?"
-msgstr ""
-
-#: admin/partials/onboarding.php:134
-msgid "This tells Quoted which AI prompts to test you on later. Pick the closest match."
-msgstr ""
-
-#: admin/partials/onboarding.php:140
-msgid "Site niche"
-msgstr ""
-
-#: admin/partials/onboarding.php:144
-msgid "— Select —"
-msgstr ""
-
-#: admin/partials/onboarding.php:155
+#: admin/partials/onboarding.php:107
 msgid "Continue"
 msgstr ""
 
-#: admin/partials/onboarding.php:164
-msgid "Step 3 — Auto-scan your top posts"
+#: admin/partials/onboarding.php:112
+msgid "Live AI Test arrives with Pro."
 msgstr ""
 
-#: admin/partials/onboarding.php:165
-msgid "We'll scan your 20 most-recent posts and prepare them for AI bots. Takes about 30 seconds."
-msgstr ""
-
-#: admin/partials/onboarding.php:169
-msgid "Auto-scan now"
-msgstr ""
-
-#: admin/partials/onboarding.php:177
-msgid "Step 4 — See AI read your site"
-msgstr ""
-
-#: admin/partials/onboarding.php:178
-msgid "Quoted will ask an AI a question about your niche and show you the live answer."
-msgstr ""
-
-#: admin/partials/onboarding.php:182
-msgid "Test it live"
-msgstr ""
-
-#: admin/partials/onboarding.php:192
-msgid "Live AI Test will arrive in the next update."
-msgstr ""
-
-#: admin/partials/onboarding.php:193
+#: admin/partials/onboarding.php:113
 msgid "For now, ClaudeBot and GPTBot will start finding your llms.txt file within 24 hours. Your dashboard will show every visit."
 msgstr ""
 
-#: admin/partials/onboarding.php:201
+#: admin/partials/onboarding.php:121
 msgid "You're all set"
 msgstr ""
 
-#: admin/partials/onboarding.php:202
+#: admin/partials/onboarding.php:122
 msgid "Quoted is now monitoring your site. Check your dashboard daily to see AI bot visits."
 msgstr ""
 
-#: admin/partials/onboarding.php:206
+#: admin/partials/onboarding.php:126
 msgid "Go to dashboard"
 msgstr ""
 
-#: admin/partials/onboarding.php:211
+#: admin/partials/onboarding.php:131
 msgid "What's next:"
 msgstr ""
 
-#: admin/partials/onboarding.php:217
+#: admin/partials/onboarding.php:137
 msgid "Your AI sitemap is live at <a href=\"%1$s\" target=\"_blank\">%1$s</a>"
 msgstr ""
 
-#: admin/partials/onboarding.php:221
+#: admin/partials/onboarding.php:141
 msgid "AI bots will start crawling within 24 hours"
 msgstr ""
 
-#: admin/partials/onboarding.php:222
+#: admin/partials/onboarding.php:142
 msgid "Check the dashboard once a week to see which AI bots find you"
 msgstr ""
 
-#: admin/partials/onboarding.php:23
-msgid "Outdoor gear & hiking"
-msgstr ""
-
-#: admin/partials/onboarding.php:24
-msgid "Fitness & gym equipment"
-msgstr ""
-
-#: admin/partials/onboarding.php:25
-msgid "Supplements & nutrition"
-msgstr ""
-
-#: admin/partials/onboarding.php:26
-msgid "Cooking & recipes"
-msgstr ""
-
-#: admin/partials/onboarding.php:27
-msgid "Kitchen gadgets"
-msgstr ""
-
-#: admin/partials/onboarding.php:28
-msgid "Travel & destinations"
-msgstr ""
-
-#: admin/partials/onboarding.php:29
-msgid "Hotels & accommodation"
-msgstr ""
-
-#: admin/partials/onboarding.php:30
-msgid "Parenting"
-msgstr ""
-
-#: admin/partials/onboarding.php:31
-msgid "Baby gear"
-msgstr ""
-
-#: admin/partials/onboarding.php:32
-msgid "Personal finance"
-msgstr ""
-
-#: admin/partials/onboarding.php:33
-msgid "Investing"
-msgstr ""
-
-#: admin/partials/onboarding.php:34
-msgid "Crypto"
-msgstr ""
-
-#: admin/partials/onboarding.php:35
-msgid "Real estate"
-msgstr ""
-
-#: admin/partials/onboarding.php:36
-msgid "Software & SaaS reviews"
-msgstr ""
-
-#: admin/partials/onboarding.php:37
-msgid "Productivity tools"
-msgstr ""
-
-#: admin/partials/onboarding.php:38
-msgid "AI tools"
-msgstr ""
-
-#: admin/partials/onboarding.php:39
-msgid "Marketing"
-msgstr ""
-
-#: admin/partials/onboarding.php:40
-msgid "SEO"
-msgstr ""
-
-#: admin/partials/onboarding.php:41
-msgid "Web development"
-msgstr ""
-
-#: admin/partials/onboarding.php:42
-msgid "Gardening"
-msgstr ""
-
-#: admin/partials/onboarding.php:43
-msgid "Home improvement"
-msgstr ""
-
-#: admin/partials/onboarding.php:44
-msgid "Smart home"
-msgstr ""
-
-#: admin/partials/onboarding.php:45
-msgid "Pets"
-msgstr ""
-
-#: admin/partials/onboarding.php:46
-msgid "Automotive"
-msgstr ""
-
-#: admin/partials/onboarding.php:47
-msgid "EV / electric cars"
-msgstr ""
-
-#: admin/partials/onboarding.php:48
-msgid "Photography"
-msgstr ""
-
-#: admin/partials/onboarding.php:49
-msgid "Gaming"
-msgstr ""
-
-#: admin/partials/onboarding.php:50
-msgid "Book reviews"
-msgstr ""
-
-#: admin/partials/onboarding.php:51
-msgid "Online courses & education"
-msgstr ""
-
-#: admin/partials/onboarding.php:52
-msgid "Wellness & mental health"
-msgstr ""
-
-#: admin/partials/onboarding.php:53
-msgid "Other / general"
-msgstr ""
-
-#: admin/partials/onboarding.php:60
+#: admin/partials/onboarding.php:20
 msgid "Welcome to Quoted"
 msgstr ""
 
-#: admin/partials/onboarding.php:61
+#: admin/partials/onboarding.php:21
 msgid "Make your site AI-readable. See when ChatGPT, Claude, and Perplexity quote you."
 msgstr ""
 
-#: admin/partials/onboarding.php:66
-msgid "Connect"
+#: admin/partials/onboarding.php:26
+msgid "Start"
 msgstr ""
 
-#: admin/partials/onboarding.php:67
-msgid "Niche"
-msgstr ""
-
-#: admin/partials/onboarding.php:68
+#: admin/partials/onboarding.php:27
 msgid "Scan"
 msgstr ""
 
-#: admin/partials/onboarding.php:69
-msgid "Test"
+#: admin/partials/onboarding.php:28
+msgid "Preview"
 msgstr ""
 
-#: admin/partials/onboarding.php:70
+#: admin/partials/onboarding.php:29
 msgid "Done"
 msgstr ""
 
-#: admin/partials/onboarding.php:76
+#: admin/partials/onboarding.php:36
 msgid "Step 1 — Activate your license"
 msgstr ""
 
-#: admin/partials/onboarding.php:81
+#: admin/partials/onboarding.php:41
 msgid "Paste the license key Lemon Squeezy emailed you after checkout. Don't have one? %s"
 msgstr ""
 
-#: admin/partials/onboarding.php:82
-#: admin/partials/settings.php:71
+#: admin/partials/onboarding.php:42
+#: admin/partials/settings.php:74
 msgid "See pricing →"
 msgstr ""
 
-#: admin/partials/onboarding.php:91
-#: admin/partials/settings.php:51
+#: admin/partials/onboarding.php:51
+#: admin/partials/settings.php:54
 msgid "License key"
 msgstr ""
 
-#: admin/partials/settings.php:101
+#: admin/partials/onboarding.php:67
+msgid "Activate"
+msgstr ""
+
+#: admin/partials/onboarding.php:72
+msgid "Or skip this step — Quoted Free works without a license. You can activate later in Settings."
+msgstr ""
+
+#: admin/partials/onboarding.php:74
+msgid "Continue on the Free plan →"
+msgstr ""
+
+#: admin/partials/onboarding.php:78
+msgid "Welcome to Quoted Free"
+msgstr ""
+
+#: admin/partials/onboarding.php:79
+msgid "Your site is about to become AI-readable. The Free tier ships everything you need to start: llms.txt at /llms.txt, clean Markdown endpoints, AI bot detection, allowlist, schema markup."
+msgstr ""
+
+#: admin/partials/onboarding.php:80
+msgid "Pro features (citation tracking, Live AI Test, niche benchmark) are in active development. Free will always be free."
+msgstr ""
+
+#: admin/partials/onboarding.php:82
+msgid "Let's go →"
+msgstr ""
+
+#: admin/partials/onboarding.php:89
+msgid "Step 2 — Generate your AI sitemap"
+msgstr ""
+
+#: admin/partials/onboarding.php:90
+msgid "We'll build your llms.txt right now from your published posts. Takes about a second."
+msgstr ""
+
+#: admin/partials/onboarding.php:94
+msgid "Generate now"
+msgstr ""
+
+#: admin/partials/settings.php:102
+msgid "Expired"
+msgstr ""
+
+#: admin/partials/settings.php:104
 msgid "Disabled"
 msgstr ""
 
-#: admin/partials/settings.php:103
+#: admin/partials/settings.php:106
 msgid "Free plan"
 msgstr ""
 
-#: admin/partials/settings.php:108
+#: admin/partials/settings.php:111
 msgid "Plan"
 msgstr ""
 
-#: admin/partials/settings.php:112
+#: admin/partials/settings.php:115
 msgid "See plans →"
 msgstr ""
 
-#: admin/partials/settings.php:121
+#: admin/partials/settings.php:124
 msgid "Deactivate this license? You can re-activate any time using the same key."
 msgstr ""
 
-#: admin/partials/settings.php:122
+#: admin/partials/settings.php:125
 msgid "Deactivate license"
 msgstr ""
 
-#: admin/partials/settings.php:126
+#: admin/partials/settings.php:129
 msgid "Activate license"
 msgstr ""
 
-#: admin/partials/settings.php:140
+#: admin/partials/settings.php:145
 msgid "Pro feature API keys"
 msgstr ""
 
-#: admin/partials/settings.php:142
+#: admin/partials/settings.php:147
 msgid "Citation tracking and Live AI Test call third-party APIs. Bring your own keys — Quoted never proxies your queries through a backend, and your spend stays on your own provider account."
 msgstr ""
 
-#: admin/partials/settings.php:147
+#: admin/partials/settings.php:152
 msgid "Perplexity API key"
 msgstr ""
 
-#: admin/partials/settings.php:165
+#: admin/partials/settings.php:170
 msgid "Get one at %s. Stored locally, never sent to Quoted."
 msgstr ""
 
-#: admin/partials/settings.php:170
-#: admin/partials/settings.php:194
+#: admin/partials/settings.php:175
+#: admin/partials/settings.php:199
 msgid "Requires Solo or Pro+ license."
 msgstr ""
 
-#: admin/partials/settings.php:177
+#: admin/partials/settings.php:182
 msgid "Tavily API key"
 msgstr ""
 
-#: admin/partials/settings.php:192
+#: admin/partials/settings.php:197
 msgid "Optional alternative search-grounded LLM. Use either Perplexity or Tavily."
 msgstr ""
 
-#: admin/partials/settings.php:201
+#: admin/partials/settings.php:207
 msgid "Privacy"
 msgstr ""
 
-#: admin/partials/settings.php:204
+#: admin/partials/settings.php:210
 msgid "Hash IPs"
 msgstr ""
 
-#: admin/partials/settings.php:208
+#: admin/partials/settings.php:214
 msgid "Hash visitor IPs (SHA-256) before storing in the bot log"
 msgstr ""
 
-#: admin/partials/settings.php:210
+#: admin/partials/settings.php:216
 msgid "Recommended ON. With this on, raw IPs are never written to the database."
 msgstr ""
 
-#: admin/partials/settings.php:214
+#: admin/partials/settings.php:220
 msgid "Disable bot logging"
 msgstr ""
 
-#: admin/partials/settings.php:218
+#: admin/partials/settings.php:224
 msgid "Stop logging bot visits entirely (kills dashboard data)"
 msgstr ""
 
-#: admin/partials/settings.php:220
+#: admin/partials/settings.php:226
 msgid "Use this if you need a hard kill switch. You can re-enable any time."
 msgstr ""
 
-#: admin/partials/settings.php:224
+#: admin/partials/settings.php:230
 msgid "Trust proxy headers"
 msgstr ""
 
-#: admin/partials/settings.php:228
+#: admin/partials/settings.php:234
 msgid "Read client IP from CF-Connecting-IP / X-Forwarded-For (only enable if your site is behind Cloudflare or another trusted reverse proxy)."
 msgstr ""
 
-#: admin/partials/settings.php:230
+#: admin/partials/settings.php:236
 msgid "On a non-proxied install these headers are attacker-controlled. Leaving this off uses REMOTE_ADDR."
 msgstr ""
 
-#: admin/partials/settings.php:235
+#: admin/partials/settings.php:241
 msgid "AI crawler allowlist"
 msgstr ""
 
-#: admin/partials/settings.php:237
+#: admin/partials/settings.php:243
 msgid "Decide which AI bots are allowed to use your content. Allowed = bot gets the full page. Blocked = bot gets HTTP 403 and a Disallow rule in /robots.txt. Bots that respect robots.txt will stop crawling on their own; the 403 covers the ones that don't."
 msgstr ""
 
-#: admin/partials/settings.php:253
+#: admin/partials/settings.php:259
 msgid "Allow"
 msgstr ""
 
-#: admin/partials/settings.php:257
+#: admin/partials/settings.php:263
 msgid "Block"
 msgstr ""
 
-#: admin/partials/settings.php:264
+#: admin/partials/settings.php:270
 msgid "Schema markup"
 msgstr ""
 
-#: admin/partials/settings.php:266
+#: admin/partials/settings.php:272
 msgid "Quoted ships Article and FAQPage JSON-LD on single posts and pages. AI engines use schema to identify what each page is and which sections are quote-worthy."
 msgstr ""
 
-#: admin/partials/settings.php:270
+#: admin/partials/settings.php:276
 msgid "Enable schema output"
 msgstr ""
 
-#: admin/partials/settings.php:274
+#: admin/partials/settings.php:280
 msgid "Output Article + FAQPage JSON-LD on single posts and pages"
 msgstr ""
 
-#: admin/partials/settings.php:279
+#: admin/partials/settings.php:285
 msgid "Mode"
 msgstr ""
 
-#: admin/partials/settings.php:284
+#: admin/partials/settings.php:290
 msgid "Auto (recommended)"
 msgstr ""
 
-#: admin/partials/settings.php:289
+#: admin/partials/settings.php:295
 msgid "Detected %s — Article schema will be skipped to avoid duplicates. FAQ schema still emitted."
 msgstr ""
 
-#: admin/partials/settings.php:293
+#: admin/partials/settings.php:299
 msgid "No conflicting SEO plugin detected — both Article and FAQ schemas will be output."
 msgstr ""
 
-#: admin/partials/settings.php:298
+#: admin/partials/settings.php:304
 msgid "Always"
 msgstr ""
 
-#: admin/partials/settings.php:299
+#: admin/partials/settings.php:305
 msgid "Output our schema even if Yoast / Rank Math / SEOPress are active. May produce duplicate JSON-LD; verify with Google Rich Results test."
 msgstr ""
 
-#: admin/partials/settings.php:303
+#: admin/partials/settings.php:309
 msgid "Never"
 msgstr ""
 
-#: admin/partials/settings.php:304
+#: admin/partials/settings.php:310
 msgid "Suppress Article schema entirely. FAQ schema is still emitted from [faq] shortcodes and question-shaped headings — disable the master toggle above to suppress everything."
 msgstr ""
 
-#: admin/partials/settings.php:311
+#: admin/partials/settings.php:317
 msgid "Display"
 msgstr ""
 
-#: admin/partials/settings.php:314
+#: admin/partials/settings.php:320
 msgid "Powered-by badge"
 msgstr ""
 
-#: admin/partials/settings.php:324
+#: admin/partials/settings.php:330
 msgid "Show \"Powered by Quoted\" badge in site footer"
 msgstr ""
 
-#: admin/partials/settings.php:328
+#: admin/partials/settings.php:334
 msgid "Free plan: badge is required. Upgrade to Solo to remove."
 msgstr ""
 
-#: admin/partials/settings.php:40
+#: admin/partials/settings.php:42
 msgid "Quoted Settings"
 msgstr ""
 
-#: admin/partials/settings.php:43
+#: admin/partials/settings.php:46
 msgid "License"
 msgstr ""
 
-#: admin/partials/settings.php:66
+#: admin/partials/settings.php:69
 msgid "Currently active. Use \"Deactivate\" to free this seat and unbind the key from this site."
 msgstr ""
 
-#: admin/partials/settings.php:70
+#: admin/partials/settings.php:73
 msgid "Paste the UUID we emailed you after purchase. No license yet? %s"
 msgstr ""
 
-#: admin/partials/settings.php:79
+#: admin/partials/settings.php:82
 msgid "Status"
 msgstr ""
 
-#: admin/partials/settings.php:82
+#: admin/partials/settings.php:85
 msgid "Active"
 msgstr ""
 
-#: admin/partials/settings.php:90
+#: admin/partials/settings.php:93
 msgid "Renews / expires %s"
 msgstr ""
 
-#: admin/partials/settings.php:96
+#: admin/partials/settings.php:99
 msgid "Billed to:"
 msgstr ""
 
-#: admin/partials/settings.php:99
-msgid "Expired"
+#: includes/class-quoted-activator.php:24
+msgid "Quoted does not support multisite network activation. Activate it per-site instead. The plugin stores per-site bot crawl data and licenses are tied to a single domain."
+msgstr ""
+
+#: includes/class-quoted-activator.php:25
+msgid "Quoted — multisite network activation not supported"
+msgstr ""
+
+#: includes/class-quoted-activator.php:35
+msgid "Quoted requires the PHP libxml extension (the DOMDocument class). Your server is missing it. Ask your host to enable libxml-dom or install the php-xml package."
+msgstr ""
+
+#: includes/class-quoted-activator.php:36
+msgid "Quoted — missing PHP extension"
 msgstr ""
 
 #: includes/class-quoted-license.php:275
@@ -912,6 +799,18 @@ msgstr ""
 
 #: public/class-quoted-rest.php:53
 msgid "Post not found."
+msgstr ""
+
+#: quoted.php:146
+msgid "Quoted needs pretty permalinks"
+msgstr ""
+
+#: quoted.php:150
+msgid "your site is currently using \"Plain\" permalinks (e.g. ?p=123), so the AI sitemap at /llms.txt will 404. %s and pick any option other than \"Plain\"."
+msgstr ""
+
+#: quoted.php:151
+msgid "Go to Settings → Permalinks"
 msgstr ""
 
 #: quoted.php:58

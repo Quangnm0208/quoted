@@ -95,7 +95,8 @@ class Quoted_Activator {
 			'quoted_plan'                 => 'free',
 			'quoted_variant_name'         => '',
 			'quoted_customer_email'       => '',
-			// Onboarding state.
+			// Onboarding state. (The `quoted_niche` slug used pre-v0.3 is gone —
+			// it fed the OmniPlug backend's prompt-routing, which we removed.)
 			'quoted_onboarded'            => false,
 			// BYO API keys for Pro features.
 			'quoted_perplexity_api_key'   => '',

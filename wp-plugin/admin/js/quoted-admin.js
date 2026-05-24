@@ -70,43 +70,12 @@
 				});
 			});
 
-			// Step 2: Niche
-			$('#quoted-niche-form').on('submit', function (e) {
-				e.preventDefault();
-				var niche = $('#quoted-niche').val();
-				var $status = $('#quoted-niche-status');
-				var $btn = $('#quoted-niche-btn');
-
-				if (!niche) {
-					$status.addClass('error').text('Please select a niche.');
-					return;
-				}
-
-				$btn.prop('disabled', true);
-
-				$.post(QuotedAdmin.ajax_url, {
-					action: 'quoted_save_niche',
-					nonce: QuotedAdmin.nonce,
-					niche: niche
-				}).done(function (resp) {
-					if (resp.success) {
-						goToStep(3);
-					} else {
-						$status.addClass('error').text(QuotedAdmin.i18n.error_generic);
-						$btn.prop('disabled', false);
-					}
-				}).fail(function () {
-					$status.addClass('error').text(QuotedAdmin.i18n.error_generic);
-					$btn.prop('disabled', false);
-				});
-			});
-
-			// Step 3: Auto-scan
+			// Step 2: Generate llms.txt
 			$('#quoted-scan-btn').on('click', function () {
 				var $btn = $(this);
 				var $result = $('#quoted-scan-result');
 
-				$btn.prop('disabled', true).text(QuotedAdmin.i18n.syncing);
+				$btn.prop('disabled', true).text('Generating...');
 				$result.hide().empty();
 
 				$.post(QuotedAdmin.ajax_url, {
@@ -114,23 +83,23 @@
 					nonce: QuotedAdmin.nonce
 				}).done(function (resp) {
 					if (resp.success) {
-						var synced = (resp.data && resp.data.synced) || 0;
+						var count = (resp.data && resp.data.synced) || 0;
 						$result.html(
-							'<p><strong>✓ Synced ' + synced + ' posts.</strong></p>' +
+							'<p><strong>✓ Found ' + count + ' published posts.</strong></p>' +
 							'<p>Your AI sitemap is now live at <code>' + QuotedAdmin.site_url + '/llms.txt</code></p>'
 						).show();
-						setTimeout(function () { goToStep(4); }, 1500);
+						setTimeout(function () { goToStep(3); }, 1500);
 					} else {
-						$result.html('<p style="color:#d63638">Sync failed. Try again or check Settings.</p>').show();
-						$btn.prop('disabled', false).text('Auto-scan now');
+						$result.html('<p style="color:#d63638">Could not generate. Try again or check Settings.</p>').show();
+						$btn.prop('disabled', false).text('Generate now');
 					}
 				}).fail(function () {
-					$result.html('<p style="color:#d63638">Sync failed. Try again or check Settings.</p>').show();
-					$btn.prop('disabled', false).text('Auto-scan now');
+					$result.html('<p style="color:#d63638">Could not generate. Try again or check Settings.</p>').show();
+					$btn.prop('disabled', false).text('Generate now');
 				});
 			});
 
-			// Step 4: Live AI Test (Phase 0 stub)
+			// Step 3: Live AI Test preview (Pro stub)
 			$('#quoted-test-btn').on('click', function () {
 				var $btn = $(this);
 				var $result = $('#quoted-test-result');
@@ -138,8 +107,7 @@
 				$btn.prop('disabled', true);
 				$result.show();
 
-				// Auto-advance after showing the placeholder
-				setTimeout(function () { goToStep(5); }, 2500);
+				setTimeout(function () { goToStep(4); }, 1500);
 			});
 
 			function goToStep(stepNum) {

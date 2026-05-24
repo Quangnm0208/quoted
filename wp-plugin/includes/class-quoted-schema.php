@@ -208,6 +208,23 @@ class Quoted_Schema {
 	 * Returns an array of [ ['q' => '…', 'a' => '…'], … ] or empty array.
 	 */
 	private function extract_faqs( $post ) {
+		// Per-post cache. do_blocks() and the regex pass below are not free
+		// on long-form articles; without this, every page view of a post
+		// re-runs the whole thing. Invalidated by save_post via the existing
+		// Quoted_Rest::invalidate_post_cache() hook (it also drops the
+		// per-post markdown transient, so the cycle is one delete_post_meta).
+		static $request_cache = array();
+		if ( isset( $request_cache[ $post->ID ] ) ) {
+			return $request_cache[ $post->ID ];
+		}
+
+		$cache_key = 'quoted_faqs_' . md5( $post->ID . '|' . $post->post_modified_gmt );
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) {
+			$request_cache[ $post->ID ] = $cached;
+			return $cached;
+		}
+
 		$content = $post->post_content;
 		$pairs   = array();
 
@@ -224,7 +241,7 @@ class Quoted_Schema {
 
 		// Strategy 2 — H2/H3 ending in "?" followed by content.
 		if ( empty( $pairs ) ) {
-			$expanded = do_blocks( $content );
+			$expanded = function_exists( 'do_blocks' ) ? do_blocks( $content ) : $content;
 			if ( preg_match_all( '#<h[23][^>]*>([^<]*\?)\s*</h[23]>([\s\S]*?)(?=<h[23][^>]*>|$)#i', $expanded, $m ) ) {
 				$count = count( $m[1] );
 				for ( $i = 0; $i < $count; $i++ ) {
@@ -237,12 +254,14 @@ class Quoted_Schema {
 			}
 		}
 
-		// Cap at 20 pairs — Google ignores FAQ schema with more anyway, and
-		// massive Q&A blocks bloat the page weight.
+		// Cap at 20 pairs — Google ignores FAQ schema beyond that anyway.
 		if ( count( $pairs ) > 20 ) {
 			$pairs = array_slice( $pairs, 0, 20 );
 		}
 
+		// Cache for 12h. The save_post hook will short-circuit it sooner.
+		set_transient( $cache_key, $pairs, 12 * HOUR_IN_SECONDS );
+		$request_cache[ $post->ID ] = $pairs;
 		return $pairs;
 	}
 

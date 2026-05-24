@@ -62,7 +62,6 @@ class Quoted_Core {
 
 		// AJAX handlers — capability-checked inside each handler.
 		$this->loader->add_action( 'wp_ajax_quoted_connect_backend', $admin, 'ajax_connect_backend' );
-		$this->loader->add_action( 'wp_ajax_quoted_save_niche', $admin, 'ajax_save_niche' );
 		$this->loader->add_action( 'wp_ajax_quoted_sync_posts', $admin, 'ajax_sync_posts' );
 		$this->loader->add_action( 'wp_ajax_quoted_dashboard_data', $admin, 'ajax_dashboard_data' );
 		$this->loader->add_action( 'wp_ajax_quoted_disconnect', $admin, 'ajax_disconnect' );

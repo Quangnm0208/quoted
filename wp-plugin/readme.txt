@@ -5,7 +5,7 @@ Tags: ai, llms.txt, chatgpt, claude, perplexity
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,8 +23,8 @@ It runs **alongside** your existing SEO plugin (Yoast, Rank Math, AIOSEO, SEOPre
 
 * **llms.txt auto-generator** — the AI-bot equivalent of sitemap.xml, served at `/llms.txt`. Up to 50 posts on the free tier.
 * **Clean Markdown endpoints** — every post serves clean, AI-friendly Markdown at `/wp-json/quoted/v1/llm/{slug}`. AI parses 10× faster than HTML.
-* **14 AI bot signatures** detected automatically: ClaudeBot, GPTBot, ChatGPT-User, OAI-SearchBot, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended, Bytespider, Meta-ExternalAgent, CCBot, DiffBot, cohere-ai, YouBot.
-* **AI Crawler Allowlist** — allow or block any of the 14 bots one by one. Blocked bots get HTTP 403 + a `Disallow` rule in your robots.txt.
+* **60+ AI bot signatures** detected automatically — every major LLM operator (Anthropic, OpenAI, Google Gemini, Perplexity, Mistral, xAI Grok, DeepSeek, Cohere, Apple Intelligence, Meta AI, Amazon, Bytedance, Alibaba, Baidu, Naver, Yandex), every relevant training-corpus crawler (Common Crawl, AI2, LAION FriendlyCrawler, Hive ImagesiftBot, Diffbot), and the SEO crawlers that resell data to LLM training pipelines (Ahrefs, Semrush, DataForSEO, MJ12).
+* **AI Crawler Allowlist** — allow or block any of those 60+ bots one by one. Blocked bots get HTTP 403 + a `Disallow` rule in your robots.txt.
 * **Schema engine** — Article (or BlogPosting) and FAQPage JSON-LD on single posts. Auto-detects FAQ from `[faq_item]` shortcodes and H2/H3 question patterns. Defers to Yoast / Rank Math / AIOSEO / SEOPress when they're active.
 * **Local-first dashboard** — AI Distribution Score, top crawling bots, recent crawls feed, posts synced quota. Reads from your own database. Nothing sent to external servers.
 * **Privacy by default** — visitor IPs are SHA-256 hashed before storage. Toggle off entirely if you prefer. GDPR/CCPA-friendly.
@@ -143,6 +143,14 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 
 == Changelog ==
 
+= 0.3.0 =
+* **Bot catalog expanded from 14 → 60+ signatures.** Now covers Anthropic Claude-User + Claude-SearchBot, OpenAI Operator, Google GoogleOther + GoogleOther-Image, Microsoft Bingbot/MSNBot, Mistral, xAI Grok, DeepSeek, Amazon, Alibaba, Baidu (Baiduspider + Baidu-AI), Naver Yeti + NaverGPT, Yandex, Sogou, Huawei PetalBot, AI2Bot (Allen Institute), Hive ImagesiftBot, LAION FriendlyCrawler, Semantic Scholar, omgilibot, TimpiBot, PleiasBot, img2dataset, and the SEO crawlers (Ahrefs, Semrush, DataForSEO, MJ12) that resell data to LLM training pipelines. Also Internet Archive's ia_archiver — historically the largest single training-data source.
+* Refactor: bot detector now has a single `bot_catalog()` source of truth. `bot_signatures()` and `bot_metadata()` derive from it, so adding a new bot is a one-line edit.
+* Perf: `wp_quoted_bot_log` unsynced count is cached in a 60-second transient. Eliminates the SELECT COUNT(*) on ~99% of bot hits.
+* Perf: FAQ extraction (`do_blocks()` + H2/H3 question regex) is now cached per-post in a 12h transient + per-request static. Invalidated automatically by the existing save_post hook.
+* UX: dropped the obsolete "niche" onboarding step (it fed an old backend prompt-routing flow that no longer exists). Onboarding is now 4 steps instead of 5.
+* Cleanup: removed dead `ajax_save_niche` AJAX handler + JS, removed unused `i18n.syncing` localization string, slimmed onboarding partial by 30+ lines of dead niche-picker markup.
+
 = 0.2.0 =
 * **First public release — Free tier.** The plugin ships fully self-contained: no backend, no SaaS proxy, no required external service.
 * Paid Pro tier is in development at quotedeasy.com — the Pro UI auto-appears once the operator's Lemon Squeezy store is wired up. Until then the plugin runs Free-only.
@@ -166,6 +174,9 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 * Free tier with 50-post limit
 
 == Upgrade Notice ==
+
+= 0.3.0 =
+Major bot-catalog expansion (14 → 60+ signatures). Performance improvements on the bot log and FAQ schema extraction. Removed the unused "niche" onboarding step. Safe drop-in upgrade.
 
 = 0.2.0 =
 First public release. Free tier — no account needed, no data leaves your server. Pro features coming soon.

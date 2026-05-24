@@ -1,16 +1,11 @@
 <?php
 /**
- * Onboarding wizard — 8-click flow.
+ * Onboarding wizard — 4-step flow.
  *
- * Click count:
- *  1. Install plugin (outside this UI)
- *  2. Activate (outside this UI)
- *  3. "Connect" button on step 1 (after license + URL entered)
- *  4. "Continue" button on step 2 (niche selected)
- *  5. "Auto-scan now" button on step 3
- *  6. "Test it live" button on step 4 (shows live AI Test stub for Phase 1)
- *  7. (passive — AI response renders)
- *  8. "Go to dashboard" button on step 5
+ * Step 1: License activation (or "Welcome to Free" when LS isn't configured)
+ * Step 2: Auto-scan — refresh local llms.txt cache + show post count
+ * Step 3: "Coming soon" preview for the Pro Live AI Test
+ * Step 4: Done — link to dashboard + show /llms.txt URL
  *
  * @package Quoted
  */
@@ -18,41 +13,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-$niches = array(
-	'outdoor-gear'              => __( 'Outdoor gear & hiking', 'quoted' ),
-	'fitness-equipment'         => __( 'Fitness & gym equipment', 'quoted' ),
-	'supplements'               => __( 'Supplements & nutrition', 'quoted' ),
-	'cooking'                   => __( 'Cooking & recipes', 'quoted' ),
-	'kitchen-gadgets'           => __( 'Kitchen gadgets', 'quoted' ),
-	'travel'                    => __( 'Travel & destinations', 'quoted' ),
-	'hotels'                    => __( 'Hotels & accommodation', 'quoted' ),
-	'parenting'                 => __( 'Parenting', 'quoted' ),
-	'baby-gear'                 => __( 'Baby gear', 'quoted' ),
-	'finance-personal'          => __( 'Personal finance', 'quoted' ),
-	'investing'                 => __( 'Investing', 'quoted' ),
-	'crypto'                    => __( 'Crypto', 'quoted' ),
-	'real-estate'               => __( 'Real estate', 'quoted' ),
-	'software-saas'             => __( 'Software & SaaS reviews', 'quoted' ),
-	'productivity-tools'        => __( 'Productivity tools', 'quoted' ),
-	'ai-tools'                  => __( 'AI tools', 'quoted' ),
-	'marketing'                 => __( 'Marketing', 'quoted' ),
-	'seo'                       => __( 'SEO', 'quoted' ),
-	'web-dev'                   => __( 'Web development', 'quoted' ),
-	'gardening'                 => __( 'Gardening', 'quoted' ),
-	'home-improvement'          => __( 'Home improvement', 'quoted' ),
-	'smart-home'                => __( 'Smart home', 'quoted' ),
-	'pets'                      => __( 'Pets', 'quoted' ),
-	'automotive'                => __( 'Automotive', 'quoted' ),
-	'ev-cars'                   => __( 'EV / electric cars', 'quoted' ),
-	'photography'               => __( 'Photography', 'quoted' ),
-	'gaming'                    => __( 'Gaming', 'quoted' ),
-	'books-reviews'             => __( 'Book reviews', 'quoted' ),
-	'education-online-courses'  => __( 'Online courses & education', 'quoted' ),
-	'wellness-mental-health'    => __( 'Wellness & mental health', 'quoted' ),
-	'other'                     => __( 'Other / general', 'quoted' ),
-);
-
 ?>
 <div class="wrap quoted-onboarding">
 
@@ -63,15 +23,14 @@ $niches = array(
 
 	<div class="quoted-progress">
 		<ol>
-			<li class="step-1 active"><?php esc_html_e( 'Connect', 'quoted' ); ?></li>
-			<li class="step-2"><?php esc_html_e( 'Niche', 'quoted' ); ?></li>
-			<li class="step-3"><?php esc_html_e( 'Scan', 'quoted' ); ?></li>
-			<li class="step-4"><?php esc_html_e( 'Test', 'quoted' ); ?></li>
-			<li class="step-5"><?php esc_html_e( 'Done', 'quoted' ); ?></li>
+			<li class="step-1 active"><?php esc_html_e( 'Start', 'quoted' ); ?></li>
+			<li class="step-2"><?php esc_html_e( 'Scan', 'quoted' ); ?></li>
+			<li class="step-3"><?php esc_html_e( 'Preview', 'quoted' ); ?></li>
+			<li class="step-4"><?php esc_html_e( 'Done', 'quoted' ); ?></li>
 		</ol>
 	</div>
 
-	<!-- Step 1: Welcome (varies by whether Pro / LS is configured) -->
+	<!-- Step 1: License activation (or Free intro) -->
 	<section class="quoted-step quoted-step-1 active">
 		<?php if ( Quoted_Billing::is_configured() ) : ?>
 			<h2><?php esc_html_e( 'Step 1 — Activate your license', 'quoted' ); ?></h2>
@@ -92,15 +51,13 @@ $niches = array(
 							<label for="quoted-license-key"><?php esc_html_e( 'License key', 'quoted' ); ?></label>
 						</th>
 						<td>
-							<input
-								type="text"
-								id="quoted-license-key"
-								name="license_key"
-								class="regular-text"
-								placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-								autocomplete="off"
-								required
-							/>
+							<input type="text"
+							       id="quoted-license-key"
+							       name="license_key"
+							       class="regular-text"
+							       placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+							       autocomplete="off"
+							       required />
 						</td>
 					</tr>
 				</table>
@@ -127,76 +84,40 @@ $niches = array(
 		<?php endif; ?>
 	</section>
 
-	<!-- Step 2: Niche -->
+	<!-- Step 2: Auto-scan (refresh llms.txt cache) -->
 	<section class="quoted-step quoted-step-2" style="display:none;">
-		<h2><?php esc_html_e( 'Step 2 — What does your site cover?', 'quoted' ); ?></h2>
-		<p class="description"><?php esc_html_e( 'This tells Quoted which AI prompts to test you on later. Pick the closest match.', 'quoted' ); ?></p>
-
-		<form id="quoted-niche-form">
-			<table class="form-table">
-				<tr>
-					<th scope="row">
-						<label for="quoted-niche"><?php esc_html_e( 'Site niche', 'quoted' ); ?></label>
-					</th>
-					<td>
-						<select id="quoted-niche" name="niche" required>
-							<option value=""><?php esc_html_e( '— Select —', 'quoted' ); ?></option>
-							<?php foreach ( $niches as $slug => $label ) : ?>
-								<option value="<?php echo esc_attr( $slug ); ?>"><?php echo esc_html( $label ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</td>
-				</tr>
-			</table>
-
-			<p class="submit">
-				<button type="submit" class="button button-primary button-hero" id="quoted-niche-btn">
-					<?php esc_html_e( 'Continue', 'quoted' ); ?>
-				</button>
-				<span class="quoted-status" id="quoted-niche-status"></span>
-			</p>
-		</form>
-	</section>
-
-	<!-- Step 3: Auto-scan -->
-	<section class="quoted-step quoted-step-3" style="display:none;">
-		<h2><?php esc_html_e( 'Step 3 — Auto-scan your top posts', 'quoted' ); ?></h2>
-		<p class="description"><?php esc_html_e( "We'll scan your 20 most-recent posts and prepare them for AI bots. Takes about 30 seconds.", 'quoted' ); ?></p>
+		<h2><?php esc_html_e( 'Step 2 — Generate your AI sitemap', 'quoted' ); ?></h2>
+		<p class="description"><?php esc_html_e( "We'll build your llms.txt right now from your published posts. Takes about a second.", 'quoted' ); ?></p>
 
 		<div class="quoted-scan-box">
 			<button type="button" class="button button-primary button-hero" id="quoted-scan-btn">
-				<?php esc_html_e( 'Auto-scan now', 'quoted' ); ?>
+				<?php esc_html_e( 'Generate now', 'quoted' ); ?>
 			</button>
 			<div class="quoted-scan-result" id="quoted-scan-result" style="display:none;"></div>
 		</div>
 	</section>
 
-	<!-- Step 4: Test it live -->
-	<section class="quoted-step quoted-step-4" style="display:none;">
-		<h2><?php esc_html_e( 'Step 4 — See AI read your site', 'quoted' ); ?></h2>
-		<p class="description"><?php esc_html_e( "Quoted will ask an AI a question about your niche and show you the live answer.", 'quoted' ); ?></p>
+	<!-- Step 3: Live AI Test preview (Pro stub) -->
+	<section class="quoted-step quoted-step-3" style="display:none;">
+		<h2><?php esc_html_e( 'Step 3 — Preview what comes next', 'quoted' ); ?></h2>
+		<p class="description"><?php esc_html_e( "Once your site has been crawled, Pro will let you ask an AI a question about your content and see whether it cites you.", 'quoted' ); ?></p>
 
 		<div class="quoted-test-box">
 			<button type="button" class="button button-primary button-hero" id="quoted-test-btn">
-				<?php esc_html_e( 'Test it live', 'quoted' ); ?>
+				<?php esc_html_e( 'Continue', 'quoted' ); ?>
 			</button>
 
 			<div class="quoted-test-result" id="quoted-test-result" style="display:none;">
-				<!--
-					Phase 0 stub: Live AI Test ships in Phase 1.
-					For Phase 0, this just shows a static "coming soon" message
-					so the onboarding completes cleanly.
-				-->
 				<div class="quoted-test-placeholder">
-					<p><strong><?php esc_html_e( 'Live AI Test will arrive in the next update.', 'quoted' ); ?></strong></p>
+					<p><strong><?php esc_html_e( 'Live AI Test arrives with Pro.', 'quoted' ); ?></strong></p>
 					<p><?php esc_html_e( 'For now, ClaudeBot and GPTBot will start finding your llms.txt file within 24 hours. Your dashboard will show every visit.', 'quoted' ); ?></p>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- Step 5: Done -->
-	<section class="quoted-step quoted-step-5" style="display:none;">
+	<!-- Step 4: Done -->
+	<section class="quoted-step quoted-step-4" style="display:none;">
 		<h2>🎉 <?php esc_html_e( "You're all set", 'quoted' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Quoted is now monitoring your site. Check your dashboard daily to see AI bot visits.', 'quoted' ); ?></p>
 

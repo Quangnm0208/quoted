@@ -53,7 +53,8 @@ foreach ( $options as $opt ) {
 	delete_option( $opt );
 }
 
-// Delete all our transients (any cached markdown).
+// Delete all our transients (cached markdown, cached FAQ extraction,
+// bot-log unsynced-count cache, llms.txt cache).
 $wpdb->query(
 	"DELETE FROM {$wpdb->options}
 	 WHERE option_name LIKE '_transient_quoted_%'

@@ -98,8 +98,7 @@ class Quoted_Admin {
 			'site_url'    => home_url(),
 			'is_connected' => ( new Quoted_License() )->is_connected(),
 			'i18n'        => array(
-				'connecting'   => __( 'Connecting...', 'quoted' ),
-				'syncing'      => __( 'Syncing posts...', 'quoted' ),
+				'connecting'   => __( 'Activating...', 'quoted' ),
 				'error_generic' => __( 'Something went wrong. Please try again.', 'quoted' ),
 				'success'      => __( 'Done!', 'quoted' ),
 			),
@@ -307,26 +306,6 @@ class Quoted_Admin {
 			'variant_name' => $result['variant_name'],
 			'expires_at'   => $result['expires_at'],
 		) );
-	}
-
-	public function ajax_save_niche() {
-		check_ajax_referer( 'quoted_admin_nonce', 'nonce' );
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
-			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
-		}
-
-		$niche = isset( $_POST['niche'] ) ? sanitize_key( wp_unslash( $_POST['niche'] ) ) : '';
-
-		if ( empty( $niche ) ) {
-			wp_send_json_error( array( 'message' => __( 'Please select a niche.', 'quoted' ) ), 400 );
-			return;
-		}
-
-		update_option( 'quoted_niche', $niche );
-
-		wp_send_json_success( array( 'niche' => $niche ) );
 	}
 
 	public function ajax_sync_posts() {
