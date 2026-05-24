@@ -1,15 +1,15 @@
 <?php
 /**
- * Plugin Name:       Quoted — Make your WordPress site AI-readable
- * Plugin URI:        https://quotedeasy.com
- * Description:       Make your WordPress site readable by ChatGPT, Claude, Perplexity, and Google AI. Auto-generates llms.txt, serves clean Markdown per post, detects AI bot crawls, and lets you allow/block bots one by one.
+ * Plugin Name:       Quoted - AI Citation Tracker for WordPress
+ * Plugin URI:        https://quoted.io
+ * Description:       Track when ChatGPT, Claude, Perplexity cite your content. Free AI bot tracking (60+ bots), llms.txt generation, Markdown endpoints, and schema markup for WordPress.
  * Version:           0.3.0
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      7.4
  * Author:            Nguyễn Mạnh Quang
- * Author URI:        https://quotedeasy.com
- * License:           GPL-2.0-or-later
+ * Author URI:        https://quoted.io
+ * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       quoted
  * Domain Path:       /languages

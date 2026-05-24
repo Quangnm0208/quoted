@@ -1,182 +1,225 @@
-=== Quoted — Make your WordPress site AI-readable ===
-Contributors: nguyenmanhquang
-Donate link: https://quotedeasy.com
-Tags: ai, llms.txt, chatgpt, claude, perplexity
+=== Quoted - AI Citation Tracker for WordPress ===
+Contributors: nmquang
+Donate link: https://quoted.io/donate
+Tags: ai, llms-txt, seo, analytics, chatgpt
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 0.3.0
-License: GPL-2.0-or-later
+License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Make your WordPress site readable by ChatGPT, Claude, Perplexity, and Google AI. Auto llms.txt + Markdown endpoints + per-bot allow/block.
+Track when ChatGPT, Claude, Perplexity cite your content. Free AI bot tracking and llms.txt generation for WordPress.
 
 == Description ==
 
-**Quoted is the AI-readability layer for WordPress.** Get your content discovered, parsed, and cited by ChatGPT, Claude, Perplexity, Google AI Overviews, Gemini, and every other AI search engine.
+**Quoted** helps WordPress site owners understand how AI search engines interact with their content. Track every visit from ChatGPT, Claude, Perplexity, and other AI assistants. Generate `llms.txt` automatically. Know when AI cites you.
 
-It runs **alongside** your existing SEO plugin (Yoast, Rank Math, AIOSEO, SEOPress) — never touches your titles, meta descriptions, canonicals, or sitemaps. It only adds the layer those plugins don't have: AI bot signals.
+**Why Quoted?**
 
-= 🆓 What you get free =
+Search behavior is shifting. People ask ChatGPT and Claude instead of Googling. Your content may be feeding AI answers — but you have no way to know which content, how often, or whether you are credited.
 
-**No account required. No data leaves your server.**
+Quoted fixes that.
 
-* **llms.txt auto-generator** — the AI-bot equivalent of sitemap.xml, served at `/llms.txt`. Up to 50 posts on the free tier.
-* **Clean Markdown endpoints** — every post serves clean, AI-friendly Markdown at `/wp-json/quoted/v1/llm/{slug}`. AI parses 10× faster than HTML.
-* **60+ AI bot signatures** detected automatically — every major LLM operator (Anthropic, OpenAI, Google Gemini, Perplexity, Mistral, xAI Grok, DeepSeek, Cohere, Apple Intelligence, Meta AI, Amazon, Bytedance, Alibaba, Baidu, Naver, Yandex), every relevant training-corpus crawler (Common Crawl, AI2, LAION FriendlyCrawler, Hive ImagesiftBot, Diffbot), and the SEO crawlers that resell data to LLM training pipelines (Ahrefs, Semrush, DataForSEO, MJ12).
-* **AI Crawler Allowlist** — allow or block any of those 60+ bots one by one. Blocked bots get HTTP 403 + a `Disallow` rule in your robots.txt.
-* **Schema engine** — Article (or BlogPosting) and FAQPage JSON-LD on single posts. Auto-detects FAQ from `[faq_item]` shortcodes and H2/H3 question patterns. Defers to Yoast / Rank Math / AIOSEO / SEOPress when they're active.
+**Key features (Free):**
+
+* **AI bot activity log** — see exactly when GPTBot, ClaudeBot, PerplexityBot, and other AI crawlers visit your site
+* **60+ AI bot signatures** detected automatically — every major LLM operator (Anthropic, OpenAI, Google Gemini, Microsoft Copilot, Perplexity, Mistral, xAI Grok, DeepSeek, Cohere, Apple Intelligence, Meta AI, Amazon, ByteDance, Alibaba, Baidu, Naver, Yandex), every relevant training-corpus crawler (Common Crawl, AI2, LAION FriendlyCrawler, Hive ImagesiftBot, Diffbot, Semantic Scholar), and the SEO crawlers that resell data to LLM training pipelines (Ahrefs, Semrush, DataForSEO, MJ12)
+* **llms.txt auto-generation** — creates the standard file AI search engines use to understand your site structure, served at `/llms.txt` (up to 50 posts on Free)
+* **Clean Markdown endpoints** — every post serves AI-friendly Markdown at `/wp-json/quoted/v1/llm/{slug}`. AI parses 10x faster than HTML.
+* **AI Crawler Allowlist** — allow or block any of the 60+ bots one by one. Blocked bots get HTTP 403 + a `Disallow` rule in robots.txt.
+* **Schema markup enhancement** — auto-inject Article and FAQPage JSON-LD to make content more citable. Detects 16 active SEO plugins (Yoast, RankMath, AIOSEO, SEOPress, Slim SEO, SEO Framework, etc.) and defers when they're emitting their own schema.
 * **Local-first dashboard** — AI Distribution Score, top crawling bots, recent crawls feed, posts synced quota. Reads from your own database. Nothing sent to external servers.
-* **Privacy by default** — visitor IPs are SHA-256 hashed before storage. Toggle off entirely if you prefer. GDPR/CCPA-friendly.
-* **< 2 ms overhead** per pageview — one substring scan on the User-Agent header.
-* **Multi-language** — UTF-8 safe; tested with French accents, Vietnamese diacritics, Japanese kanji, CJK characters.
+* **Privacy by default** — visitor IPs are SHA-256 hashed before storage. Toggle off entirely if you prefer.
 
-= ⭐ Pro features (coming soon) =
+**Coming soon (Pro):**
 
-The Free tier above is fully functional and will stay free forever. A paid Pro tier is in active development at [quotedeasy.com](https://quotedeasy.com), planned features:
-
-* **Unlimited posts** in llms.txt (free tier caps at 50)
-* **12 months** of bot history (free is 7 days)
-* **Citation tracking** with your own Perplexity/Tavily API key — we never proxy your queries or use our credits
+* **Citation alerts** — get notified when AI assistants quote your content (BYO Perplexity/Tavily API key — your queries never proxy through us)
 * **Live AI Test** — ask AI a question and see if your site is cited
 * **Niche benchmark** — compare your AI distribution vs competitors
-* **Multi-site license** (up to 30 sites)
+* **Unlimited posts** in llms.txt (Free tier caps at 50)
+* **12 months** of bot history (Free is 7 days)
+* **Multi-site license** — up to 5 sites (Solo) or 30 sites (Pro+)
 * **Remove the "Powered by Quoted" badge** in footer
-* **Priority support**
+* **Priority support** (24h SLA)
 
-Pricing and exact launch date will be announced at [quotedeasy.com](https://quotedeasy.com). Subscribe there to be notified.
+Pro launches at [quoted.io](https://quoted.io). The Pro UI auto-appears inside this plugin once the store is wired up — no separate install needed.
 
-= 🤖 AI engines supported =
+**External services notice:**
 
-ChatGPT, ChatGPT Search, Perplexity AI, Claude, Google AI Overviews, Gemini, Apple Intelligence, Meta AI, Bytespider, Common Crawl, Cohere, Diffbot, You.com.
+The Free release of Quoted does NOT connect to any external server. Everything runs locally on your WordPress site. When Pro launches, paid features will route through Lemon Squeezy's License API (for license validation) and call the AI provider you choose (Perplexity / Tavily) directly using YOUR API key — Quoted never proxies your queries. See the Privacy section below for details.
 
-= 💡 Why it exists =
+**Resources:**
 
-Your existing SEO plugin makes you findable by Google. **Quoted makes you findable, readable, and quotable by AI.** As AI search displaces traditional search, the sites that ship `llms.txt` early get the long-tail citation flywheel.
+* [Documentation](https://quoted.io/docs)
+* [Support forum](https://wordpress.org/support/plugin/quoted/)
 
 == Installation ==
 
-1. Upload the plugin folder to `/wp-content/plugins/quoted/` (or install via Plugins → Add New → Upload).
-2. Activate through the **Plugins** menu in WordPress.
-3. The plugin auto-redirects you to a short setup wizard. Skip it to use the Free plan, or paste a Pro license key from your purchase email.
-4. Visit `Quoted → Settings` to review the AI crawler allowlist, privacy options, and (Pro) BYO API keys.
-5. Confirm `/llms.txt` resolves by visiting `https://your-site.com/llms.txt` in a browser. You should see the auto-generated AI sitemap.
+**Automatic installation (recommended)**
+
+1. Go to Plugins → Add New in your WordPress admin
+2. Search for "Quoted"
+3. Click "Install Now" then "Activate"
+4. Go to Quoted in your admin menu to start tracking
+
+**Manual installation**
+
+1. Download the plugin .zip from WordPress.org
+2. Upload via Plugins → Add New → Upload Plugin
+3. Activate the plugin
+4. Go to Quoted in your admin menu
+
+**Setup (takes 30 seconds)**
+
+1. Activate the plugin. The setup wizard opens automatically.
+2. Click "Let's go" — Free tier needs no account.
+3. Confirm Settings → Permalinks is set to anything other than "Plain" (so the AI sitemap at `/llms.txt` resolves cleanly).
+4. Wait 24-48 hours, then check the Quoted dashboard to see your first AI bot visits.
 
 == Frequently Asked Questions ==
 
-= Does this conflict with my existing SEO plugin (Yoast, Rank Math, AIOSEO, SEOPress)? =
+= Is this free? =
 
-No. Yoast / Rank Math / AIOSEO / SEOPress optimize for the Google search bot. Quoted optimizes for AI bots — they read your site in different ways. Quoted doesn't touch your existing meta tags, sitemap.xml, or any SEO settings. Your Google ranking is unchanged.
+Yes. The core features — AI bot tracking (60+ bots), llms.txt generation, Markdown endpoints, AI crawler allowlist, schema injection, local dashboard — are free forever, no account required, no data leaves your server. Pro features (citation alerts, multi-site, BYO API key) launch at [quoted.io](https://quoted.io) and require a paid subscription.
 
-The Schema engine is smart about this — in **Auto mode** (the default), Quoted detects active SEO plugins and skips Article schema to avoid duplicate JSON-LD. FAQ schema is still emitted because most SEO plugins don't pick up shortcode-based FAQ patterns.
+= Does the free version send my data anywhere? =
 
-= AI bots already crawl my site. Why do I need a plugin? =
-
-Yes, AI bots crawl HTML — but they bounce off ads, popups, JavaScript, and navigation chrome, losing about 90% of your content in the process. The `llms.txt` spec (proposed by Mistral and Anthropic in September 2024) is the AI-native answer. Sites that ship it early get cited more often.
+No. The free version operates entirely on your WordPress site. No outbound HTTP. No external account. No telemetry. See the Privacy section below.
 
 = Will this slow down my site? =
 
-No. Bot detection is a single substring scan on the User-Agent header — under 2ms per pageview. The `/llms.txt` file is cached for 5 minutes and served with edge cache headers.
+No. Bot detection is a single substring scan on the User-Agent header — under 2ms per pageview. The `/llms.txt` file is cached for 5 minutes and served with short browser-cache headers (no aggressive edge cache, so post updates propagate fast). Schema JSON-LD is generated server-side as static JSON in `<head>`. We've tested on sites with 200+ posts and 50+ simultaneous bot requests — no measurable impact.
 
-= How does the AI Crawler Allowlist work? =
+= How is this different from Google Analytics? =
 
-In Settings → AI Crawler Allowlist, you'll see all 14 supported bots with Allow / Block radios. Blocked bots get HTTP 403 when they request a page, and a `Disallow: /` rule appended to your robots.txt under that bot's User-agent. Bots that respect robots.txt will stop crawling on their own; the 403 covers the ones that don't. Crawls are still logged before the 403, so your dashboard shows the blocked attempts.
+Google Analytics tracks human visitors. Quoted tracks AI bots — ChatGPT, Claude, Perplexity, and 57 others. These are different traffic sources captured differently. AI bots are filtered out of GA's reports. You need both for a full picture.
 
-= What about the Schema engine? It says it won't conflict with my SEO plugin? =
+= Does this conflict with my existing SEO plugin (Yoast / Rank Math / AIOSEO / SEOPress)? =
 
-Right. In **Auto** mode (default), the Schema engine checks `is_plugin_active()` for Yoast, Yoast Premium, Rank Math, Rank Math Pro, AIOSEO, AIOSEO Pro, SEOPress, and SEOPress Pro. If any are active, Quoted skips its own Article schema so Google's Rich Results Test doesn't see duplicates. FAQ schema is still emitted — it's auto-detected from `[faq_item question="…"]Answer[/faq_item]` shortcodes (common in plugins like Easy FAQ and Quick & Easy FAQs) and from H2/H3 headings that end in `?`.
+No. Quoted is designed to coexist. The Schema engine actively detects 16 SEO plugins on your site and, in Auto mode (the default), defers Article schema to whichever one is active so you don't get duplicate JSON-LD in Google's Rich Results test. Your existing meta tags, titles, sitemap.xml, canonicals are untouched.
 
-You can override with **Always** (output both regardless) or **Never** (suppress Article only).
+= What if AI bots change their user agent? =
 
-= Do you proxy my data through your servers? =
+We maintain an up-to-date catalog of 60+ AI bot UA signatures, sourced from each provider's public documentation. The catalog ships inside the plugin as a single PHP array — when a new AI service launches, we add detection in the next minor release (typically within 1-2 weeks).
 
-**No.** Quoted is a standalone plugin. The only outbound HTTP call is to Lemon Squeezy's License API for license validation (once daily) when you have a Pro license. Pro features that call AI APIs (Perplexity, Tavily) use **your own API key**, configured in Settings — we never see your queries or charge you per call.
+= Is this GDPR compliant? =
 
-= What if my host blocks AI bot user-agents? =
+Yes. The free version does not collect any personal data. Visitor IPs are SHA-256 hashed before storage (or can be disabled entirely in Settings → Privacy). Bot user agents are not personal data. No data leaves your server. See the Privacy section below.
 
-Some shared hosts have WAF rules that block bot user-agents. If you see zero crawls after a week, contact your host and ask them to whitelist ClaudeBot, GPTBot, and PerplexityBot.
+= Can I block AI bots instead of tracking them? =
 
-= Will my data be lost if I cancel Pro? =
+Yes. Settings → AI crawler allowlist gives you Allow / Block radios per bot. Blocked bots get HTTP 403 + a `Disallow: /` rule appended to your robots.txt under each of that bot's published UA patterns. Most users let all bots through (to get cited), but the choice is yours.
 
-No. The bot crawl log lives in your own database (table `wp_quoted_bot_log`). If you cancel, you revert to the Free tier — you keep `llms.txt`, Markdown endpoints, schema, allowlist, and 7-day local bot history. Only the long-history view and Pro-only features lock.
+= Do I need technical skills? =
 
-= I have multibyte content (Vietnamese, Japanese, Chinese). Will it work? =
+No. The plugin works out of the box. Onboarding is 4 clicks total. Advanced users can customize via Quoted → Settings.
 
-Yes. Quoted is UTF-8 throughout. Post titles, body content, and category names survive intact in the Markdown output. Note: WordPress's built-in slug generator strips CJK characters from URLs — that's a core WP behavior, not a Quoted limitation. For Japanese/Chinese sites, install a transliteration plugin if you want readable slugs.
+= What happens if I uninstall? =
 
-== External services ==
+The plugin removes its database table (`wp_quoted_bot_log`), all options, all transients, and the per-post cache-key meta. No leftover data.
 
-**This Free release of Quoted does not connect to any external service.** Everything happens on your own server: llms.txt is generated from your local posts, Markdown is rendered from your local content, bot crawls are logged to your local database, schema is emitted into your own pages, and the dashboard reads only from your `wp_quoted_bot_log` table.
+= How do I get support? =
 
-The integrations below are described for transparency — they will activate **only after the Pro tier launches** and only if you choose to activate a paid license. Until then, none of these URLs are hit by the plugin.
-
-= Lemon Squeezy License API (Pro only — not active in this release) =
-
-When you activate a Pro license, the plugin sends a POST request to `https://api.lemonsqueezy.com/v1/licenses/activate` with your license key and the site's hostname. Once daily, it revalidates by POSTing to `https://api.lemonsqueezy.com/v1/licenses/validate`. The plugin stores the instance ID returned by Lemon Squeezy locally so you can deactivate the seat later.
-
-* **What we send:** license key, site hostname.
-* **What we don't send:** post content, user data, page views, any analytics.
-* **Terms of service:** https://www.lemonsqueezy.com/legal/terms-of-service
-* **Privacy policy:** https://www.lemonsqueezy.com/legal/privacy
-
-= Lemon Squeezy hosted checkout (Pro only — not active in this release) =
-
-When Pro launches, the Upgrade page will contain anchor links to `https://STORE.lemonsqueezy.com/buy/...`. Clicking opens Lemon Squeezy's hosted checkout in a new tab. No data is sent from the plugin to Lemon Squeezy until you click. Subject to Lemon Squeezy's own terms/privacy linked above.
-
-= Perplexity AI / Tavily (Pro only, BYO key, not active in this release) =
-
-After Pro launches: when you paste a Perplexity or Tavily API key into Settings and trigger a Live AI Test or Citation Check, the plugin will post your query directly from your WordPress server to `https://api.perplexity.ai` or `https://api.tavily.com` using **your** API key. Quoted never sees the query.
-
-* Perplexity terms: https://www.perplexity.ai/hub/legal/perplexity-api-terms-of-service
-* Perplexity privacy: https://www.perplexity.ai/hub/legal/privacy-policy
-* Tavily terms: https://tavily.com/terms
+Free users: WordPress.org support forum (link above). Pro users (once launched): email support@quoted.io, response within 24 hours.
 
 == Screenshots ==
 
-1. AI Distribution Score gauge + recent bot crawls feed on the local dashboard.
-2. AI Crawler Allowlist — Allow / Block toggle per bot with the bot operator (Anthropic, OpenAI, Perplexity, etc.) shown beneath the bot name.
-3. Schema settings — master enable + Auto / Always / Never mode. The Auto label calls out the active SEO plugin so you know why Article is being deferred.
-4. llms.txt rendered output in the browser, with site description and the latest 50 posts.
-5. Per-post markdown endpoint — clean Markdown body, no ads, no scripts.
-6. Settings → Privacy — IP hashing toggle, disable-logging kill switch, trust-proxy opt-in.
+1. Main dashboard showing AI bot activity over the last 7 days — AI Distribution Score gauge, recent crawls feed, top bots chart.
+2. AI Crawler Allowlist — Allow / Block toggle per bot, grouped by operator (Anthropic, OpenAI, Google, Perplexity, Mistral, xAI, etc.).
+3. Schema settings — master enable + Auto / Always / Never mode. Auto label calls out the active SEO plugin so you know why Article is being deferred.
+4. llms.txt rendered in the browser — site description + the 50 most-recent posts.
+5. Per-post Markdown endpoint — clean Markdown body, no ads, no scripts.
+6. Settings → Privacy — IP hashing, kill switch, trust-proxy opt-in.
 7. Welcome screen on first activation — Free tier ready in one click.
 
 == Changelog ==
 
 = 0.3.0 =
-* **Bot catalog expanded from 14 → 60+ signatures.** Now covers Anthropic Claude-User + Claude-SearchBot, OpenAI Operator, Google GoogleOther + GoogleOther-Image, Microsoft Bingbot/MSNBot, Mistral, xAI Grok, DeepSeek, Amazon, Alibaba, Baidu (Baiduspider + Baidu-AI), Naver Yeti + NaverGPT, Yandex, Sogou, Huawei PetalBot, AI2Bot (Allen Institute), Hive ImagesiftBot, LAION FriendlyCrawler, Semantic Scholar, omgilibot, TimpiBot, PleiasBot, img2dataset, and the SEO crawlers (Ahrefs, Semrush, DataForSEO, MJ12) that resell data to LLM training pipelines. Also Internet Archive's ia_archiver — historically the largest single training-data source.
-* Refactor: bot detector now has a single `bot_catalog()` source of truth. `bot_signatures()` and `bot_metadata()` derive from it, so adding a new bot is a one-line edit.
-* Perf: `wp_quoted_bot_log` unsynced count is cached in a 60-second transient. Eliminates the SELECT COUNT(*) on ~99% of bot hits.
-* Perf: FAQ extraction (`do_blocks()` + H2/H3 question regex) is now cached per-post in a 12h transient + per-request static. Invalidated automatically by the existing save_post hook.
-* UX: dropped the obsolete "niche" onboarding step (it fed an old backend prompt-routing flow that no longer exists). Onboarding is now 4 steps instead of 5.
-* Cleanup: removed dead `ajax_save_niche` AJAX handler + JS, removed unused `i18n.syncing` localization string, slimmed onboarding partial by 30+ lines of dead niche-picker markup.
+* **Bot catalog expanded from 14 → 60+ signatures.** Now covers Anthropic Claude-User + Claude-SearchBot, OpenAI Operator, Google GoogleOther + GoogleOther-Image, Microsoft Bingbot/MSNBot, Mistral, xAI Grok, DeepSeek, Amazon, Alibaba, Baidu (Baiduspider + Baidu-AI), Naver Yeti + NaverGPT, Yandex, Sogou, Huawei PetalBot, AI2Bot (Allen Institute), Hive ImagesiftBot, LAION FriendlyCrawler, Semantic Scholar, omgilibot, TimpiBot, PleiasBot, img2dataset, and the SEO crawlers (Ahrefs, Semrush, DataForSEO, MJ12) that resell data to LLM training pipelines. Plus Internet Archive's ia_archiver.
+* Refactor: bot detector now has a single `bot_catalog()` source of truth. `bot_signatures()` and `bot_metadata()` derive from it.
+* Perf: `wp_quoted_bot_log` unsynced count cached in a 60-second transient. Eliminates the SELECT COUNT(*) on ~99% of bot hits.
+* Perf: FAQ extraction (`do_blocks()` + H2/H3 question regex) cached per-post in a 12h transient + per-request static.
+* UX: dropped the obsolete "niche" onboarding step. Onboarding is 4 steps instead of 5.
+* Cleanup: removed dead `ajax_save_niche` AJAX handler + JS markup, removed unused `i18n.syncing` localization, slimmed onboarding partial by 30+ lines of dead niche-picker UI.
 
 = 0.2.0 =
-* **First public release — Free tier.** The plugin ships fully self-contained: no backend, no SaaS proxy, no required external service.
-* Paid Pro tier is in development at quotedeasy.com — the Pro UI auto-appears once the operator's Lemon Squeezy store is wired up. Until then the plugin runs Free-only.
-* Architecture: standalone refactor. License module talks directly to Lemon Squeezy's License API; no JWT, no backend hop.
-* New: **AI Crawler Allowlist** — Allow / Block any of 14 supported bots from Settings. Blocked bots get HTTP 403 and a `Disallow` rule in robots.txt.
-* New: **Schema engine** — Article and FAQPage JSON-LD output on single posts/pages. Auto-detects active SEO plugins and defers Article to them in Auto mode. FAQ extraction from `[faq_item]` shortcodes and H2/H3 question patterns.
-* New: **BYO API keys** for Pro citation tracking — Perplexity and Tavily fields in Settings.
-* Dashboard rewritten to read 100% from local `wp_quoted_bot_log` — no backend call.
-* Drop legacy sync module (220 lines) and the three cron hooks it scheduled.
-* Trim `class-quoted-api-client.php` — no consumer left after the standalone refactor.
-* Settings: drop "Backend URL" field, drop "Tenant ID" / "Niche" rows.
-* Onboarding step 1: rewritten as license activation (or skip to Free).
-* Misc: 9 P0 bug fixes from the v0.1.0 → v0.1.1 audit cycle, including raw markdown emission from REST endpoints, real Chart.js 4.4.0 bundled, hash_ip inversion fix, settings save gate, save_post transient invalidation, and `/llms.txt` priority-1 template_redirect handler.
+* **First public release — Free tier.** Plugin ships fully self-contained — no backend, no SaaS proxy, no required external service.
+* AI Crawler Allowlist (allow/block per bot, robots.txt rule injection, HTTP 403 enforcement on blocked bots).
+* Schema Engine (Article + FAQPage JSON-LD with SEO-plugin conflict detection across 16 plugins).
+* Local-first dashboard reading from `wp_quoted_bot_log` table.
+* Markdown endpoint per post (raw text/markdown, not JSON-wrapped).
+* Multisite refuse + DOMDocument guard + admin notice for Plain permalinks + 7-day "no bots detected" advisory.
+* `Cache-Control: max-age=300, must-revalidate` on /llms.txt — no aggressive edge cache that holds stale content after post edits.
 
 = 0.1.0 =
-* Initial release
+* Initial scaffold (private)
 * 8-click onboarding
 * llms.txt generation
-* Markdown endpoints
-* 14 AI bot user-agents tracked
-* Free tier with 50-post limit
+* Markdown endpoints (JSON-wrapped — fixed in 0.2.0)
+* 14 AI bot user-agents tracked (expanded to 60+ in 0.3.0)
 
 == Upgrade Notice ==
 
 = 0.3.0 =
-Major bot-catalog expansion (14 → 60+ signatures). Performance improvements on the bot log and FAQ schema extraction. Removed the unused "niche" onboarding step. Safe drop-in upgrade.
+Major bot-catalog expansion (14 → 60+ signatures). Performance improvements on the bot log and FAQ schema extraction. Removed the unused niche onboarding step. Safe drop-in upgrade.
 
 = 0.2.0 =
-First public release. Free tier — no account needed, no data leaves your server. Pro features coming soon.
+First public release. Free tier — no account needed, no data leaves your server.
+
+== Privacy ==
+
+**What data the Free version processes**
+
+When an AI bot visits your site, Quoted logs:
+
+* The bot identifier (e.g. `ClaudeBot`, `GPTBot`) — extracted from the User-Agent header
+* Timestamp of visit (UTC)
+* Request URL path
+* Truncated User-Agent string (up to 512 chars)
+* Hashed IP address (SHA-256 of IP + a per-site salt) — or disabled entirely if you uncheck "Hash IPs" in Settings → Privacy
+
+All of this is stored in your WordPress database in the `wp_quoted_bot_log` table. **Nothing is sent to any external server in the Free version.** No telemetry. No phone-home. No analytics.
+
+**What the Free version does NOT process**
+
+* No personal data of human visitors — bot detection only fires for the 60+ known AI bot UAs.
+* No post content is ever transmitted off your server.
+* No user IDs, no login data, no session data.
+
+**External services (Pro tier only — not active in this release)**
+
+When the Pro tier launches at [quoted.io](https://quoted.io), it will introduce these outbound HTTP calls. Each is opt-in and described below for transparency. None of them activate until you explicitly enter a Pro license key.
+
+* `https://api.lemonsqueezy.com/v1/licenses/activate` — when you activate a license key. Payload: license key + your site hostname. Used to validate the seat and look up your subscription plan.
+* `https://api.lemonsqueezy.com/v1/licenses/validate` — once daily via cron. Same payload. Confirms the seat is still active so a cancelled subscription downgrades to Free.
+* `https://api.lemonsqueezy.com/v1/licenses/deactivate` — when you press "Deactivate license" in Settings.
+* `https://STORE.lemonsqueezy.com/buy/VARIANT` — the Lemon Squeezy hosted checkout, opened in a new tab when you click "Upgrade". No data is sent from the plugin to LS until you click.
+* `https://api.perplexity.ai` and `https://api.tavily.com` — only fired if you paste a Perplexity or Tavily API key into Settings AND trigger a Live AI Test or Citation Check. Quoted posts your query directly using YOUR API key — we never proxy and we never see the query.
+
+**Third-party services policies**
+
+* Lemon Squeezy (Merchant of Record for payments): https://www.lemonsqueezy.com/legal/privacy
+* Perplexity AI: https://www.perplexity.ai/hub/legal/privacy-policy
+* Tavily: https://tavily.com/terms
+
+**Your rights**
+
+You can export or delete all data Quoted holds locally via:
+
+* WordPress Tools → Export Personal Data
+* WordPress Tools → Erase Personal Data
+* Uninstalling the plugin removes the `wp_quoted_bot_log` table, all `quoted_*` options, all `_transient_quoted_*` transients, and all `_quoted_md_cache_key` post-meta entries.
+
+For data we hold on the Pro tier service (once launched), email privacy@quoted.io.
+
+**Disable external connections entirely**
+
+To run only the Free, fully-local features:
+
+* Do not enter a Pro license key in Settings.
+* Do not paste any API key into the Pro feature fields.
+
+That's the default state on activation. The plugin makes no outbound HTTP calls until you opt in.
+
+Last updated: 2026-05-23

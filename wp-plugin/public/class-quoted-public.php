@@ -92,7 +92,7 @@ class Quoted_Public {
 
 		echo '<div style="text-align:center;padding:10px;font-size:11px;color:#999;">';
 		echo 'AI-readable via ';
-		echo '<a href="https://quotedeasy.com" target="_blank" rel="noopener" style="color:#666;">Quoted</a>';
+		echo '<a href="https://quoted.io" target="_blank" rel="noopener" style="color:#666;">Quoted</a>';
 		echo '</div>';
 	}
 

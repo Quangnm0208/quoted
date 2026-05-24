@@ -431,7 +431,7 @@ class Quoted_Admin {
 			$next_action = array(
 				'title'       => __( 'No AI bot visits in 7+ days — check your firewall', 'quoted' ),
 				'description' => __( "ClaudeBot and GPTBot should have discovered /llms.txt by now. If you run Wordfence, Sucuri, or iThemes Security, their default WAF rules often block AI bot user-agents. Whitelist ClaudeBot, GPTBot, PerplexityBot, Google-Extended in your security plugin, or ask your host to allow them at the server level.", 'quoted' ),
-				'action_url'  => 'https://quotedeasy.com/docs/security-plugin-conflict',
+				'action_url'  => 'https://quoted.io/docs/security-plugin-conflict',
 			);
 		} elseif ( $total_this === 0 ) {
 			$next_action = array(

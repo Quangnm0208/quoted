@@ -18,17 +18,17 @@ msgstr ""
 
 #. Plugin Name of the plugin
 msgctxt ""
-msgid "Quoted — Make your WordPress site AI-readable"
+msgid "Quoted - AI Citation Tracker for WordPress"
 msgstr ""
 
 #. Plugin URI of the plugin
 msgctxt ""
-msgid "https://quotedeasy.com"
+msgid "https://quoted.io"
 msgstr ""
 
 #. Description of the plugin
 msgctxt ""
-msgid "Make your WordPress site readable by ChatGPT, Claude, Perplexity, and Google AI. Auto-generates llms.txt, serves clean Markdown per post, detects AI bot crawls, and lets you allow/block bots one by one."
+msgid "Track when ChatGPT, Claude, Perplexity cite your content. Free AI bot tracking (60+ bots), llms.txt generation, Markdown endpoints, and schema markup for WordPress."
 msgstr ""
 
 #. Author of the plugin
