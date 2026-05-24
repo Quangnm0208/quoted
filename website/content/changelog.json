@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "version": "0.2.0",
+      "date": "2026-05-23",
+      "summary": "First public release on WordPress.org -- Free tier shipped fully standalone.",
+      "fixed": [
+        "Serve /llms.txt at template_redirect priority 1 to beat redirect_canonical.",
+        "Match /llms.txt with or without trailing slash.",
+        "Invalidate stale markdown transients on save_post / before_delete_post.",
+        "Guard wp_is_xmlrpc_request() with function_exists()."
+      ],
+      "improved": [
+        "Standalone refactor -- license module talks directly to Lemon Squeezy License API; no JWT, no backend hop.",
+        "AI Crawler Allowlist -- allow / block any of 14 supported bots from settings.",
+        "Schema engine -- Article and FAQPage JSON-LD with conflict detection across 15+ SEO plugins.",
+        "BYO API keys for Pro citation tracking (Perplexity, Tavily).",
+        "Dashboard reads 100% from local wp_quoted_bot_log -- no external calls."
+      ],
+      "security": [
+        "P1 hardening rollup: serializer safety, JS XSS guard, proxy trust, JWT validation, AJAX returns."
+      ],
+      "notes": "Pro tier UI auto-appears once the Lemon Squeezy store is configured. Until then the plugin runs Free-only."
+    },
+    {
+      "version": "0.1.0",
+      "date": "2026-04-12",
+      "summary": "Initial scaffold release.",
+      "fixed": [],
+      "improved": [
+        "8-click onboarding wizard.",
+        "llms.txt generation.",
+        "Markdown endpoints.",
+        "14 AI bot user-agents tracked.",
+        "Free tier with 50-post limit."
+      ],
+      "security": [],
+      "notes": "Internal alpha. Not yet published to WordPress.org."
+    }
+  ]
+}

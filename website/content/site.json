@@ -1,0 +1,43 @@
+{
+  "name": "Quoted",
+  "tagline": "AI-ready WordPress in 30 seconds",
+  "description": "Get your WordPress content discovered, parsed, and cited by ChatGPT, Claude, Perplexity, and Google AI. Lightweight plugin. No code. Zero-click setup.",
+  "url": "https://quotedeasy.com",
+  "supportEmail": "support@quotedeasy.com",
+  "twitter": "@quotedeasy",
+  "wordpressPluginUrl": "https://wordpress.org/plugins/quoted/",
+  "githubUrl": "https://github.com/muahangngayvn/quoted",
+  "nav": [
+    { "label": "Pricing", "href": "/pricing" },
+    { "label": "Docs", "href": "/docs" },
+    { "label": "Blog", "href": "/blog" },
+    { "label": "FAQ", "href": "/faq" },
+    { "label": "Changelog", "href": "/changelog" }
+  ],
+  "footerSections": [
+    {
+      "title": "Product",
+      "links": [
+        { "label": "Pricing", "href": "/pricing" },
+        { "label": "Changelog", "href": "/changelog" },
+        { "label": "Documentation", "href": "/docs" },
+        { "label": "Download", "href": "https://wordpress.org/plugins/quoted/" }
+      ]
+    },
+    {
+      "title": "Resources",
+      "links": [
+        { "label": "Blog", "href": "/blog" },
+        { "label": "FAQ", "href": "/faq" },
+        { "label": "Support", "href": "/support" }
+      ]
+    },
+    {
+      "title": "Legal",
+      "links": [
+        { "label": "Privacy", "href": "/docs/privacy" },
+        { "label": "Terms", "href": "/docs/terms" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "currency": "USD",
+  "yearlyDiscountNote": "Save ~17% with annual billing",
+  "plans": [
+    {
+      "id": "free",
+      "name": "Free",
+      "tagline": "Everything you need to be AI-readable.",
+      "monthlyPrice": 0,
+      "yearlyPrice": 0,
+      "ctaLabel": "Install on WordPress.org",
+      "ctaHref": "https://wordpress.org/plugins/quoted/",
+      "checkoutEnv": null,
+      "highlight": false,
+      "features": [
+        "Auto-generated /llms.txt",
+        "Clean Markdown endpoint per post",
+        "Detect 14+ AI bots (ClaudeBot, GPTBot, PerplexityBot, ...)",
+        "Per-bot allowlist with HTTP 403 + robots.txt sync",
+        "Article + FAQ JSON-LD schema (conflict-aware with Yoast / Rank Math / AIOSEO)",
+        "Local dashboard with bot activity feed",
+        "GDPR-friendly: SHA-256 IP hashing, no external data",
+        "Up to 50 posts in /llms.txt"
+      ],
+      "limits": "1 site, 50 posts, 7-day bot history."
+    },
+    {
+      "id": "starter",
+      "name": "Starter",
+      "tagline": "For solo creators and small business sites.",
+      "monthlyPrice": 19,
+      "yearlyPrice": 190,
+      "ctaLabel": "Get Starter",
+      "ctaHref": null,
+      "checkoutEnv": {
+        "monthly": "NEXT_PUBLIC_LEMONSQUEEZY_STARTER_MONTHLY_URL",
+        "yearly": "NEXT_PUBLIC_LEMONSQUEEZY_STARTER_YEARLY_URL"
+      },
+      "highlight": false,
+      "features": [
+        "Everything in Free",
+        "Unlimited posts in /llms.txt",
+        "12-month bot crawl history",
+        "Live AI Test (BYO Perplexity / Tavily key)",
+        "Citation tracking, 10 prompts / week",
+        "Remove 'Powered by Quoted' badge",
+        "Email support"
+      ],
+      "limits": "1 site."
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "tagline": "For agencies, niche sites, and content teams.",
+      "monthlyPrice": 29,
+      "yearlyPrice": 290,
+      "ctaLabel": "Get Pro",
+      "ctaHref": null,
+      "checkoutEnv": {
+        "monthly": "NEXT_PUBLIC_LEMONSQUEEZY_PRO_MONTHLY_URL",
+        "yearly": "NEXT_PUBLIC_LEMONSQUEEZY_PRO_YEARLY_URL"
+      },
+      "highlight": true,
+      "badge": "Recommended",
+      "features": [
+        "Everything in Starter",
+        "Up to 5 sites on one license",
+        "Citation tracking, 40 prompts / week",
+        "Multi-provider: Perplexity + Tavily fallback",
+        "Niche benchmark (anonymous, opt-in)",
+        "CSV export of citations",
+        "Priority email support"
+      ],
+      "limits": "Up to 5 sites."
+    }
+  ],
+  "compareNote": "All plans include the maintenance contract: curated bot list updates, WordPress compatibility patches, schema conflict matrix across 15+ SEO plugins, and security hardening."
+}

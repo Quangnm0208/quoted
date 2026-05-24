@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "question": "What is Quoted?",
+      "answer": "Quoted is a WordPress plugin that makes your site readable by AI search engines like ChatGPT, Claude, Perplexity, and Google AI. It auto-generates `/llms.txt`, serves clean Markdown for each post, detects AI crawlers, and adds JSON-LD schema -- without conflicting with your existing SEO plugin."
+    },
+    {
+      "question": "Who is Quoted for?",
+      "answer": "Small business owners, WordPress agencies, SEO freelancers, content marketers, and niche site owners who want AI search engines to discover and cite their content. If you publish content on WordPress and want AI engines to read it properly, Quoted is for you."
+    },
+    {
+      "question": "Does Quoted replace SEO plugins like Yoast or Rank Math?",
+      "answer": "No. Quoted runs alongside Yoast, Rank Math, AIOSEO, SEOPress, and other SEO plugins. Those plugins optimize for Google's search bot. Quoted optimizes for AI bots -- they read your site differently. Quoted's schema engine auto-detects active SEO plugins and avoids duplicate JSON-LD."
+    },
+    {
+      "question": "Does Quoted work with Rank Math or Yoast?",
+      "answer": "Yes. Quoted's schema engine is in 'Auto' mode by default, which detects Yoast, Yoast Premium, Rank Math, Rank Math Pro, AIOSEO, AIOSEO Pro, SEOPress, SEOPress Pro, Slim SEO, Schema Pro, and 5+ others. When any are active, Quoted skips its Article schema to prevent duplicates and only emits FAQ schema that those plugins typically miss."
+    },
+    {
+      "question": "Is Quoted only for AI search?",
+      "answer": "Quoted is built for AI search first (ChatGPT, Claude, Perplexity, Gemini, AI Overviews, Apple Intelligence). But its features -- clean Markdown, FAQ schema, structured site index -- also help traditional search engines parse your content more accurately."
+    },
+    {
+      "question": "Do I need technical knowledge to use Quoted?",
+      "answer": "No. Quoted is designed for zero-click setup. Install, activate, and the plugin auto-detects your niche, enables features based on your environment (WooCommerce, recipe sites, multilingual), and starts serving /llms.txt within 30 seconds. No configuration required for the Free plan."
+    },
+    {
+      "question": "How does billing work?",
+      "answer": "Billing is handled securely by Lemon Squeezy. You can pay monthly or yearly with credit card or PayPal, and Lemon Squeezy handles VAT/sales tax for your region. Your license key is sent by email after purchase -- paste it into WordPress Admin -> Quoted -> Settings to unlock Pro features."
+    },
+    {
+      "question": "Can agencies use this for clients?",
+      "answer": "Yes. The Pro plan covers up to 5 sites. Agency multi-site licenses (10 / 30 sites) are on the roadmap. Each site activates independently with the same license key, and your client keeps their data locally -- nothing is sent to a central server."
+    },
+    {
+      "question": "Can I cancel anytime?",
+      "answer": "Yes. Cancel from your Lemon Squeezy customer portal at any time. Your plan stays active until the end of your billing period. After cancellation, the plugin reverts to the Free tier -- you keep /llms.txt, Markdown endpoints, schema, allowlist, and local bot history. Only Pro-only features (Live AI Test, citation tracking, extended history) lock."
+    },
+    {
+      "question": "Is there a free plan?",
+      "answer": "Yes. The Free plan is fully functional and will stay free forever. It includes /llms.txt generation, Markdown endpoints, 14 bot detection, per-bot allowlist, Article + FAQ schema, and the local dashboard -- enough to make any WordPress site AI-readable."
+    },
+    {
+      "question": "Will my data be sent to your servers?",
+      "answer": "No. The Free plan is fully standalone -- no data leaves your WordPress site. Pro features that call AI APIs (Perplexity, Tavily) use your own API key, configured locally in plugin settings. We never see your queries or content."
+    },
+    {
+      "question": "What about multilingual sites and CJK characters?",
+      "answer": "Quoted is UTF-8 throughout. Post titles, body content, and category names in Vietnamese, Japanese, Chinese, Korean, Arabic, and other scripts are preserved intact in the Markdown output."
+    }
+  ]
+}

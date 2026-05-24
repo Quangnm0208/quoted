@@ -1,0 +1,2 @@
+robots.txt is generated dynamically by Next.js at /robots.txt from app/robots.ts.
+This placeholder exists only so the public/ folder has at least one file in git.
