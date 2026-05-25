@@ -61,3 +61,21 @@ test('T-CMS-FE-5: programs (promotions) section header is CMS-editable', async (
   assert.ok(typeof programs.subtitle === 'string' && programs.subtitle.length > 0, 'programs.subtitle required');
   assert.ok(programs.payload && typeof programs.payload.eyebrow === 'string', 'programs.payload.eyebrow required');
 });
+
+test('T-CMS-FE-6: programs.items[] is seeded with 6 promotion cards', async () => {
+  const { body } = await get('/api/public/pages/quoted_home');
+  const programs = (body.sections || []).find(s => s.key === 'programs');
+  const items = programs.payload && programs.payload.items;
+  assert.ok(Array.isArray(items), 'programs.payload.items must be an array (migration 039 applied?)');
+  assert.equal(items.length, 6, 'expected 6 promotion cards');
+  const requiredFields = ['pill', 'title', 'body', 'cta_label', 'cta_url', 'meta'];
+  items.forEach((item, idx) => {
+    for (const f of requiredFields) {
+      assert.ok(typeof item[f] === 'string', `items[${idx}].${f} missing or not a string`);
+    }
+  });
+  // Sanity-check the first feature card exposes a copyable code
+  assert.equal(items[0].pill, 'Early bird');
+  assert.equal(items[0].code, 'EARLYBIRD30');
+  assert.equal(items[0].is_feature, true);
+});

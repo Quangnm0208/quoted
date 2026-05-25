@@ -128,6 +128,7 @@ export async function renderShell(activeTab, pageTitle) {
     { label: '', items: [{ id: 'dashboard', label: 'Dashboard', href: '/admin/dashboard.html', icon: icon.dashboard }] },
     { label: 'Content', items: [
       { id: 'articles', label: 'Bài viết', href: '/admin/articles.html', icon: icon.articles },
+      { id: 'pages', label: 'Pages', href: '/admin/pages.html', icon: icon.sections },
       { id: 'sections', label: 'Sections', href: '/admin/sections.html', icon: icon.sections },
       { id: 'media', label: 'Media', href: '/admin/media.html', icon: icon.media },
     ] },

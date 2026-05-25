@@ -63,8 +63,9 @@ old copy will keep showing on the site (no harm done).
 
 | Surface | Status | When |
 |---|---|---|
-| Home page sections after the hero (the shift demo, how-it-works, pricing cards, FAQ, etc.) | Static HTML | Milestone 2 |
-| The 6 promotion **cards** under the "Programs" header (Early bird, Money-back, Switch & save, Partner, Non-profit, Refer) | Static HTML — only the section header is CMS-editable today | Milestone 2 (needs a small list-renderer in `cms.js`) |
+| Home page sections after the hero (the shift demo, how-it-works, pricing cards, FAQ, etc.) | Static HTML | Milestone 3 |
+| The 6 promotion cards under the "Programs" header | ✅ CMS-editable as of M2 (pill, title, body, code, CTA label, CTA URL, meta — icons stay static) | — |
+| Other admin pages with write UI (Users, Tenants, License activate, Media upload) | Read-only in admin; writes via API | Milestone 3+ |
 | `/pricing`, `/faq`, `/success` pages | Static HTML | Milestone 3 |
 | `/docs`, `/blog`, `/changelog` lists | Static HTML | Milestone 4 |
 | Header logo, footer text, social links | Static HTML | Milestone 5 |
@@ -82,6 +83,11 @@ edit them the same way.
 |---|---|
 | Edit homepage hero copy | **Pages** → `quoted_home` → `hero` |
 | Edit promotions/programs header (eyebrow chip, heading, lead) | **Pages** → `quoted_home` → `programs` |
+| Edit any of the 6 promotion CARDS (pill, headline, body, CTA label, CTA URL, meta) | **Pages** → `quoted_home` → `programs` → edit `payload.items[N]` in the Payload JSON box |
+| Edit any site-wide config (logo, contact, SEO defaults, etc.) | **Site Settings** → click row → edit value → Save |
+| See who changed what + when | **Audit Log** (real data, not mock) |
+| See real users / tenants | **Users** / **Tenants** (read-only — write UI in M3) |
+| See real license plan status | **License** (read-only) |
 | Hide a section temporarily | Open the section → toggle `is_visible` off → save. Refresh site — section disappears, fallback HTML still rendered if any. |
 | See who changed what | **Audit log** — every section edit is recorded |
 | Upload an image to use later | **Media library** — for milestone 1 the upload works; wiring it onto the hero is milestone 6 |

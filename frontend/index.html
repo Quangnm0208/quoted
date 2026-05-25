@@ -1697,26 +1697,31 @@
       <p class="lead" data-cms="programs.subtitle">Discounts and partnerships we actually mean. No "limited-time offer that resets every Tuesday."</p>
     </div>
 
+    <!-- 6 promotion cards. Each <h3>/<p>/<a>/<span> with data-cms="programs.items.N.<field>"
+         is overwritten from CMS on load. SVG icons + per-card styling stay static —
+         only TEXT and URLs are CEO-editable. CMS edit path: /admin/pages → programs → payload.items[N] -->
     <div class="programs-grid">
       <!-- Feature: early bird -->
       <div class="program feature">
         <span class="program-pill">
           <span style="width:6px;height:6px;border-radius:50%;background:#fff;"></span>
-          Early bird
+          <span data-cms="programs.items.0.pill">Early bird</span>
         </span>
         <div class="program-ico">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
         </div>
-        <h3>30% off Pro for the first 100 agencies — for life.</h3>
-        <p>Lock in launch pricing while we finish citation history. Subscription stays at the discount as long as you renew. 17 of 100 spots claimed.</p>
+        <h3 data-cms="programs.items.0.title">30% off Pro for the first 100 agencies — for life.</h3>
+        <p data-cms="programs.items.0.body">Lock in launch pricing while we finish citation history. Subscription stays at the discount as long as you renew. 17 of 100 spots claimed.</p>
         <div class="row gap-12" style="margin-top:4px;flex-wrap:wrap;">
           <button class="program-code" onclick="navigator.clipboard?.writeText(this.firstElementChild.textContent);this.lastElementChild.style.opacity='1';setTimeout(()=>this.lastElementChild.style.opacity='0.6',1200);">
-            <span>EARLYBIRD30</span>
+            <span data-cms="programs.items.0.code">EARLYBIRD30</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6;transition:120ms;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
-          <a href="pricing.html" class="btn btn-sm btn-on-dark btn-primary" style="background:#fff;color:var(--q-primary-ink);">Claim my spot →</a>
+          <a data-cms-href="programs.items.0.cta_url" href="pricing.html" class="btn btn-sm btn-on-dark btn-primary" style="background:#fff;color:var(--q-primary-ink);">
+            <span data-cms="programs.items.0.cta_label">Claim my spot →</span>
+          </a>
         </div>
-        <span class="program-meta">
+        <span class="program-meta" data-cms="programs.items.0.meta">
           <span>17 / 100 claimed</span>
           <span>·</span>
           <span>Ends June 30, 2026</span>
@@ -1725,62 +1730,62 @@
 
       <!-- Money-back -->
       <div class="program">
-        <span class="program-pill">Guarantee</span>
+        <span class="program-pill" data-cms="programs.items.1.pill">Guarantee</span>
         <div class="program-ico">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1l3 6 6 .9-4.5 4.4 1 6.7L12 16l-5.5 3 1-6.7L3 7.9 9 7z"/></svg>
         </div>
-        <h3>30-day money-back guarantee.</h3>
-        <p>Try Starter or Pro for a month. If it doesn't fit your WordPress workflow, email us — we refund the full amount, no questions.</p>
-        <a href="faq.html#pricing" class="program-cta">How it works →</a>
-        <span class="program-meta"><span>Auto via Lemon Squeezy</span></span>
+        <h3 data-cms="programs.items.1.title">30-day money-back guarantee.</h3>
+        <p data-cms="programs.items.1.body">Try Starter or Pro for a month. If it doesn't fit your WordPress workflow, email us — we refund the full amount, no questions.</p>
+        <a data-cms-href="programs.items.1.cta_url" data-cms="programs.items.1.cta_label" href="faq.html#pricing" class="program-cta">How it works →</a>
+        <span class="program-meta"><span data-cms="programs.items.1.meta">Auto via Lemon Squeezy</span></span>
       </div>
 
       <!-- Switch & save -->
       <div class="program">
-        <span class="program-pill">Switch &amp; save</span>
+        <span class="program-pill" data-cms="programs.items.2.pill">Switch &amp; save</span>
         <div class="program-ico">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
         </div>
-        <h3>Already paying Yoast Premium or Rank Math Pro?</h3>
-        <p>Forward your last invoice to <code style="font-size:0.92em;background:var(--q-surface-2);padding:1px 6px;border-radius:4px;font-family:var(--q-font-mono);">switch@quotedeasy.com</code> and we'll cover your first 3 months on Starter or Pro.</p>
-        <a href="mailto:switch@quotedeasy.com" class="program-cta">Forward invoice →</a>
-        <span class="program-meta"><span>Yoast · Rank Math · AIOSEO · SEOPress</span></span>
+        <h3 data-cms="programs.items.2.title">Already paying Yoast Premium or Rank Math Pro?</h3>
+        <p data-cms="programs.items.2.body">Forward your last invoice to <code style="font-size:0.92em;background:var(--q-surface-2);padding:1px 6px;border-radius:4px;font-family:var(--q-font-mono);">switch@quotedeasy.com</code> and we'll cover your first 3 months on Starter or Pro.</p>
+        <a data-cms-href="programs.items.2.cta_url" data-cms="programs.items.2.cta_label" href="mailto:switch@quotedeasy.com" class="program-cta">Forward invoice →</a>
+        <span class="program-meta"><span data-cms="programs.items.2.meta">Yoast · Rank Math · AIOSEO · SEOPress</span></span>
       </div>
 
       <!-- Agency partner -->
       <div class="program">
-        <span class="program-pill">Partner</span>
+        <span class="program-pill" data-cms="programs.items.3.pill">Partner</span>
         <div class="program-ico">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
-        <h3>Agency partner program.</h3>
-        <p>Manage 5+ client sites? Get listed on our partner page, earn 25% recurring on every client you sign up, and unlock the Pro features across your client portfolio.</p>
-        <a href="mailto:partners@quotedeasy.com" class="program-cta">Apply →</a>
-        <span class="program-meta"><span>25% recurring · co-marketing</span></span>
+        <h3 data-cms="programs.items.3.title">Agency partner program.</h3>
+        <p data-cms="programs.items.3.body">Manage 5+ client sites? Get listed on our partner page, earn 25% recurring on every client you sign up, and unlock the Pro features across your client portfolio.</p>
+        <a data-cms-href="programs.items.3.cta_url" data-cms="programs.items.3.cta_label" href="mailto:partners@quotedeasy.com" class="program-cta">Apply →</a>
+        <span class="program-meta"><span data-cms="programs.items.3.meta">25% recurring · co-marketing</span></span>
       </div>
 
       <!-- Education / nonprofit -->
       <div class="program">
-        <span class="program-pill">Non-profit &amp; edu</span>
+        <span class="program-pill" data-cms="programs.items.4.pill">Non-profit &amp; edu</span>
         <div class="program-ico">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         </div>
-        <h3>50% off for schools and registered non-profits.</h3>
-        <p>Sites running on .edu, .ac, or registered 501(c) / equivalent get half off Starter or Pro for the lifetime of the subscription. One simple verification email.</p>
-        <a href="mailto:edu@quotedeasy.com" class="program-cta">Get verified →</a>
-        <span class="program-meta"><span>Universities · NGOs · libraries</span></span>
+        <h3 data-cms="programs.items.4.title">50% off for schools and registered non-profits.</h3>
+        <p data-cms="programs.items.4.body">Sites running on .edu, .ac, or registered 501(c) / equivalent get half off Starter or Pro for the lifetime of the subscription. One simple verification email.</p>
+        <a data-cms-href="programs.items.4.cta_url" data-cms="programs.items.4.cta_label" href="mailto:edu@quotedeasy.com" class="program-cta">Get verified →</a>
+        <span class="program-meta"><span data-cms="programs.items.4.meta">Universities · NGOs · libraries</span></span>
       </div>
 
       <!-- Referral -->
       <div class="program">
-        <span class="program-pill">Refer</span>
+        <span class="program-pill" data-cms="programs.items.5.pill">Refer</span>
         <div class="program-ico">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         </div>
-        <h3>Refer a friend. Get a month free.</h3>
-        <p>Every paying customer you refer credits one free month to your account. Stack them — your subscription can pay for itself with three referrals a year.</p>
-        <a href="pricing.html" class="program-cta">Get my link →</a>
-        <span class="program-meta"><span>1 month free per signup · no cap</span></span>
+        <h3 data-cms="programs.items.5.title">Refer a friend. Get a month free.</h3>
+        <p data-cms="programs.items.5.body">Every paying customer you refer credits one free month to your account. Stack them — your subscription can pay for itself with three referrals a year.</p>
+        <a data-cms-href="programs.items.5.cta_url" data-cms="programs.items.5.cta_label" href="pricing.html" class="program-cta">Get my link →</a>
+        <span class="program-meta"><span data-cms="programs.items.5.meta">1 month free per signup · no cap</span></span>
       </div>
     </div>
   </div>

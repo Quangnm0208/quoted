@@ -107,7 +107,8 @@ now includes the dev port `5500`. Production deploys must set
 |---|---|---|
 | 1 | Hero on `index.html` end-to-end + helper + seed + test + CEO guide | ✅ done |
 | 1b | Programs/promotions section **header** (eyebrow, h2, lead) — cards still static | ✅ done |
-| 2 | Remaining `index.html` sections (`the_shift`, `how_it_works`, `live_demo`, `product`, `pricing`, `testimonials`, `faq`, `final_cta`) **and** the 6 promotion CARDS (needs a list-renderer in `cms.js`) | ⏳ next |
+| 2 | **Admin UI rewired** (`page-content.js` was a Vinhomes mockup with 0 fetch calls — now calls `/api/admin/*` for real). Pages + Sections + Site Settings have real Save buttons. Users/Tenants/Audit/License/Leads/Media show real data read-only. Plus: 6 promotion CARDS on the home page wired via `data-cms="programs.items.N.field"` + dot-path extension in `cms.js` + migration 039 (json_set idempotent enrich). | ✅ done |
+| 3 | Remaining `index.html` sections (`the_shift`, `how_it_works`, `live_demo`, `product`, `pricing`, `testimonials`, `faq`, `final_cta`) | ⏳ next |
 | 3 | `pricing.html`, `faq.html`, `success.html` | ⏳ next |
 | 4 | `docs.html`, `blog.html`, `changelog.html` (article-list rendering) | ⏳ next |
 | 5 | Site settings (logo, footer, social links) wired into header/footer partials | ⏳ next |

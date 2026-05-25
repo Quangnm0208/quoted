@@ -60,14 +60,33 @@
   }
 
   // ── Field lookup ────────────────────────────────────────────────────
-  function pickField(section, field) {
-    if (!section) return null;
-    if (field === 'title') return section.title || null;
-    if (field === 'subtitle') return section.subtitle || null;
-    if (section.payload && Object.prototype.hasOwnProperty.call(section.payload, field)) {
-      return section.payload[field];
+  //
+  // Supports both flat and nested paths:
+  //   "title"                 → section.title
+  //   "subtitle"              → section.subtitle
+  //   "eyebrow"               → section.payload.eyebrow
+  //   "items.0.title"         → section.payload.items[0].title
+  //   "items.2.cta.url"       → section.payload.items[2].cta.url
+  //
+  // The first segment after `<section_key>.` is the field. Dots within
+  // the field walk into payload (or into section.title/subtitle when
+  // they are objects, which they normally aren't).
+  function pickField(section, fieldPath) {
+    if (!section || !fieldPath) return null;
+    const parts = String(fieldPath).split('.');
+    const head = parts[0];
+    let cursor;
+    if (head === 'title') cursor = section.title;
+    else if (head === 'subtitle') cursor = section.subtitle;
+    else cursor = section.payload ? section.payload[head] : undefined;
+    for (let i = 1; i < parts.length; i++) {
+      if (cursor == null) return null;
+      const key = parts[i];
+      // Numeric key → array index
+      const idx = /^\d+$/.test(key) ? Number(key) : key;
+      cursor = cursor[idx];
     }
-    return null;
+    return cursor == null ? null : cursor;
   }
 
   // ── Apply one attribute ─────────────────────────────────────────────
@@ -88,21 +107,26 @@
     el.setAttribute(attr, str);
   }
 
+  function splitBind(bind) {
+    // "programs.items.0.title" → ["programs", "items.0.title"]
+    var i = bind.indexOf('.');
+    if (i < 0) return null;
+    return [bind.slice(0, i), bind.slice(i + 1)];
+  }
+
   function hydrateElement(el, sectionsByKey) {
     var bind = el.getAttribute('data-cms');
     if (bind) {
-      var parts = bind.split('.');
-      if (parts.length === 2) {
-        applyTextContent(el, pickField(sectionsByKey[parts[0]], parts[1]));
-      }
+      var parts = splitBind(bind);
+      if (parts) applyTextContent(el, pickField(sectionsByKey[parts[0]], parts[1]));
     }
     var attrs = ['href', 'src', 'alt'];
     for (var i = 0; i < attrs.length; i++) {
       var a = attrs[i];
       var bound = el.getAttribute('data-cms-' + a);
       if (bound) {
-        var p = bound.split('.');
-        if (p.length === 2) applyAttr(el, a, pickField(sectionsByKey[p[0]], p[1]));
+        var p = splitBind(bound);
+        if (p) applyAttr(el, a, pickField(sectionsByKey[p[0]], p[1]));
       }
     }
   }
