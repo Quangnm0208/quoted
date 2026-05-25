@@ -71,6 +71,11 @@ export function recentCrawls(tenantId, limit = 8) {
   return stmt().recentCrawls.all(tenantId, limit);
 }
 
+/**
+ * Nightly cleanup hook — drops bot_crawls rows older than `days`.
+ * Not called yet (no cron in Phase 0). Wire from a scheduler when retention
+ * matters; until then writes accumulate but indexes make reads cheap.
+ */
 export function cleanupOld(days = 90) {
   return stmt().cleanupOld.run(days).changes;
 }

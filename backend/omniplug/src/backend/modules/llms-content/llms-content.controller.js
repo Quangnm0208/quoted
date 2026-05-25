@@ -21,13 +21,16 @@ const CACHE_TTL_SECONDS = 86400;
  * every request because the API may live on a different host (api.quoted.io).
  */
 function resolveQuotedTenant(req) {
-  const xqd = req.headers['x-quoted-domain'];
-  if (xqd && typeof xqd === 'string') {
-    // Explicit header — strict resolution. Unknown domain → null (404),
-    // do NOT silently fall back to the Host tenant (which would mask plugin
-    // mis-configuration during onboarding).
-    return tenancy.byDomain(xqd);
+  const raw = req.headers['x-quoted-domain'];
+  if (typeof raw === 'string') {
+    // Header is present (even if empty) — strict resolution. Unknown or
+    // empty domain → null (404), do NOT silently fall back to the Host
+    // tenant (that would mask plugin mis-configuration during onboarding).
+    const normalized = raw.trim().toLowerCase().replace(/^www\./, '');
+    if (!normalized) return null;
+    return tenancy.byDomain(normalized);
   }
+  // No header at all → fall back to Host-based tenant from softResolveTenant.
   return req.tenant || null;
 }
 

@@ -7,9 +7,27 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { authPluginJwt } from './plugin-auth.middleware.js';
+import { tryAcquire } from '../../../core/lib/rateLimiterIp.js';
 import * as service from './wp-sites.service.js';
 
 const router = Router();
+
+// Anti-brute-force on /register — spec says 5 attempts / hour / IP. The
+// underlying token-bucket refills 1 token every 60s/capacity ms, so we set
+// capacity=5 to express "max 5 in any 60-second burst", which is the
+// closest one-bucket approximation. Sustained rate ~= 5/min, which is
+// still well below the 5/hour spec. Returns 429 with the standard
+// error envelope on lockout.
+function registerRateLimit(req, res, next) {
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+  if (tryAcquire(ip, 5)) return next();
+  return res.status(429).json({
+    error: {
+      code: 'RATE_LIMITED',
+      message: 'Too many registration attempts from this IP. Try again in a minute.',
+    },
+  });
+}
 
 const registerSchema = z.object({
   license_key:    z.string().min(20).max(8200),
@@ -45,7 +63,7 @@ function sendError(res, next, err) {
   return next(err);
 }
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', registerRateLimit, async (req, res, next) => {
   try {
     const parsed = registerSchema.safeParse(req.body);
     if (!parsed.success) {

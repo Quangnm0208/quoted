@@ -1,6 +1,11 @@
 /**
  * citations repository — minimal Phase 0 implementation.
  * Schema is final (see migration 027); queries grow in Phase 2.
+ *
+ * `countVerifiedSince`, `countLikelySince`, `findRecent` are exported now
+ * so the Phase 2 dashboard wiring is a one-line change. They are NOT
+ * called in Phase 0 (the dashboard summary stubs citation counts as 0).
+ * Removing them would force Phase 2 to redesign the repo from scratch.
  */
 
 import db from '../../../core/db/connection.js';

@@ -49,7 +49,8 @@ export function buildSitemapMarkdown({ siteName, siteDomain, description, articl
 /**
  * Serialize a single article to markdown.
  *
- * @param {object} article — row from articles table
+ * @param {object} article — row from quoted_posts (passed in by the
+ *   llms-content controller — tenant-scoped at the call site)
  * @param {object} opts
  * @returns {string}
  */

@@ -100,6 +100,10 @@ export function markSynced(id) {
   stmt().markSynced.run(id);
 }
 
+/**
+ * Set the site's niche (used by Phase 3 niche benchmark). Not called yet
+ * by the WP plugin — the onboarding step that captures niche is Phase 1.
+ */
 export function setNiche(id, niche) {
   stmt().setNiche.run(niche, id);
 }
