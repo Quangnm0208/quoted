@@ -43,12 +43,19 @@ sqlite> DROP TABLE IF EXISTS wp_sites;
 
 **Symptom:** Plugin shows "Invalid license key format" on connect.
 
-**Cause:** License key not generated correctly, or extra whitespace.
+**Cause:** License key mistyped, or extra whitespace, or the LS webhook
+hasn't reached our backend yet (the customer activated within seconds of
+purchase and LS retry hasn't fired).
 
 **Fix:**
-1. Verify the key starts with `qtd_live_` or `qtd_test_`
-2. Run `node scripts/op-license-sign.js --verify <key>` — should print "valid"
-3. Check plugin is sending the key in `license_key` field (not `key`)
+1. Verify the key is a UUID in `8-4-4-4-12` format (Lemon Squeezy format,
+   e.g. `8a7b6c5d-4e3f-2a1b-0c9d-1234567890ab`).
+2. Check `webhook_events` in the backend DB — there should be a
+   `license_key_created` row with `signature_valid=1, processed=1`.
+3. If status is `LICENSE_NOT_YET_SYNCED` (503), wait 30s and retry — LS
+   may have delayed the webhook. After 5 min, check LS webhook delivery
+   log in the dashboard.
+4. Check plugin is sending the key in `license_key` field (not `key`).
 
 ---
 

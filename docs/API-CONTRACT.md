@@ -89,7 +89,7 @@ POST /api/v1/wp-sites/register HTTP/1.1
 Content-Type: application/json
 
 {
-  "license_key": "qtd_live_4a7f9c2b1e8d3a6f...",
+  "license_key": "8a7b6c5d-4e3f-2a1b-0c9d-1234567890ab",  // Lemon Squeezy UUID
   "domain": "marcus-outdoor.com",
   "wp_version": "6.5.2",
   "plugin_version": "0.1.0",

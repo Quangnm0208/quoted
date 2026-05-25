@@ -27,11 +27,10 @@ backend/
     │       ├── live-ai-test/       (overlay) Phase 0 stub
     │       └── llms-content/       (overlay) public llms.txt + post markdown
     ├── scripts/
-    │   ├── op-license-sign.js      Upstream operator-key signing CLI
-    │   ├── op-key-generate.js      Upstream operator-key generator
-    │   └── qtd-license-sign.js     (overlay) wraps op-license-sign into the
-    │                               `qtd_(live|test)_<jwt>` envelope the WP
-    │                               plugin expects.
+    │   ├── op-license-sign.js      Upstream operator-key signing CLI (kept
+    │   │                           for OmniPlug deployment licenses; not
+    │   │                           used by Quoted commercial flow anymore).
+    │   └── op-key-generate.js      Upstream operator-key generator.
     └── keys/                       op-license-pub.pem committed; *.priv.pem
                                     is .gitignored and operator-managed.
 ```
