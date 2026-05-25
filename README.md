@@ -1,8 +1,32 @@
-# Quoted v0.4.0 — Commercial WordPress Plugin + Backend
+# Quoted v0.5.0 — Commercial WordPress Plugin + CMS-driven marketing site + Backend
 
 **Owner:** Nguyễn Mạnh Quang &lt;quangnm0208@gmail.com&gt;
-**Status:** Commercial layer wired (Lemon Squeezy proxy + webhook + license activate). Test-mode end-to-end green; production gated on LS credentials.
+**Status:** Production-shape. Commercial layer wired (Lemon Squeezy proxy + webhook + license activate). Marketing site home page (hero + 6 promotion cards) edited from the admin — no developer needed. Admin UI calls the real backend (the pre-0.5 admin shipped as a mockup). Test-mode end-to-end green; production gated on LS credentials + domain mapping.
 **Date packaged:** 2026-05-25
+**Tests:** 19/19 (`npm test`)
+
+### What changed in 0.5 (high level)
+
+1. **Real CEO-editable home page.** The hero block (eyebrow, lead, both
+   CTAs) and the 6 launch promotion cards (pill, title, body, code, CTA
+   label/URL, meta) on `index.html` are now driven by `page_sections`
+   rows in SQLite. CEO logs in at `/admin/pages.html`, edits, saves,
+   hard-refreshes the marketing site → change is live.
+2. **Admin UI actually works.** The OmniPlug admin shipped in v0.4 was
+   a UI mockup with hardcoded Vinhomes (real-estate) demo data — Save
+   buttons did nothing. v0.5 rewrites every renderer to call the real
+   `/api/admin/*` endpoint. Read what really is in your DB; write what
+   you really want.
+3. **Visible build stamp + cache-bust.** The sidebar footer shows
+   `vX.Y.Z · admin build M2.1` so the operator can confirm a fresh
+   deploy. `/admin/*` static now sends `no-cache, must-revalidate` so
+   the browser stops pinning old ESM modules in memory.
+4. **CEO handoff doc.** [`docs/LAUNCH-HANDOFF.md`](docs/LAUNCH-HANDOFF.md)
+   is the single doc a non-technical CEO reads to know exactly what to
+   do to go live: domain, env vars, Lemon Squeezy webhook setup, the
+   11-step smoke test, the do-not-touch list. Plus
+   [`docs/CMS-CEO-GUIDE.md`](docs/CMS-CEO-GUIDE.md) covers daily content
+   operations.
 
 This package contains the complete buildable scaffold for the Quoted product:
 a WordPress plugin (PHP) + backend extensions to the existing OmniPlug CMS Core

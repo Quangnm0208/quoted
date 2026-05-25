@@ -7,6 +7,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-05-25 — Real CMS-driven marketing + functional admin
+
+The marketing site's home page can now be edited from the admin without
+code changes, and the admin UI itself was rewritten to actually call the
+backend (the previous shipping admin was a UI mockup with hardcoded
+Vinhomes real-estate demo data and zero fetch calls).
+
+### Added (M1 — hero through OmniPlug page_sections)
+- Migration `037_quoted_marketing_pages.sql` seeds `page_key=quoted_home`,
+  `section_key=hero` with the live Quoted hero copy. Idempotent
+  (`INSERT OR IGNORE`).
+- `frontend/assets/cms.js` (~150 LoC) — hydration helper. Reads
+  `data-cms` / `data-cms-href` bindings on the static HTML and patches
+  text + safe attrs only (never `innerHTML`). 5s fetch budget. Fail-safe
+  to static fallback if API down.
+- `frontend/index.html` hero is now CMS-editable: eyebrow chip, lead
+  paragraph, both CTA labels + URLs. `<h1>` stays static (inline
+  `<br>`+`<span class="accent">` — milestone 6 will add a whitelisted
+  mini-markup).
+- New test suite `quoted-test-cms-frontend.mjs` (T-CMS-FE-1..6) covering
+  endpoint shape, hero contract, cache header, programs header, promo
+  items array, unknown-page safety.
+
+### Added (M1b — promotions section header)
+- Migration `038_quoted_marketing_programs.sql` seeds the "Programs"
+  promotions section header (eyebrow / heading / lead paragraph) on
+  the home page.
+
+### Added (M2 — admin UI wired to real backend)
+- Full rewrite of `backend/omniplug/src/cms/admin/assets/page-content.js`.
+  Every renderer is async and calls the real `/api/admin/*` endpoint.
+  All Vinhomes demo arrays removed.
+- New `page-content-handlers.js` — centralised Save handlers:
+  - `.js-save-section` → `PATCH /api/admin/pages/sections/:id` with
+    inline JSON parse + busy state + toast feedback.
+  - `.js-save-site` → `PUT /api/admin/site/:key` (the upstream uses PUT,
+    not PATCH; the original mock UI would have hit the wrong verb).
+- `page-init.js` now `await`s the async renderer and shows a loading
+  skeleton between the chrome and the data.
+- New `renderPagesAdmin` (the old admin had no `pages:` case at all —
+  `/admin/pages.html` was falling back to the dashboard renderer).
+  Groups sections by `page_key`, renders an inline form per section
+  with Title / Subtitle / Payload JSON / Visible toggle + Save button.
+- `renderSite` is a real per-key editor backed by `/api/admin/site`.
+- `renderUsers`, `renderTenants`, `renderAudit`, `renderLicense`,
+  `renderLeads`, `renderMedia`, `renderArticles`, `renderProjects`
+  show real DB data read-only with a warning banner where the write UI
+  is deferred (queued for M3).
+- `renderDashboard` shows real counts (users, tenants, sections, audit
+  entries, leads, site config keys, license plan) instead of fake KPI
+  numbers.
+- `frontend/assets/cms.js`: `pickField` extended to walk dot paths
+  (`programs.items.0.title` → `payload.items[0].title`). Backward
+  compatible with the flat `hero.subtitle` style.
+- Migration `039_quoted_marketing_programs_items.sql` enriches the
+  `programs` payload with `items[]` for all 6 launch cards (Early bird,
+  Guarantee, Switch & save, Partner, Non-profit & edu, Refer) via
+  `json_set` guarded by `json_extract($.items) IS NULL` — strictly
+  idempotent + never overwrites operator edits.
+- `frontend/index.html`: all 6 promotion cards now bind to
+  `programs.items.N.{pill,title,body,code,cta_label,cta_url,meta}`.
+  SVG icons + per-card styling stay static.
+- `pages.html` `data-page` fixed from `sections` → `pages`.
+- Sidebar gains a Pages link (was missing).
+
+### Fixed (M2.1 — final mock scrub + cache strategy)
+- Three remaining hardcoded `vinhomes.vn` strings in `shell.js`:
+  the email fallback, the brand sub-line, and the `'Pro'` role label.
+  Brand sub now resolves from `/api/admin/tenants` (the current tenant's
+  domain).
+- Brand name flipped from "OmniPlug CMS" → "Quoted CMS".
+- Login form placeholder updated from `admin@vinhomes.vn` →
+  `admin@quoted.local`.
+- `/admin/*` static assets now send `Cache-Control: no-cache,
+  must-revalidate` — without this, ESM modules were pinned in browser
+  memory and the new admin UI was invisible until the operator manually
+  hard-refreshed.
+- New visible build stamp in the sidebar footer (`vX.Y.Z · admin build
+  M2.1`) so the operator can confirm a fresh deploy at a glance.
+
+### Fixed (pre-existing P1 in `.env.example`)
+- `LEMONSQUEEZY_TEST_MODE` defaulted to `false`, contradicting the
+  README's "default `.env` ships in `TEST_MODE=true`" promise and
+  breaking the SDK + checkout suites on every fresh bootstrap.
+  Restored to `true` + added placeholder hosted-checkout URLs so
+  `npm test` is 19/19 green from a clean install.
+- `CORS_ORIGIN` now includes `:5500` (the marketing site dev port —
+  `npm run fe`) and the `127.0.0.1` variants so CMS hydration is not
+  blocked in dev.
+
+### Docs
+- `docs/CMS-FRONTEND-INTEGRATION.md` — design + milestone roadmap
+  (M1..M7).
+- `docs/CMS-CEO-GUIDE.md` — CEO operator walkthrough: what's editable
+  today, what's coming, what never to touch.
+- `docs/LAUNCH-HANDOFF.md` — 10-section CEO handoff: exec summary,
+  production checklist, Lemon Squeezy webhook setup, domain mapping,
+  sales flow, smoke test, do-not-touch list, commercial-readiness
+  statement, one-page operator instruction.
+
+### Tests
+- `npm test`: 19/19 pass (was 16/19 before TEST_MODE fix; +6 new
+  CMS-frontend assertions; no regression on the 15 commercial
+  T-PAY/T-LIC/T-E2E tests).
+
 ## [0.4.0] — 2026-05-25 — Commercial layer
 
 ### Added
