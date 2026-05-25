@@ -152,16 +152,27 @@ export async function renderShell(activeTab, pageTitle) {
       { id: 'posts', label: 'Synced Posts', href: '/admin/posts.html', icon: icon.articles },
       { id: 'webhookevents', label: 'Webhook Events', href: '/admin/webhook-events.html', icon: icon.audit },
     ] },
-    { label: 'Marketing CMS', items: [
-      { id: 'pages', label: 'Pages (hero, promos)', href: '/admin/pages.html', icon: icon.sections },
-      { id: 'sections', label: 'Sections (flat)', href: '/admin/sections.html', icon: icon.sections },
-      { id: 'articles', label: 'Blog Articles', href: '/admin/articles.html', icon: icon.articles },
-      { id: 'site', label: 'Site Settings', href: '/admin/site.html', icon: icon.site },
+    // v0.7.1 — split Marketing CMS into CMS (editorial) + Marketing Admin
+    // (commercial). Per docs/NAVIGATION_MAPPING.md. ROUTES UNCHANGED — this
+    // is purely a sidebar grouping + label change. Every page renders from
+    // the same data-page attribute and the same renderer in page-content.js.
+    //
+    // CMS = "what content do we publish on the website?"
+    { label: 'CMS', items: [
+      { id: 'articles', label: 'Posts / Articles', href: '/admin/articles.html', icon: icon.articles },
       { id: 'media', label: 'Media Library', href: '/admin/media.html', icon: icon.media },
+    ] },
+    // Marketing Admin = "how do we sell and position the product?"
+    { label: 'Marketing Admin', items: [
+      { id: 'pages', label: 'Product Pages', href: '/admin/pages.html', icon: icon.sections },
+      { id: 'sections', label: 'Landing Sections', href: '/admin/sections.html', icon: icon.sections },
       { id: 'leads', label: 'Leads', href: '/admin/leads.html', icon: icon.leads },
     ] },
+    // System = "how is the admin system configured?" Site Settings moved
+    // here per master prompt §5 sidebar spec (Settings → System).
     { label: 'System', items: [
       { id: 'dashboard', label: 'OmniPlug Dashboard', href: '/admin/dashboard.html', icon: icon.dashboard },
+      { id: 'site', label: 'Settings', href: '/admin/site.html', icon: icon.site },
       { id: 'users', label: 'Admin Users', href: '/admin/users.html', icon: icon.users },
       { id: 'tenants', label: 'Tenants', href: '/admin/tenants.html', icon: icon.tenants },
       { id: 'audit', label: 'Audit Log', href: '/admin/audit.html', icon: icon.audit },
@@ -231,7 +242,7 @@ export async function renderShell(activeTab, pageTitle) {
 
 // Bump on every functional admin UI change so the user sees a new
 // stamp in the sidebar footer and knows the file isn't a stale cache.
-export const ADMIN_BUILD = 'v0.7.0 / M4';
+export const ADMIN_BUILD = 'v0.7.1';
 
 export function themeSwitcher() {
   const current = getTheme();

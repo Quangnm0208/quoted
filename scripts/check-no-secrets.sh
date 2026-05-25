@@ -134,8 +134,10 @@ if [ -n "$DEFAULTS" ]; then
     [ -z "$f" ] && continue
     case "$f" in
       # Legitimate dev/scaffold files: env validator, dev seed, dev docker, smoke
-      # test, local .env (gitignored anyway), all docs.
+      # test, local .env (gitignored anyway), all docs, all test files (any
+      # tests/* path or *.test.* or *test*.mjs naming convention).
       */env.js|*/migrate.js|*/seed.js|*/smoke.js|*/docker-compose.yml|*/.env|*/.env.example|*.md) continue ;;
+      */tests/*|*test*.mjs|*test*.js|*.test.*) continue ;;
       *) REAL_LEAK="$REAL_LEAK$f"$'\n' ;;
     esac
   done <<<"$DEFAULTS"

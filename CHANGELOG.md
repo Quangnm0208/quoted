@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-05-25 — Admin sidebar restructure: CMS vs Marketing Admin
+
+UX refinement release per master prompt v0.7.1 directive: split the
+overloaded "Marketing CMS" sidebar group into two clearer groups —
+**CMS** (editorial publishing) and **Marketing Admin** (product/sales
+surfaces). Plus Site Settings moves to System (infrastructure).
+
+ZERO functional change. ZERO routes moved. ZERO API touched. ZERO DB
+migration. Pure sidebar config edit in `shell.js::navGroups[]`.
+
+Group splits:
+  CMS              ← Posts/Articles + Media Library
+  Marketing Admin  ← Product Pages + Landing Sections + Leads
+  System           ← (existing) + Settings moved in
+
+Label changes (display only; ids preserved so active-route highlighting
+still works without code touch):
+  Blog Articles            → Posts / Articles
+  Pages (hero, promos)     → Product Pages
+  Sections (flat)          → Landing Sections
+  Site Settings            → Settings
+
+Verification: npm test 20/20 unchanged, security smoke 9/9 unchanged,
+admin renderer simulator 19/19 unchanged. Every admin URL returns 200.
+
+See `docs/RELEASE_NOTES_v0.7.1.md` for the full master-prompt §17
+acceptance gate + per-item per-group spec.
+
 ## [0.7.0] — 2026-05-25 — Blog/article content management
 
 Adds full content management to Quoted CMS — CEO can publish blog
