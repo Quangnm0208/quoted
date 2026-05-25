@@ -203,7 +203,11 @@ app.use('/api/admin/license', normalizeLicenseBodyParserError);
 // verification can compute against the exact bytes LS signed. Mount the
 // raw-body parser BEFORE the global express.json() so the JSON parser
 // doesn't consume the stream first. Limit 1 MB (LS payloads are ~5 KB).
-app.use('/api/payments/webhook/lemon-squeezy', express.raw({ type: '*/*', limit: '1mb' }));
+// Raw-body parser for EVERY vendor's webhook. The vendor-agnostic router
+// at /api/payments/webhook/:vendor picks the provider and verifies HMAC
+// against the exact bytes the vendor signed. Mount BEFORE the global
+// express.json() so the JSON parser doesn't consume the stream first.
+app.use('/api/payments/webhook', express.raw({ type: '*/*', limit: '1mb' }));
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
@@ -401,7 +405,7 @@ app.get('/api/v1/health/legacy-traffic', (req, res) => {
 // (decoded inside the router). /api/payments/webhook/lemon-squeezy uses
 // HMAC against the raw body.
 app.use('/api/payments',                       quotedPaymentsRouter);
-app.use('/api/payments/webhook/lemon-squeezy', quotedWebhookRouter);
+app.use('/api/payments/webhook', quotedWebhookRouter);
 app.use('/api/products',                       quotedProductsRouter);
 app.use('/api/v1/licenses',                    quotedLicensesRouter);
 

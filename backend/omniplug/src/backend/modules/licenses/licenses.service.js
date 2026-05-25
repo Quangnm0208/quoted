@@ -21,9 +21,15 @@
 
 import jwt from 'jsonwebtoken';
 import { env } from '../../../core/config/env.js';
-import { callLicenseApi } from '../payments/lemon-squeezy.client.js';
+import { getProvider, getProviderForPlan } from '../providers/index.js';
 import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../entitlements/entitlement.repository.js';
 import { planIdFromVariantId, getPlan } from '../plans/plans.config.js';
+
+// Default provider — used when a license has no recorded vendor (the
+// common case before we add a second provider). Looking it up by id
+// keeps this file vendor-agnostic. Future: persist customer_licenses.provider_id
+// per row and look up here.
+const DEFAULT_PROVIDER_ID = 'lemon-squeezy';
 
 const ACTIVATION_TOKEN_TTL = 24 * 3600;  // 24h — plugin re-validates daily
 
@@ -65,44 +71,42 @@ export function decodeActivationToken(token) {
 export async function activate({ license_key, site_url, plugin_version, wp_version }) {
   const hash = hashLicenseKey(license_key);
   let license = entitlementRepo.findLicenseByHash(hash);
+  const provider = getProvider(DEFAULT_PROVIDER_ID);
+  if (!provider) throw err('NO_PROVIDER', 'No payment provider configured.', 500);
 
-  // Path A: license unknown locally — try LS.
+  // Path A: license unknown locally — try the provider directly.
   if (!license) {
-    const lsRes = await callLicenseApi('/licenses/activate', {
+    const lsRes = await provider.activateLicense({
       license_key,
       instance_name: siteInstanceName(site_url),
     });
-    if (lsRes.status === 0) {
-      // LS unreachable. Webhook may arrive shortly with the license_key_created event.
+    if (lsRes.unreachable) {
       throw err('LICENSE_NOT_YET_SYNCED', 'License not yet synced. Retry in a moment.', 503);
     }
-    if (!lsRes.ok || !lsRes.body?.activated) {
-      throw err('LICENSE_NOT_FOUND', 'License key not recognised.', 404, lsRes.body?.error || null);
+    if (!lsRes.ok) {
+      throw err('LICENSE_NOT_FOUND', 'License key not recognised.', 404, lsRes.error || null);
     }
-    // Materialise locally from LS response. This rarely runs in steady state —
-    // webhook usually beats activate. But it handles the "webhook ran late" case.
-    const lsLicense = lsRes.body.license_key;
-    const lsMeta    = lsRes.body.meta;
-    const lemonCustomerId = lsMeta?.customer_id;
+    // Materialise locally from the provider's response. Rare in steady state —
+    // webhook usually beats activate. Handles the "webhook ran late" case.
+    const meta = lsRes.license_meta;
     const customer = entitlementRepo.upsertCustomerByLemon({
-      email: lsMeta?.customer_email || `unknown-${lemonCustomerId}@unknown.local`,
-      name: lsMeta?.customer_name,
-      lemon_customer_id: lemonCustomerId,
+      email: meta.customer_email || `unknown-${meta.customer_id}@unknown.local`,
+      name: meta.customer_name,
+      lemon_customer_id: meta.customer_id,
     });
-    const variantId = lsMeta?.variant_id;
-    const planId = planIdFromVariantId(variantId);
-    if (!planId) throw err('UNKNOWN_PLAN', `Variant ${variantId} not mapped to a plan.`, 500);
+    const planId = planIdFromVariantId(meta.variant_id);
+    if (!planId) throw err('UNKNOWN_PLAN', `Variant ${meta.variant_id} not mapped to a plan.`, 500);
     const plan = getPlan(planId);
     license = entitlementRepo.upsertLicense({
-      lemon_license_id: lsLicense.id,
+      lemon_license_id: meta.lemon_license_id,
       customer_id: customer.id,
       subscription_id: null,
       license_key_hash: hash,
       license_key_short: shortLicenseKey(license_key),
-      status: lsLicense.status || 'active',
-      activation_limit: lsLicense.activation_limit || 1,
-      instances_count: lsLicense.activation_usage || 0,
-      expires_at: lsLicense.expires_at || null,
+      status: meta.status,
+      activation_limit: meta.activation_limit,
+      instances_count: meta.activation_usage,
+      expires_at: meta.expires_at,
     });
     entitlementRepo.upsertEntitlement({
       customer_id: customer.id,
@@ -112,11 +116,10 @@ export async function activate({ license_key, site_url, plugin_version, wp_versi
       quota: { tier: plan.tier, billing_cycle: plan.billing_cycle },
       status: 'active',
     });
-    // LS already incremented instances_count on its side; mirror locally.
     return finishActivation({ license, customer, planId, plan, site_url });
   }
 
-  // Path B: known locally — gate on status + limit, then call LS.
+  // Path B: known locally — gate on status + limit, then confirm with provider.
   if (license.status === 'disabled') {
     throw err('LICENSE_DISABLED', 'License has been disabled.', 410);
   }
@@ -131,20 +134,19 @@ export async function activate({ license_key, site_url, plugin_version, wp_versi
     );
   }
 
-  const lsRes = await callLicenseApi('/licenses/activate', {
+  const lsRes = await provider.activateLicense({
     license_key,
     instance_name: siteInstanceName(site_url),
   });
-  if (lsRes.status === 0) {
-    // LS unreachable but we have local entitlement. We could grant offline,
-    // but then instances_count drifts. Safer to fail.
+  if (lsRes.unreachable) {
+    // Provider unreachable but we have local entitlement. Safer to fail
+    // than to drift instances_count.
     throw err('UPSTREAM_UNAVAILABLE', 'License service unreachable. Try again shortly.', 503);
   }
-  if (!lsRes.ok || !lsRes.body?.activated) {
-    throw err('LICENSE_NOT_ACTIVATABLE', lsRes.body?.error || 'License could not be activated.', 400, lsRes.body);
+  if (!lsRes.ok) {
+    throw err('LICENSE_NOT_ACTIVATABLE', lsRes.error || 'License could not be activated.', 400);
   }
   entitlementRepo.incrementInstances(license.id);
-  // Reload the updated row.
   license = entitlementRepo.findLicenseByHash(hash);
 
   const customer = { id: license.customer_id };
@@ -212,13 +214,16 @@ export async function deactivate({ token, site_url, license_key }) {
   const lic = lookupLicenseById(claims.license_id);
   if (!lic) return { ok: true };  // already gone
 
-  // Best-effort LS deactivate. Don't fail if LS is down — the customer
-  // gets stuck otherwise. We still decrement locally.
+  // Best-effort provider deactivate. Don't fail if the upstream is down —
+  // the customer gets stuck otherwise. We still decrement locally.
   if (license_key) {
-    await callLicenseApi('/licenses/deactivate', {
-      license_key,
-      instance_id: siteInstanceName(site_url),
-    });
+    const provider = getProvider(DEFAULT_PROVIDER_ID);
+    if (provider) {
+      await provider.deactivateLicense({
+        license_key,
+        instance_id: siteInstanceName(site_url),
+      });
+    }
   }
   entitlementRepo.decrementInstances(lic.id);
   return { ok: true };

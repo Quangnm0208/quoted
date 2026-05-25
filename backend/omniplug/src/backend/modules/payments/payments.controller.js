@@ -1,20 +1,32 @@
 /**
- * Payments controller.
+ * Payments controller — vendor-agnostic checkout + webhook + plans.
  *
  * Routes mounted at:
  *   POST /api/payments/checkout                 — visitor selects plan → checkout URL
  *   GET  /api/products/plans                    — public plan catalogue (FE-safe)
- *   POST /api/payments/webhook/lemon-squeezy    — LS server-to-server hook
+ *   POST /api/payments/webhook/:vendor          — generic webhook receiver,
+ *                                                  dispatches to providers[vendor]
  *
- * The webhook route requires the RAW request body for HMAC verification.
- * Mounting order in server.js handles that — see comments there.
+ * Webhook flow (same for every vendor):
+ *   1. Look up provider by :vendor — 404 UNKNOWN_PROVIDER on miss.
+ *   2. provider.verifyWebhookSignature(rawBody, headers) — 401 BAD_SIGNATURE on miss.
+ *   3. JSON parse the body — 400 INVALID_JSON on miss.
+ *   4. provider.parseEvent(json) → { event_id, event_name } — 400 INVALID_EVENT on miss.
+ *   5. webhook_events INSERT OR IGNORE on event_id — duplicate → 200 ok+duplicate.
+ *   6. provider.isSupportedEvent? — no → mark processed + 200 ignored.
+ *   7. provider.handleEvent(event_name, json) — throw → mark failed + 200 ok:false.
+ *   8. Mark processed + 200 ok:true.
+ *
+ * This file knows NOTHING about Lemon Squeezy specifically. Adding Stripe =
+ * drop providers/stripe/index.js + register it; this file unchanged.
  */
 
 import { Router } from 'express';
 import { z } from 'zod';
 import { tryAcquire } from '../../../core/lib/rateLimiterIp.js';
 import * as service from './payments.service.js';
-import { handleWebhook } from './webhook.handlers.js';
+import { getProvider } from '../providers/index.js';
+import * as eventStore from './webhook-events.repository.js';
 
 // ─── /api/payments ────────────────────────────────────────────────────
 export const paymentsRouter = Router();
@@ -25,7 +37,6 @@ const checkoutSchema = z.object({
 });
 
 function checkoutRateLimit(req, res, next) {
-  // Pre-purchase endpoint — fairly liberal (10/min/IP).
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
   if (tryAcquire(ip, 10)) return next();
   return res.status(429).json({
@@ -33,7 +44,7 @@ function checkoutRateLimit(req, res, next) {
   });
 }
 
-paymentsRouter.post('/checkout', checkoutRateLimit, (req, res, next) => {
+paymentsRouter.post('/checkout', checkoutRateLimit, async (req, res, next) => {
   try {
     const parsed = checkoutSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -41,7 +52,7 @@ paymentsRouter.post('/checkout', checkoutRateLimit, (req, res, next) => {
         error: { code: 'INVALID_REQUEST', message: 'Checkout payload invalid', details: parsed.error.flatten() },
       });
     }
-    const result = service.createCheckout(parsed.data);
+    const result = await service.createCheckout(parsed.data);
     return res.status(200).json(result);
   } catch (e) {
     if (e.code) {
@@ -53,23 +64,68 @@ paymentsRouter.post('/checkout', checkoutRateLimit, (req, res, next) => {
   }
 });
 
-// ─── /api/payments/webhook/lemon-squeezy ──────────────────────────────
+// ─── /api/payments/webhook/:vendor ────────────────────────────────────
 //
-// Receives raw body via express.raw({type: '*/*'}) mounted upstream of
-// this router. The handler verifies HMAC + persists the event + processes
-// idempotently. Returns 200 quickly even on duplicates so LS stops retrying.
+// raw-body parser is mounted at /api/payments/webhook/ in server.js — so
+// req.body here is a Buffer. We extract :vendor from the URL, dispatch.
 export const webhookRouter = Router();
 
-webhookRouter.post('/', async (req, res) => {
+webhookRouter.post('/:vendor', async (req, res) => {
+  const vendor = String(req.params.vendor || '').toLowerCase();
+  const provider = getProvider(vendor);
+  if (!provider) {
+    return res.status(404).json({
+      error: { code: 'UNKNOWN_PROVIDER', message: `No payment provider registered for "${vendor}"` },
+    });
+  }
+
+  const rawBody = req.body;  // Buffer
+  if (!provider.verifyWebhookSignature(rawBody, req.headers)) {
+    return res.status(401).json({
+      error: { code: 'BAD_SIGNATURE', message: 'Signature mismatch' },
+    });
+  }
+
+  let payload;
   try {
-    const rawBody = req.body;  // Buffer (because express.raw)
-    const signature = req.headers['x-signature'];
-    const result = await handleWebhook(rawBody, signature);
-    return res.status(result.httpStatus).json(result.body);
+    payload = JSON.parse(Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : String(rawBody));
+  } catch {
+    return res.status(400).json({
+      error: { code: 'INVALID_JSON', message: 'Webhook body not JSON' },
+    });
+  }
+
+  const event = provider.parseEvent(payload);
+  if (!event) {
+    return res.status(400).json({
+      error: { code: 'INVALID_EVENT', message: 'Provider could not parse the event' },
+    });
+  }
+
+  const rawStr = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : String(rawBody);
+  const { isNew } = eventStore.recordEventIfNew({
+    eventId: `${vendor}:${event.event_id}`,  // namespace event_id by vendor so two providers can share UUID space
+    eventName: event.event_name,
+    signatureValid: true,
+    rawPayload: rawStr,
+  });
+  if (!isNew) {
+    return res.status(200).json({ ok: true, duplicate: true });
+  }
+
+  if (provider.isSupportedEvent && !provider.isSupportedEvent(event.event_name)) {
+    eventStore.markProcessed(`${vendor}:${event.event_id}`);
+    return res.status(200).json({ ok: true, ignored: event.event_name });
+  }
+
+  try {
+    await provider.handleEvent(event.event_name, payload);
+    eventStore.markProcessed(`${vendor}:${event.event_id}`);
+    return res.status(200).json({ ok: true, event_name: event.event_name });
   } catch (e) {
-    // Webhook handlers swallow their own errors; this is a last-ditch catch.
-    console.error('[webhook] unhandled:', e);
-    return res.status(500).json({ error: { code: 'WEBHOOK_FAILED', message: 'Internal error' } });
+    eventStore.markFailed(`${vendor}:${event.event_id}`, e.message);
+    console.error(`[webhook/${vendor}] handler failed for ${event.event_name}:`, e);
+    return res.status(200).json({ ok: false, event_name: event.event_name, error: e.message });
   }
 });
 

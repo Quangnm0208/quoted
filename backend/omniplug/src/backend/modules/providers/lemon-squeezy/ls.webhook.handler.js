@@ -25,14 +25,16 @@
  * with raw_payload kept for future expansion. Returns 200.
  */
 
-import db from '../../../core/db/connection.js';
-import { transaction } from '../../../core/db/connection.js';
-import { verifyWebhookSignature } from './lemon-squeezy.client.js';
-import * as eventStore from './webhook-events.repository.js';
-import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../entitlements/entitlement.repository.js';
-import { planIdFromVariantId, getPlan } from '../plans/plans.config.js';
+// Moved from payments/webhook.handlers.js as part of the providers/ seam
+// (M6). The vendor-agnostic flow control (HMAC verify → idempotency log →
+// dispatch by event_name) now lives in payments/payments.controller.js +
+// providers/index.js; this file is purely the LS event handlers.
 
-const SUPPORTED = new Set([
+import db, { transaction } from '../../../../core/db/connection.js';
+import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../../entitlements/entitlement.repository.js';
+import { planIdFromVariantId, getPlan } from '../../plans/plans.config.js';
+
+export const SUPPORTED_EVENTS = new Set([
   'order_created',
   'subscription_created',
   'subscription_updated',
@@ -44,63 +46,15 @@ const SUPPORTED = new Set([
 ]);
 
 /**
- * Top-level entry called by the controller.
- * Returns { httpStatus, body } — controller wraps as the HTTP response.
+ * Vendor-specific event dispatcher. Called by the LS provider's
+ * handleEvent(). Throws on logic failure — the caller logs to
+ * webhook_events with error_message.
+ *
+ * HMAC verify, JSON parse, event_id extraction, idempotency log, and
+ * "unsupported event → 200 ignored" are NOT here anymore — they live in
+ * payments/payments.controller.js so the same flow runs for every vendor.
  */
-export async function handleWebhook(rawBody, signatureHeader) {
-  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-  if (!secret) {
-    // Configuration error — refuse silently so we don't leak the gap.
-    console.warn('[webhook] LEMONSQUEEZY_WEBHOOK_SECRET not configured — rejecting');
-    return { httpStatus: 503, body: { error: { code: 'WEBHOOK_NOT_CONFIGURED', message: 'Server not configured' } } };
-  }
-
-  const sigOk = verifyWebhookSignature(rawBody, signatureHeader || '', secret);
-  if (!sigOk) {
-    return { httpStatus: 401, body: { error: { code: 'BAD_SIGNATURE', message: 'Signature mismatch' } } };
-  }
-
-  let payload;
-  try {
-    payload = JSON.parse(Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : String(rawBody));
-  } catch {
-    return { httpStatus: 400, body: { error: { code: 'INVALID_JSON', message: 'Webhook body not JSON' } } };
-  }
-
-  const eventName = payload?.meta?.event_name;
-  const eventId   = payload?.meta?.webhook_id || payload?.meta?.event_id;
-  if (!eventName || !eventId) {
-    return { httpStatus: 400, body: { error: { code: 'INVALID_EVENT', message: 'Missing meta.event_name or webhook_id' } } };
-  }
-
-  // Idempotency log.
-  const rawStr = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : String(rawBody);
-  const { isNew } = eventStore.recordEventIfNew({
-    eventId, eventName, signatureValid: true, rawPayload: rawStr,
-  });
-  if (!isNew) {
-    return { httpStatus: 200, body: { ok: true, duplicate: true } };
-  }
-
-  if (!SUPPORTED.has(eventName)) {
-    // Persist + ack so LS stops retrying; we can backfill later if needed.
-    eventStore.markProcessed(eventId);
-    return { httpStatus: 200, body: { ok: true, ignored: eventName } };
-  }
-
-  try {
-    await dispatchHandler(eventName, payload);
-    eventStore.markProcessed(eventId);
-    return { httpStatus: 200, body: { ok: true, event_name: eventName } };
-  } catch (e) {
-    eventStore.markFailed(eventId, e.message);
-    console.error(`[webhook] handler failed for ${eventName} (event_id=${eventId}):`, e);
-    // Still 200 — we logged it and don't want LS to hammer us forever.
-    return { httpStatus: 200, body: { ok: false, event_name: eventName, error: e.message } };
-  }
-}
-
-async function dispatchHandler(eventName, payload) {
+export async function handleEvent(eventName, payload) {
   switch (eventName) {
     case 'order_created':         return handleOrderCreated(payload);
     case 'subscription_created':
@@ -110,6 +64,8 @@ async function dispatchHandler(eventName, payload) {
     case 'subscription_expired':  return handleSubscriptionEnded(payload);
     case 'license_key_created':
     case 'license_key_updated':   return handleLicenseUpsert(payload);
+    default:
+      throw new Error(`No handler for LS event '${eventName}'`);
   }
 }
 
