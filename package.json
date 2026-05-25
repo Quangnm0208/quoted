@@ -1,19 +1,32 @@
 {
   "name": "quoted",
-  "version": "0.4.0",
-  "description": "Quoted — make your WordPress site AI-readable. Monorepo for backend (Node + SQLite + OmniPlug), marketing site (static), WP plugin (PHP), and JS SDK (npm).",
+  "version": "0.4.1",
+  "description": "Quoted — make your WordPress site AI-readable. Monorepo: backend (Node + SQLite + OmniPlug), marketing site (static), WP plugin (PHP), JS SDK (npm).",
   "private": true,
   "workspaces": [
     "sdk/js-client"
   ],
   "scripts": {
-    "bootstrap": "bash scripts/bootstrap.sh",
-    "dev": "bash scripts/dev.sh",
-    "test": "bash scripts/test-all.sh",
-    "check": "cd backend/omniplug && node scripts/check-sql-patterns.mjs && node --env-file=.env scripts/verify-schema.js",
-    "migrate": "cd backend/omniplug && node --env-file=.env src/core/db/migrate.js",
-    "be": "cd backend/omniplug && node --env-file=.env src/backend/server.js",
-    "fe": "cd frontend && node node_modules/.bin/serve -l 5500 -n"
+    "setup":              "cp -n .env.local.example .env.local 2>/dev/null || true && bash scripts/bootstrap.sh --test-mode",
+    "dev":                "bash scripts/dev.sh",
+    "dev:frontend":       "cd frontend && node node_modules/.bin/serve -l 5500 -n",
+    "dev:backend":        "cd backend/omniplug && node --env-file=.env src/backend/server.js",
+    "db:migrate":         "cd backend/omniplug && node --env-file=.env src/core/db/migrate.js",
+    "db:seed":            "cd backend/omniplug && node --env-file=.env scripts/seed.js",
+    "test":               "bash scripts/test-all.sh",
+    "test:smoke":         "cd backend/omniplug && node --env-file=.env scripts/smoke.js",
+    "test:e2e":           "cd backend/omniplug && node --env-file=.env tests/quoted-test-e2e-purchase-to-activation.mjs",
+    "test:payment:sandbox": "cd backend/omniplug && node --env-file=.env tests/quoted-test-payments-checkout.mjs",
+    "test:webhook":       "cd backend/omniplug && node --env-file=.env tests/quoted-test-payments-webhook.mjs",
+    "test:licenses":      "cd backend/omniplug && node --env-file=.env tests/quoted-test-licenses-activation.mjs",
+    "test:citations":     "cd backend/omniplug && node --env-file=.env tests/quoted-test-citations.mjs",
+    "test:live-ai":       "cd backend/omniplug && node --env-file=.env tests/quoted-test-live-ai-test.mjs",
+    "test:plugin":        "php wp-plugin/tests/test-license-activation.php",
+    "check":              "cd backend/omniplug && node scripts/check-sql-patterns.mjs && node --env-file=.env scripts/verify-schema.js",
+    "preflight":          "cd backend/omniplug && node --env-file=.env scripts/preflight-strict.mjs",
+    "build":              "cd backend/omniplug && npm install --omit=dev --no-audit --no-fund",
+    "start":              "cd backend/omniplug && node --env-file=.env src/core/db/migrate.js && node --env-file=.env src/backend/server.js",
+    "bootstrap":          "bash scripts/bootstrap.sh"
   },
   "repository": {
     "type": "git",
