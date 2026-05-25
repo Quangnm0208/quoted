@@ -1,6 +1,11 @@
 /* ───────────────────────────────────────────────────────────
  * Quoted — Hero 3D parallax (cursor tilt + scroll drift)
  * Layered "document → markdown → AI answer" cards.
+ *
+ * Performance: the mousemove handler + rAF loop are gated behind an
+ * IntersectionObserver — they only run while the hero is in the viewport.
+ * Scroll past the fold and the loop stops, so mobile battery doesn't burn
+ * on a section the user can no longer see.
  * ─────────────────────────────────────────────────────────── */
 
 (function() {
@@ -14,9 +19,9 @@
     let targetX = 0, targetY = 0;
     let curX = 0, curY = 0;
     let rafId = null;
+    let running = false;
 
     function tick() {
-      // ease
       curX += (targetX - curX) * 0.08;
       curY += (targetY - curY) * 0.08;
       const t = getComputedStyle(document.documentElement).getPropertyValue('--q-tilt-scale').trim();
@@ -39,7 +44,6 @@
       const cy = r.top + r.height / 2;
       targetX = (e.clientX - cx) / (r.width / 2);
       targetY = (e.clientY - cy) / (r.height / 2);
-      // clamp
       targetX = Math.max(-1.2, Math.min(1.2, targetX));
       targetY = Math.max(-1.2, Math.min(1.2, targetY));
     }
@@ -47,15 +51,40 @@
       targetX = 0; targetY = 0;
     }
 
-    // Cards float gently when idle
+    function start() {
+      if (running) return;
+      running = true;
+      window.addEventListener('mousemove', onMove, { passive: true });
+      document.addEventListener('mouseleave', onLeave);
+      rafId = requestAnimationFrame(tick);
+    }
+    function stop() {
+      if (!running) return;
+      running = false;
+      window.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseleave', onLeave);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    }
+
+    // Idle float runs as pure CSS animation — no JS cost when off-screen
+    // because the browser stops painting hidden compositor layers anyway.
     cards.forEach((c, i) => {
       const delay = (i * 0.6).toFixed(2);
       c.style.animation = `heroFloat 6s ease-in-out ${delay}s infinite`;
     });
 
-    window.addEventListener('mousemove', onMove, { passive: true });
-    document.addEventListener('mouseleave', onLeave);
-    rafId = requestAnimationFrame(tick);
+    if (typeof IntersectionObserver === 'function') {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { e.isIntersecting ? start() : stop(); });
+      }, { threshold: 0.05 });
+      io.observe(stage);
+    } else {
+      // Old browser fallback — match v0.1.0 behavior (always run).
+      start();
+    }
   }
 
   if (document.readyState === 'loading') {

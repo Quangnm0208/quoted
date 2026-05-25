@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Quoted — Changelog</title>
+    <link>https://quotedeasy.com/changelog.html</link>
+    <atom:link href="https://quotedeasy.com/rss.xml" rel="self" type="application/rss+xml"/>
+    <description>Release notes for Quoted — security patches, bot signature updates, schema engine improvements, and feature releases.</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 23 May 2026 00:00:00 GMT</lastBuildDate>
+
+    <item>
+      <title>v0.2.0 — wp.org submission-ready package</title>
+      <link>https://quotedeasy.com/changelog.html#v0-2-0</link>
+      <guid isPermaLink="true">https://quotedeasy.com/changelog.html#v0-2-0</guid>
+      <pubDate>Wed, 21 May 2026 00:00:00 GMT</pubDate>
+      <description>Submission-ready packaging, expanded bot catalog (14 → 60+), real-world WordPress defenses, PHP 8.3 compatibility verified.</description>
+    </item>
+
+    <item>
+      <title>v0.1.0 — Phase 0 scaffold</title>
+      <link>https://quotedeasy.com/changelog.html#v0-1-0</link>
+      <guid isPermaLink="true">https://quotedeasy.com/changelog.html#v0-1-0</guid>
+      <pubDate>Fri, 23 May 2026 00:00:00 GMT</pubDate>
+      <description>Initial Phase 0 scaffold: WordPress plugin shell, llms.txt generation, Markdown endpoint per post, 10-bot detection, hourly bot-crawl sync, AI Distribution Score gauge.</description>
+    </item>
+  </channel>
+</rss>

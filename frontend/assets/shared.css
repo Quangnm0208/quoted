@@ -1,9 +1,11 @@
 /* ───────────────────────────────────────────────────────────
  * Quoted — Redesign shared stylesheet
  * Built on top of brand tokens. Marketing-tuned scale.
+ *
+ * Font loading: the @import that used to live here blocked CSS parsing
+ * (worst-case load order). HTML pages now declare `preconnect` + `stylesheet`
+ * for Google Fonts in <head> directly, before this file.
  * ─────────────────────────────────────────────────────────── */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
   /* Brand */
@@ -675,3 +677,60 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.022em; color: v
   letter-spacing: 0.06em; text-transform: uppercase;
 }
 .program.feature .program-meta { color: rgba(255,255,255,0.7); }
+
+/* ──────────────────────────────────────────────────────────────────
+ * Accessibility — sitewide additions.
+ * Skip-link, focus-visible, reduced-motion. Kept at the end so any
+ * page-specific overrides in <style> blocks still take precedence on
+ * everything ELSE — these rules are only for inputs (focus) and
+ * users with motion sensitivity.
+ * ────────────────────────────────────────────────────────────────── */
+
+/* Skip-to-content link — visible only when keyboard-focused. */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 16px;
+  background: var(--q-primary);
+  color: #fff;
+  font: 500 14px/1 var(--q-font-sans);
+  border-radius: var(--q-r-md);
+  text-decoration: none;
+  box-shadow: var(--q-shadow-3);
+  transition: top 160ms var(--q-ease);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 12px;
+  outline: none;
+}
+
+/* Visible focus ring for keyboard users. Mouse users keep the bare hover state.
+   The `:focus:not(:focus-visible)` reset stops Chrome's blue ring from showing
+   on mouse-click activation while preserving the ring on Tab. */
+*:focus-visible {
+  outline: 2px solid var(--q-primary);
+  outline-offset: 2px;
+  border-radius: var(--q-r-sm);
+}
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+[tabindex]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Honor prefers-reduced-motion sitewide. Capping at 0.01ms instead of `none`
+   keeps any callback that depends on `transitionend`/`animationend` working,
+   it just runs instantly. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

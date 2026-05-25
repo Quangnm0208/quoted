@@ -5,7 +5,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quoted — AI visibility for WordPress, without replacing your SEO plugin</title>
 <meta name="description" content="Quoted adds a lightweight AI visibility layer to WordPress: llms.txt, clean Markdown, crawler controls, and SEO-plugin compatible schema.">
+<link rel="canonical" href="https://quotedeasy.com/">
+<meta name="theme-color" content="#3b3fbf" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1014" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Quoted">
+<meta property="og:title" content="Quoted — AI visibility for WordPress, without replacing your SEO plugin">
+<meta property="og:description" content="A lightweight AI visibility layer for WordPress: llms.txt, clean Markdown, crawler controls, and SEO-plugin compatible schema.">
+<meta property="og:url" content="https://quotedeasy.com/">
+<meta property="og:image" content="https://quotedeasy.com/assets/og-default.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Quoted — AI visibility for WordPress">
+<meta name="twitter:description" content="A lightweight AI visibility layer for WordPress: llms.txt, clean Markdown, crawler controls, and SEO-plugin compatible schema.">
+<meta name="twitter:image" content="https://quotedeasy.com/assets/og-default.svg">
+<link rel="alternate" type="application/rss+xml" title="Quoted changelog" href="/rss.xml">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/shared.css">
 <style>
   /* ── Hero specific ─────────────────────────────────────── */
@@ -965,7 +982,11 @@
 </head>
 <body data-screen-label="Home">
 
+<a class="skip-link" href="#main">Skip to content</a>
+
 <div data-include="header"></div>
+
+<main id="main">
 
 <!-- ── Hero ────────────────────────────────────────────────── -->
 <section class="hero">
@@ -1053,7 +1074,7 @@
           </div>
           <div class="citation">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Source: <a href="#">acme.com/llms.txt</a>
+            Source: <code class="mono">acme.com/llms.txt</code>
           </div>
         </div>
       </div>
@@ -1231,7 +1252,7 @@
               </p>
               <div class="shift-citation">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                <span>Source: <a href="#">acme.com/services/cold-brew-catering</a></span>
+                <span>Source: <code class="mono">acme.com/services/cold-brew-catering</code></span>
               </div>
             </div>
             <div class="shift-outcome shift-outcome-good">
@@ -1623,7 +1644,7 @@
           <span class="per">/month</span>
         </div>
         <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$190 billed yearly">billed monthly</div>
-        <a href="#" class="btn btn-primary plan-cta">Start Starter</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary plan-cta">Start Starter</a>
         <div class="plan-feats">
           <ul>
             <li>Everything in Free</li>
@@ -1646,7 +1667,7 @@
           <span class="per">/month</span>
         </div>
         <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$290 billed yearly">billed monthly</div>
-        <a href="#" class="btn btn-secondary plan-cta">Start Pro</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary plan-cta">Start Pro</a>
         <div class="plan-feats">
           <ul>
             <li>Everything in Starter</li>
@@ -1875,8 +1896,37 @@
     </div>
   </div>
 </section>
+</main>
 
 <div data-include="footer"></div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Quoted",
+  "url": "https://quotedeasy.com/",
+  "logo": "https://quotedeasy.com/assets/logo-mark.svg",
+  "description": "A lightweight AI visibility layer for WordPress: llms.txt, clean Markdown, crawler controls, and SEO-plugin compatible schema.",
+  "sameAs": [
+    "https://wordpress.org/plugins/quoted/",
+    "https://github.com/muahangngayvn/quoted"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Quoted",
+  "url": "https://quotedeasy.com/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://quotedeasy.com/faq.html?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 
 <script src="assets/shared.js"></script>
 <script src="assets/hero.js"></script>

@@ -4,6 +4,19 @@
  * ─────────────────────────────────────────────────────────── */
 
 (function() {
+  // ── Storage safety ───────────────────────────────────────
+  // Safari private mode + iOS quota errors throw on direct localStorage
+  // access. Every read/write in this file goes through these wrappers so
+  // a throw never crashes the page.
+  function safeStorageGet(key) {
+    try { return localStorage.getItem(key); }
+    catch (_e) { return null; }
+  }
+  function safeStorageSet(key, value) {
+    try { localStorage.setItem(key, value); return true; }
+    catch (_e) { return false; }
+  }
+
   // ── Site config (mirrors content/site.json) ──────────────
   const SITE = {
     name: 'Quoted',
@@ -20,6 +33,9 @@
       { label: 'Changelog',     href: 'changelog.html'                                     },
     ],
     // Sitewide promo configuration — surface as both the top bar and the welcome popup.
+    // STATIC PLACEHOLDER — `claimed` is hardcoded. Before public launch this should
+    // pull from `/api/public/site` (OmniPlug already exposes a config endpoint) so the
+    // counter actually moves. Right now it says "17/100 claimed" forever.
     promo: {
       code: 'EARLYBIRD30',
       discount: '30%',
@@ -103,7 +119,7 @@
           <div class="cta-row">
             <a href="${SITE.wordpressPluginUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm hide-md">Start free</a>
             <a href="pricing.html" class="btn btn-primary btn-sm">Get Started</a>
-            <button class="btn btn-secondary btn-sm mobile-toggle" aria-label="Menu" onclick="document.getElementById('mobile-nav')?.classList.toggle('open')">
+            <button id="mobile-toggle" class="btn btn-secondary btn-sm mobile-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mobile-nav">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
           </div>
@@ -120,7 +136,21 @@
     `;
 
     setupSmartAnchors();
+    setupMobileToggle();
     if (isHome) setupSectionObserver();
+  }
+
+  // Mobile menu toggle — keeps aria-expanded in sync with the visible state.
+  // (Previously the button used inline onclick + no aria, so screen readers
+  // couldn't tell when the menu was open.)
+  function setupMobileToggle() {
+    const btn = document.getElementById('mobile-toggle');
+    const nav = document.getElementById('mobile-nav');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
   }
 
   // Smooth-scroll same-page anchors; let cross-page anchors fall through.
@@ -317,12 +347,12 @@
 
   function getTweaks() {
     try {
-      return Object.assign({}, DEFAULT_TWEAKS, JSON.parse(localStorage.getItem(TWEAKS_KEY) || '{}'));
-    } catch (e) { return { ...DEFAULT_TWEAKS }; }
+      return Object.assign({}, DEFAULT_TWEAKS, JSON.parse(safeStorageGet(TWEAKS_KEY) || '{}'));
+    } catch (_e) { return { ...DEFAULT_TWEAKS }; }
   }
   function setTweaks(patch) {
     const next = { ...getTweaks(), ...patch };
-    localStorage.setItem(TWEAKS_KEY, JSON.stringify(next));
+    safeStorageSet(TWEAKS_KEY, JSON.stringify(next));
     applyTweaks(next);
     renderTweaksPanel();
     return next;
@@ -393,8 +423,12 @@
     `;
   }
 
-  // Edit-mode protocol
+  // Edit-mode protocol.
+  // Only honor messages from the direct parent frame — guards against an
+  // attacker iframing this page to flip the design system on screenshots.
+  // We accept any parent origin because the designer tool is operator-chosen.
   window.addEventListener('message', (e) => {
+    if (e.source !== window.parent) return;
     if (!e.data || typeof e.data !== 'object') return;
     if (e.data.type === '__activate_edit_mode') {
       renderTweaksPanel();
@@ -407,7 +441,7 @@
   // ── Promo Bar (top, sitewide, dismissible) ───────────────
   function renderPromoBar() {
     if (!SITE.promo.barEnabled) return;
-    if (localStorage.getItem('quoted_promo_bar_dismissed') === '1') return;
+    if (safeStorageGet('quoted_promo_bar_dismissed') === '1') return;
 
     const bar = document.createElement('div');
     bar.id = 'promo-bar';
@@ -444,32 +478,76 @@
       bar.style.transform = 'translateY(-100%)';
       bar.style.opacity = '0';
       setTimeout(() => bar.remove(), 260);
-      localStorage.setItem('quoted_promo_bar_dismissed', '1');
+      safeStorageSet('quoted_promo_bar_dismissed', '1');
     });
     document.getElementById('promo-copy').addEventListener('click', (e) => {
-      navigator.clipboard?.writeText(SITE.promo.code);
-      const btn = e.currentTarget;
-      const orig = btn.firstElementChild.textContent;
-      btn.firstElementChild.textContent = 'Copied ✓';
-      btn.classList.add('copied');
-      setTimeout(() => {
-        btn.firstElementChild.textContent = orig;
-        btn.classList.remove('copied');
-      }, 1400);
+      copyToClipboard(SITE.promo.code, e.currentTarget);
     });
   }
 
+  // Copy helper with fallback: try navigator.clipboard, then fall back to
+  // a hidden textarea + execCommand, then to selecting the visible code.
+  // Always gives the user feedback — never a silent failure.
+  function copyToClipboard(text, btn) {
+    const label = btn && btn.firstElementChild;
+    const orig = label ? label.textContent : '';
+    const ok = () => {
+      if (!label) return;
+      label.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        label.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1400);
+    };
+    const fail = () => {
+      if (!label) return;
+      label.textContent = 'Press ⌘C';
+      setTimeout(() => { label.textContent = orig; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, fail);
+      return;
+    }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      const success = document.execCommand && document.execCommand('copy');
+      ta.remove();
+      success ? ok() : fail();
+    } catch (_e) {
+      fail();
+    }
+  }
+
   // ── Welcome Popup (first visit, lazy) ────────────────────
+  //
+  // Dialog a11y: role="dialog" + aria-modal="true" + aria-labelledby points
+  // at the visible H3. Focus is trapped inside until the user closes; the
+  // last element that had focus before open is restored on close.
+  //
+  // PLACEHOLDER: the email form is local-only. It writes
+  // quoted_welcome_subscribed=1 to localStorage and shows the code, but no
+  // email is captured server-side. Wire to /api/public/leads (OmniPlug has
+  // it) or an ESP before public launch. Until then we tell the visitor that
+  // the mailing list opens later, so we don't promise a list we don't have.
   function renderWelcomePopup() {
     if (!SITE.promo.popupEnabled) return;
-    if (localStorage.getItem('quoted_welcome_dismissed') === '1') return;
+    if (safeStorageGet('quoted_welcome_dismissed') === '1') return;
     if (here === 'docs.html') return; // skip in docs context
-    if (localStorage.getItem('quoted_welcome_subscribed') === '1') return;
+    if (safeStorageGet('quoted_welcome_subscribed') === '1') return;
+
+    const openerEl = document.activeElement;
 
     const overlay = document.createElement('div');
     overlay.id = 'welcome-overlay';
     overlay.innerHTML = `
-      <div id="welcome-popup" role="dialog" aria-label="Welcome offer">
+      <div id="welcome-popup" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
         <button id="welcome-close" aria-label="Close">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -479,8 +557,8 @@
         </div>
         <div class="welcome-body">
           <span class="welcome-eyebrow">EARLY BIRD · ${SITE.promo.total - SITE.promo.claimed} spots left</span>
-          <h3>Get ${SITE.promo.discount} off Pro for life.</h3>
-          <p>One subscription, up to 5 WordPress sites. Plus a short weekly note on AI search and a heads-up on each release.</p>
+          <h3 id="welcome-title">Get ${SITE.promo.discount} off Pro for life.</h3>
+          <p>One subscription, up to 5 WordPress sites. The mailing list opens with Phase 1 — until then the code below works at checkout once Pro launches.</p>
           <form id="welcome-form">
             <input type="email" name="email" placeholder="you@company.com" required autocomplete="email">
             <button type="submit" class="btn btn-primary">Claim code</button>
@@ -488,32 +566,57 @@
           <div id="welcome-success" hidden>
             <div class="success-row">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <strong>You're in.</strong> Your code:
+              <strong>Saved.</strong> Your code:
               <code id="welcome-code">${SITE.promo.code}</code>
               <button id="welcome-copy" type="button" title="Copy">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               </button>
             </div>
-            <p class="success-note">Apply at checkout on the <a href="pricing.html">Pricing page</a>. We also emailed it to you.</p>
+            <p class="success-note">Code is saved locally to this browser. Apply at checkout when Pro launches.</p>
           </div>
-          <p class="welcome-fine">No card. Unsubscribe in one click.</p>
+          <p class="welcome-fine">No card. Mailing list opens with Phase 1.</p>
         </div>
       </div>
     `;
     document.body.appendChild(overlay);
 
+    const popup = overlay.querySelector('#welcome-popup');
+
+    // Focus trap — collect focusable descendants and cycle on Tab/Shift+Tab.
+    function getFocusable() {
+      return popup.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+    }
+
     const close = () => {
       overlay.classList.add('closing');
       setTimeout(() => overlay.remove(), 220);
-      localStorage.setItem('quoted_welcome_dismissed', '1');
+      safeStorageSet('quoted_welcome_dismissed', '1');
+      document.removeEventListener('keydown', onKey);
+      // Restore focus to the element that opened the dialog (if it's still in the DOM).
+      if (openerEl && typeof openerEl.focus === 'function' && document.contains(openerEl)) {
+        openerEl.focus();
+      }
     };
+
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+      if (e.key !== 'Tab') return;
+      const items = getFocusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    }
+
     document.getElementById('welcome-close').addEventListener('click', close);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-    document.addEventListener('keydown', function esc(e) {
-      if (e.key === 'Escape' && document.getElementById('welcome-overlay')) {
-        close(); document.removeEventListener('keydown', esc);
-      }
-    });
+    document.addEventListener('keydown', onKey);
 
     document.getElementById('welcome-form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -521,17 +624,29 @@
       const success = document.getElementById('welcome-success');
       form.style.display = 'none';
       success.hidden = false;
-      localStorage.setItem('quoted_welcome_subscribed', '1');
+      safeStorageSet('quoted_welcome_subscribed', '1');
+      // Move focus to the success block so screen readers announce it.
+      const copyBtn = document.getElementById('welcome-copy');
+      if (copyBtn) copyBtn.focus();
     });
     document.getElementById('welcome-copy')?.addEventListener('click', (e) => {
-      navigator.clipboard?.writeText(SITE.promo.code);
       const btn = e.currentTarget;
-      btn.classList.add('copied');
-      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      // The success button has an SVG-only label; use a custom copy path that
+      // swaps the SVG to a checkmark and back without losing focus.
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(SITE.promo.code).then(() => {
+          btn.classList.add('copied');
+          btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+        });
+      }
     });
 
-    // Reveal after delay
-    setTimeout(() => overlay.classList.add('open'), SITE.promo.popupDelayMs);
+    // Reveal after delay + move focus into the dialog when it opens.
+    setTimeout(() => {
+      overlay.classList.add('open');
+      const items = getFocusable();
+      if (items.length > 0) items[0].focus();
+    }, SITE.promo.popupDelayMs);
   }
 
   // ── Init ─────────────────────────────────────────────────

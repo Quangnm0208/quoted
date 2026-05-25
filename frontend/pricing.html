@@ -5,7 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pricing — Quoted</title>
 <meta name="description" content="Free is for testing. Starter is for one business site at $19/mo. Pro is for small agencies at $29/mo. Annual billing gives you two months free.">
+<link rel="canonical" href="https://quotedeasy.com/pricing.html">
+<meta name="theme-color" content="#3b3fbf" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1014" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Quoted">
+<meta property="og:title" content="Pricing — Quoted">
+<meta property="og:description" content="Free is for testing. Starter is $19/mo. Pro is $29/mo. Annual billing gives you two months free.">
+<meta property="og:url" content="https://quotedeasy.com/pricing.html">
+<meta property="og:image" content="https://quotedeasy.com/assets/og-default.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pricing — Quoted">
+<meta name="twitter:description" content="Free is for testing. Starter is $19/mo. Pro is $29/mo. Annual billing gives you two months free.">
+<meta name="twitter:image" content="https://quotedeasy.com/assets/og-default.svg">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/shared.css">
 <style>
   .price-hero { padding: 80px 0 32px; text-align: center; }
@@ -252,8 +268,11 @@
 </head>
 <body data-screen-label="Pricing">
 
+<a class="skip-link" href="#main">Skip to content</a>
+
 <div data-include="header"></div>
 
+<main id="main">
 <section class="price-hero">
   <div class="wrap-narrow">
     <span class="eyebrow no-dot" style="justify-self:center;display:flex;justify-content:center;">Pricing</span>
@@ -303,7 +322,7 @@
           <span class="per">/month</span>
         </div>
         <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$190 billed yearly · save $38">billed monthly</div>
-        <a href="#" class="btn btn-primary cta">Start Starter</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary cta">Start Starter</a>
         <div class="feats">
           <ul>
             <li>Everything in Free</li>
@@ -326,7 +345,7 @@
           <span class="per">/month</span>
         </div>
         <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$290 billed yearly · save $58">billed monthly</div>
-        <a href="#" class="btn btn-secondary cta">Start Pro</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary cta">Start Pro</a>
         <div class="feats">
           <ul>
             <li>Everything in Starter</li>
@@ -384,12 +403,12 @@
       <div class="dm-head dm-col dm-col-rec" data-plan="starter">
         <div class="dm-plan-name">Starter <span class="rec-badge">Recommended</span></div>
         <div class="dm-plan-price"><span data-price data-monthly="$19" data-yearly="$15.83">$19</span><small>/month</small></div>
-        <a href="#" class="btn btn-primary btn-sm">Start Starter</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Start Starter</a>
       </div>
       <div class="dm-head dm-col" data-plan="pro">
         <div class="dm-plan-name">Pro</div>
         <div class="dm-plan-price"><span data-price data-monthly="$29" data-yearly="$24.17">$29</span><small>/month</small></div>
-        <a href="#" class="btn btn-secondary btn-sm">Start Pro</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Start Pro</a>
       </div>
 
       <!-- Group: Limits -->
@@ -607,8 +626,62 @@
     </div>
   </div>
 </section>
+</main>
 
 <div data-include="footer"></div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Quoted",
+  "description": "A lightweight AI visibility layer for WordPress: llms.txt, clean Markdown, crawler controls, and SEO-plugin compatible schema.",
+  "url": "https://quotedeasy.com/",
+  "applicationCategory": "WebApplication",
+  "applicationSubCategory": "WordPress plugin",
+  "operatingSystem": "WordPress 6.0+ on PHP 7.4+",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "1 site, 50 posts in /llms.txt, 7-day local bot history. No card, no account.",
+      "url": "https://wordpress.org/plugins/quoted/"
+    },
+    {
+      "@type": "Offer",
+      "name": "Starter",
+      "price": "19",
+      "priceCurrency": "USD",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "19",
+        "priceCurrency": "USD",
+        "billingDuration": "P1M",
+        "unitText": "MONTH"
+      },
+      "description": "For business owners who want a maintained AI-ready site. Unlimited posts, 12-month bot crawl history, citation checks, Live AI Test.",
+      "url": "https://wordpress.org/plugins/quoted/"
+    },
+    {
+      "@type": "Offer",
+      "name": "Pro",
+      "price": "29",
+      "priceCurrency": "USD",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "29",
+        "priceCurrency": "USD",
+        "billingDuration": "P1M",
+        "unitText": "MONTH"
+      },
+      "description": "For freelancers and small agencies. Up to 5 sites, niche benchmark, white-label client reports.",
+      "url": "https://wordpress.org/plugins/quoted/"
+    }
+  ]
+}
+</script>
 
 <script src="assets/shared.js"></script>
 <script>

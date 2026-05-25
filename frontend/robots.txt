@@ -1,0 +1,38 @@
+# Quoted marketing site — crawler policy.
+# We explicitly welcome AI bots (we sell tools to help WordPress sites do the same).
+
+User-agent: *
+Allow: /
+
+# AI assistants — allowed and encouraged.
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: GoogleExtended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+Sitemap: https://quotedeasy.com/sitemap.xml

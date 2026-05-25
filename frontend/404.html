@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Page not found — Quoted</title>
+<meta name="description" content="The page you were looking for doesn't exist on quotedeasy.com.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#3b3fbf" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1014" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://quotedeasy.com/404.html">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+  .err {
+    min-height: calc(100vh - 200px);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 80px 24px;
+  }
+  .err .code {
+    font-family: var(--q-font-mono);
+    font-size: 14px;
+    color: var(--q-text-faint);
+    margin-bottom: 24px;
+    letter-spacing: 0.15em;
+  }
+  .err h1 {
+    font-size: clamp(40px, 5vw, 56px);
+    letter-spacing: -0.03em;
+    margin: 0 0 16px;
+  }
+  .err p {
+    font-size: 17px;
+    color: var(--q-text-muted);
+    max-width: 48ch;
+    margin: 0 auto 32px;
+  }
+  .err .links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div data-include="header"></div>
+
+<main id="main" class="err">
+  <div>
+    <div class="code">HTTP 404</div>
+    <h1>This page doesn't exist.</h1>
+    <p>The link you followed is broken, or the page was moved. The good news is the rest of the site is right here.</p>
+    <div class="links">
+      <a href="/" class="btn btn-primary">Home</a>
+      <a href="docs.html" class="btn btn-secondary">Documentation</a>
+      <a href="faq.html" class="btn btn-secondary">FAQ</a>
+    </div>
+  </div>
+</main>
+
+<div data-include="footer"></div>
+
+<script src="assets/shared.js"></script>
+</body>
+</html>

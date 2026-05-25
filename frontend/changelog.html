@@ -5,7 +5,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Changelog — Quoted</title>
 <meta name="description" content="Release notes for Quoted — security patches, bot signature updates, schema engine improvements, and feature releases.">
+<link rel="canonical" href="https://quotedeasy.com/changelog.html">
+<meta name="theme-color" content="#3b3fbf" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1014" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Quoted">
+<meta property="og:title" content="Changelog — Quoted">
+<meta property="og:description" content="Release notes for Quoted — security patches, bot signature updates, schema engine improvements, and feature releases.">
+<meta property="og:url" content="https://quotedeasy.com/changelog.html">
+<meta property="og:image" content="https://quotedeasy.com/assets/og-default.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Changelog — Quoted">
+<meta name="twitter:description" content="Release notes for Quoted — security patches, bot signature updates, schema engine improvements, and feature releases.">
+<meta name="twitter:image" content="https://quotedeasy.com/assets/og-default.svg">
+<link rel="alternate" type="application/rss+xml" title="Quoted changelog" href="/rss.xml">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/shared.css">
 <style>
   .cl-hero { padding: 64px 0 32px; }
@@ -98,8 +115,11 @@
 </head>
 <body data-screen-label="Changelog">
 
+<a class="skip-link" href="#main">Skip to content</a>
+
 <div data-include="header"></div>
 
+<main id="main">
 <section class="cl-hero">
   <div class="wrap">
     <span class="eyebrow">Release notes</span>
@@ -113,7 +133,7 @@
         WordPress.org plugin
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg>
       </a>
-      <a href="#" class="btn btn-secondary btn-sm">
+      <a href="rss.xml" class="btn btn-secondary btn-sm">
         RSS feed
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
       </a>
@@ -218,8 +238,22 @@
 
   </div>
 </div>
+</main>
 
 <div data-include="footer"></div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Quoted",
+  "applicationCategory": "WebApplication",
+  "operatingSystem": "WordPress 6.0+",
+  "url": "https://quotedeasy.com/",
+  "softwareVersion": "0.2.0",
+  "releaseNotes": "Curated bot signatures, WordPress compatibility patches, schema conflict matrix, security hardening — shipped on a predictable cadence."
+}
+</script>
 
 <script src="assets/shared.js"></script>
 <script>

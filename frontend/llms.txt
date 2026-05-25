@@ -1,0 +1,19 @@
+# Quoted
+
+> A lightweight AI visibility layer for WordPress — exposes content through llms.txt, clean Markdown endpoints, AI bot tracking, crawler controls, and SEO-plugin compatible JSON-LD schema.
+
+## Pages
+
+- [Quoted — AI visibility for WordPress](https://quotedeasy.com/): Product overview, "the Shift" interactive demo, live llms.txt preview, pricing, FAQ, and integration programs.
+- [Pricing](https://quotedeasy.com/pricing.html): Three plans — Free (forever), Starter ($19/mo), Pro ($29/mo). Annual billing saves two months. Side-by-side feature matrix.
+- [Documentation](https://quotedeasy.com/docs.html): Install via WordPress.org, requirements (WP 6.0+, PHP 7.4+), and the "verify your install" flow.
+- [FAQ](https://quotedeasy.com/faq.html): Compatibility with Yoast / Rank Math, billing, free plan limits, multi-site licenses, GDPR, performance.
+- [Blog](https://quotedeasy.com/blog.html): Field notes on AI search, llms.txt, WordPress, and how small-business sites stay visible in a multi-engine world.
+- [Changelog](https://quotedeasy.com/changelog.html): Release notes — security patches, bot signature updates, schema engine improvements.
+
+## About
+
+Quoted is a WordPress plugin (PHP 7.4+) and a backend (Node.js / SQLite, built on OmniPlug CMS Core v1.4.4) that together help WordPress site operators make their content AI-readable, track AI bot activity, and surface citations from Perplexity / ChatGPT / Claude.
+
+Free plan: 50 posts, llms.txt + Markdown endpoints, AI bot tracking, crawler controls.
+Paid plans: unlimited posts, longer history, citation checks, multi-site licenses, support.
