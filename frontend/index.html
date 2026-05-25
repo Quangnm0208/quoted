@@ -980,7 +980,7 @@
   .uc-cta { font-size: 13px; font-weight: 500; color: var(--q-primary); margin-top: 4px; }
 </style>
 </head>
-<body data-screen-label="Home">
+<body data-screen-label="Home" data-cms-page="quoted_home">
 
 <a class="skip-link" href="#main">Skip to content</a>
 
@@ -995,23 +995,23 @@
       <div>
         <span class="chip">
           <span class="dot"></span>
-          New · live on WordPress.org
+          <span data-cms="hero.eyebrow">New · live on WordPress.org</span>
         </span>
         <h1 class="mt-16 text-balance">
           When customers ask AI,<br>
           be <span class="accent">in the answer</span>.
         </h1>
-        <p class="lead text-pretty">
+        <p class="lead text-pretty" data-cms="hero.subtitle">
           Quoted is a small WordPress plugin that prepares your business site for AI search.
           Your services, FAQs, products, and updates — laid out in the clean structure
           modern AI assistants need to understand who you are and what you sell.
         </p>
         <div class="cta-stack">
-          <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
-            Install free plugin
+          <a data-cms-href="hero.cta_primary_url" href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
+            <span data-cms="hero.cta_primary_label">Install free plugin</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </a>
-          <a href="#live-demo" class="btn btn-secondary btn-lg">See it in action</a>
+          <a data-cms-href="hero.cta_secondary_url" data-cms="hero.cta_secondary_label" href="#live-demo" class="btn btn-secondary btn-lg">See it in action</a>
         </div>
         <div class="meta-row">
           <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Setup in under 5 minutes</span>
@@ -2195,5 +2195,9 @@
     io.observe(shift);
   }
 </script>
+
+<!-- CMS hydration: replaces marketing copy with content edited at /admin/pages
+     (page_key "quoted_home"). Static fallback above stays if CMS is down. -->
+<script src="/assets/cms.js" defer></script>
 </body>
 </html>
