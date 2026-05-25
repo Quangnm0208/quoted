@@ -46,6 +46,16 @@ export const AUTH_LIMITS = {
 export function checkAuthRateLimit(email, ip) {
   if (!ip) return;
 
+  // Dev-mode localhost exemption (same rationale as rateLimiterIp.js).
+  // Tests at 127.0.0.1 do many intentional-failure logins per suite to
+  // verify error paths; without this, OmniPlug Smoke + Quoted commercial
+  // suites accumulate failures across runs → next test hits RATE_LIMITED_IP.
+  // Production traffic never originates from 127.0.0.1.
+  if (process.env.NODE_ENV !== 'production' &&
+      (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1')) {
+    return;
+  }
+
   const ipFails = stmt().countFailsByIP.get(ip, AUTH_LIMITS.ipWindow).c;
   if (ipFails >= AUTH_LIMITS.ipMax) {
     throw new HttpError(

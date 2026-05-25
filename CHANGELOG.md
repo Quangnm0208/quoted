@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-05-25 — P1 cancel-fix + release engineering + dev rate-limit exemption
+
+### Fixed
+- **P1 — subscription cancellation no longer skips entitlement disable** when
+  variant_id is unknown. Previously `handleSubscriptionEnded` wrapped
+  `handleSubscriptionUpsert` (which throws on unmapped variants) and the
+  entitlement disable in one transaction → operator rotates a variant in LS
+  dashboard → every subsequent cancel rolls back → customer stays "active"
+  forever despite cancelling. Fix: split the upsert (best-effort) from the
+  disable (always runs); on upsert failure, directly UPDATE subscription
+  status + disable entitlement. Live-verified end-to-end with unknown variant.
+
+### Added
+- `scripts/check-no-secrets.sh` — 9-check secret/PII scanner. Working-tree
+  mode is git-aware (only flags tracked files); release-mode (passed a
+  target dir) is strict.
+- `scripts/build-plugin-zip.sh` — produces `quoted.zip` with PHP lint +
+  secret scan + structural verification (top-level main file present).
+  Strips dev/test files, OS noise.
+- `scripts/verify-release.sh` — pre-release gate chaining: SQL lint, full
+  test suite, security smoke (9 checks), secret scan, npm audit, PHP lint,
+  cold-start ZIP test.
+- `docs/SECURITY_THREAT_MODEL.md` — 20-row threat × defense table mapping
+  every realistic attack to the current mitigation + status.
+- `docs/INCIDENT_RESPONSE.md` — 10 numbered runbooks: leaked API key,
+  leaked webhook secret, compromised admin, license abuse, webhook backlog,
+  broken checkout, broken plugin activation, prod TEST_MODE, DB corruption,
+  rollback. Each with stop-bleed → investigate → recover → prevent.
+
+### DX (dev-only)
+- Localhost rate-limit exemption in `rateLimiterIp.js`, `rateLimit.js`
+  (auth attempts), and `leads.controller.js`. When `NODE_ENV !== production`
+  AND request IP is `127.0.0.1` / `::1`, the rate-limit check is skipped.
+  Production traffic never originates from 127.0.0.1; this eliminates
+  test-suite flakiness without weakening the production posture. Verified:
+  3/3 consecutive `npm test` runs green; previously ~60% pass rate on
+  cumulative test runs.
+
+### Tests
+- `npm test`: 19/19 pass (3 runs consecutive verified).
+- `bash scripts/security-smoke.sh`: 9/9 pass.
+- New runbook drill targets in `INCIDENT_RESPONSE.md` quarterly schedule.
+
 ## [0.6.2] — 2026-05-25 — P0 security hardening from master-prompt audit
 
 Acted on the CTO master-prompt P0 items. Four exploitable surfaces hardened

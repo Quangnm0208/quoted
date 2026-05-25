@@ -75,9 +75,16 @@ export const publicRouter = Router();
 publicRouter.post('/', blockHoneypot, validate({ body: leadInputSchema }), asyncHandler((req, res) => {
   const data = req.validated.body;
   const ip = req.ip || 'unknown';
-  const recent = leadsRepository.countByIPLastHour(req.tenantId, ip);
-  if (recent >= env.LEAD_RATE_LIMIT_PER_HOUR) {
-    throw new RateLimitError('Too many submissions. Try again later.');
+  // Dev-mode localhost exemption (consistent with rateLimiterIp + rateLimit).
+  // Test suites do many lead inserts; without this, the 6th+ lead in any
+  // hour hits 429. Production traffic never originates from 127.0.0.1.
+  const isDevLocal = process.env.NODE_ENV !== 'production' &&
+    (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1');
+  if (!isDevLocal) {
+    const recent = leadsRepository.countByIPLastHour(req.tenantId, ip);
+    if (recent >= env.LEAD_RATE_LIMIT_PER_HOUR) {
+      throw new RateLimitError('Too many submissions. Try again later.');
+    }
   }
 
   const info = leadsRepository.create({
@@ -172,9 +179,16 @@ legacyRouter.post('/', blockHoneypot, validate({ body: leadInputSchema }), async
   // Re-use publicRouter logic
   const data = req.validated.body;
   const ip = req.ip || 'unknown';
-  const recent = leadsRepository.countByIPLastHour(req.tenantId, ip);
-  if (recent >= env.LEAD_RATE_LIMIT_PER_HOUR) {
-    throw new RateLimitError('Too many submissions. Try again later.');
+  // Dev-mode localhost exemption (consistent with rateLimiterIp + rateLimit).
+  // Test suites do many lead inserts; without this, the 6th+ lead in any
+  // hour hits 429. Production traffic never originates from 127.0.0.1.
+  const isDevLocal = process.env.NODE_ENV !== 'production' &&
+    (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1');
+  if (!isDevLocal) {
+    const recent = leadsRepository.countByIPLastHour(req.tenantId, ip);
+    if (recent >= env.LEAD_RATE_LIMIT_PER_HOUR) {
+      throw new RateLimitError('Too many submissions. Try again later.');
+    }
   }
   const info = leadsRepository.create({
     tenant_id: req.tenantId,

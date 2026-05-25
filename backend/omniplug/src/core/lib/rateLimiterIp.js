@@ -45,6 +45,18 @@ function evictOldest() {
   if (oldestKey != null) _buckets.delete(oldestKey);
 }
 
+// Dev-mode localhost exemption. In production this is always false (the
+// rate limit applies to everyone, including any internal probe). In dev /
+// CI / test, a developer hits all endpoints from 127.0.0.1 hundreds of
+// times across the test suite — without this exemption, the SDK smoke
+// test would hit RATE_LIMITED on the 3rd checkout. Production traffic
+// never originates from 127.0.0.1.
+function isDevLocalhost(ip) {
+  if (process.env.NODE_ENV === 'production') return false;
+  if (!ip) return false;
+  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || ip === 'localhost';
+}
+
 /**
  * Attempt to consume one token from `ip`'s bucket.
  * Returns true if allowed, false if rate-limited.
@@ -53,6 +65,7 @@ function evictOldest() {
  * @param {number} capacity - max burst within the 60s window (default 60)
  */
 export function tryAcquire(ip, capacity = DEFAULT_CAPACITY) {
+  if (isDevLocalhost(ip)) return true;
   const key = ip || 'unknown';
   const now = Date.now();
   let b = _buckets.get(key);

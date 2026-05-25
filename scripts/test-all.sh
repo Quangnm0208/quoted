@@ -57,10 +57,15 @@ if ! curl -fsS -o /dev/null "$BASE/api/health"; then
     echo "✗ Backend failed to start after 30s. See /tmp/quoted-be-test.log"
     exit 1
   fi
-  # Extra grace period for the smoke test — health responds while migrations
-  # may still be finishing on the first request. 2s eliminates the cold-start
-  # race observed on first-run after bootstrap.
-  sleep 2
+  # Warmup phase — health responds when listen() resolves, but downstream
+  # routes (admin login, articles, leads) lazily prepare statements +
+  # warm bcrypt + warm zod schemas on first hit. Without this warmup, the
+  # OmniPlug smoke (which fires 18 requests rapid-fire) sees timing-sensitive
+  # rate-limit edges on the first run after bootstrap. 3× 1s warmup curls
+  # eliminate this without slowing the regular dev cycle.
+  curl -fsS -o /dev/null "$BASE/api/health"; sleep 1
+  curl -fsS -o /dev/null "$BASE/api/health"; sleep 1
+  curl -fsS -o /dev/null "$BASE/api/health"; sleep 1
 fi
 
 cleanup() {

@@ -133,12 +133,36 @@ function handleSubscriptionEnded(payload) {
   const sub = entitlementRepo.findSubscriptionByLemonId(lemonSubId);
   if (!sub) return;  // never saw the subscription — nothing to disable
 
-  // Find every license attached to this subscription and disable its entitlement.
+  // P1 (master prompt 14.2): cancellation must always disable entitlement,
+  // even when LS variant_id is no longer in our env map (e.g. operator
+  // rotated variants). The previous version wrapped handleSubscriptionUpsert
+  // (which throws on unknown variant) + the disable in one transaction —
+  // a single rollback left the customer "active" forever.
+  //
+  // Fix: split the operations. Try the upsert (best-effort metadata
+  // refresh); if it throws on variant mapping, log + continue with the
+  // critical disable. Cancellation must succeed even when bookkeeping
+  // is stale.
+  const newStatus = payload?.data?.attributes?.status || 'cancelled';
+  const endsAt = payload?.data?.attributes?.ends_at || null;
   const licenses = db
     .prepare(`SELECT id FROM customer_licenses WHERE subscription_id = ?`)
     .all(sub.id);
+
   transaction(() => {
-    handleSubscriptionUpsert(payload);  // updates status field
+    try {
+      handleSubscriptionUpsert(payload);
+    } catch (err) {
+      // Variant unknown or other upsert failure — log + fall back to
+      // direct status update. The disable below is the security-critical
+      // step; we must not skip it on bookkeeping failure.
+      console.warn('[ls-webhook] handleSubscriptionEnded: upsert failed (continuing with status update + disable):', err.message);
+      db.prepare(`
+        UPDATE subscriptions
+        SET status = ?, ends_at = COALESCE(?, ends_at), updated_at = datetime('now')
+        WHERE id = ?
+      `).run(newStatus, endsAt, sub.id);
+    }
     for (const lic of licenses) {
       entitlementRepo.setEntitlementStatus(lic.id, 'disabled');
     }
