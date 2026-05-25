@@ -3,7 +3,7 @@
  * Plugin Name:       Quoted — Make your WordPress site AI-readable
  * Plugin URI:        https://quotedeasy.com
  * Description:       Make your WordPress site readable by ChatGPT, Claude, Perplexity, and Google AI. Auto-generates llms.txt, serves clean Markdown per post, detects AI bot crawls, and lets you allow/block bots one by one.
- * Version:           0.3.0
+ * Version:           1.0.0
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      7.4
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'QUOTED_VERSION', '0.3.0' );
+define( 'QUOTED_VERSION', '1.0.0' );
 define( 'QUOTED_PLUGIN_FILE', __FILE__ );
 define( 'QUOTED_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QUOTED_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
