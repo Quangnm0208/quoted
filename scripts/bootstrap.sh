@@ -73,18 +73,61 @@ step "Verifying SDK package (zero runtime deps)"
 step "Ensuring backend/omniplug/.env exists"
 if [ ! -f backend/omniplug/.env ]; then
   cp backend/omniplug/.env.example backend/omniplug/.env
-  yellow "  → Copied .env.example to .env (test-mode defaults active)"
-  yellow "    Edit it with real LS credentials before deploying to prod."
+  yellow "  → Copied .env.example to .env"
 else
   green "  ✓ .env already present (not overwritten)"
 fi
 
-# Ensure LEMONSQUEEZY_TEST_MODE is on in local .env (idempotent — only
-# adds it if missing).
-if ! grep -q '^LEMONSQUEEZY_TEST_MODE=' backend/omniplug/.env; then
-  echo '' >> backend/omniplug/.env
-  echo '# Auto-added by bootstrap.sh — must be unset/false in production.' >> backend/omniplug/.env
-  echo 'LEMONSQUEEZY_TEST_MODE=true' >> backend/omniplug/.env
+# Test-mode opt-in: passing --test-mode (or having TEST_MODE=true already
+# in .env) → seed mockup defaults so the full purchase + license flow
+# works locally without real Lemon Squeezy / Perplexity credentials.
+# Production runs MUST NOT call bootstrap with --test-mode.
+WANT_TEST_MODE="0"
+for arg in "$@"; do
+  [ "$arg" = "--test-mode" ] && WANT_TEST_MODE="1"
+done
+if grep -qE '^LEMONSQUEEZY_TEST_MODE=true$' backend/omniplug/.env; then
+  WANT_TEST_MODE="1"
+fi
+if [ "$WANT_TEST_MODE" = "1" ]; then
+  step "Seeding test-mode placeholder values"
+  if grep -qE '^LEMONSQUEEZY_TEST_MODE=false$' backend/omniplug/.env; then
+    sed -i 's|^LEMONSQUEEZY_TEST_MODE=false$|LEMONSQUEEZY_TEST_MODE=true|' backend/omniplug/.env
+  elif ! grep -q '^LEMONSQUEEZY_TEST_MODE=' backend/omniplug/.env; then
+    echo 'LEMONSQUEEZY_TEST_MODE=true' >> backend/omniplug/.env
+  fi
+  # seed_test_default: fill in key if absent or empty. Idempotent.
+  seed_test_default() {
+    local key="$1" value="$2"
+    if ! grep -qE "^${key}=.+" backend/omniplug/.env; then
+      if grep -qE "^${key}=$" backend/omniplug/.env; then
+        sed -i "s|^${key}=$|${key}=${value}|" backend/omniplug/.env
+      else
+        echo "${key}=${value}" >> backend/omniplug/.env
+      fi
+    fi
+  }
+  seed_test_default LEMONSQUEEZY_API_KEY                  'test-key-fake-1234567890'
+  seed_test_default LEMONSQUEEZY_STORE_ID                 '99999'
+  seed_test_default LEMONSQUEEZY_WEBHOOK_SECRET           'test-webhook-secret-for-local-only'
+  seed_test_default LEMONSQUEEZY_VARIANT_PRO_MONTHLY      '100001'
+  seed_test_default LEMONSQUEEZY_VARIANT_PRO_YEARLY       '100002'
+  seed_test_default LEMONSQUEEZY_VARIANT_AGENCY_MONTHLY   '100003'
+  seed_test_default LEMONSQUEEZY_VARIANT_AGENCY_YEARLY    '100004'
+  seed_test_default LEMONSQUEEZY_CHECKOUT_PRO_MONTHLY     'https://example.lemonsqueezy.com/checkout/buy/test-pro-monthly'
+  seed_test_default LEMONSQUEEZY_CHECKOUT_PRO_YEARLY      'https://example.lemonsqueezy.com/checkout/buy/test-pro-yearly'
+  seed_test_default LEMONSQUEEZY_CHECKOUT_AGENCY_MONTHLY  'https://example.lemonsqueezy.com/checkout/buy/test-agency-monthly'
+  seed_test_default LEMONSQUEEZY_CHECKOUT_AGENCY_YEARLY   'https://example.lemonsqueezy.com/checkout/buy/test-agency-yearly'
+  seed_test_default CITATIONS_TEST_MODE                   'true'
+  seed_test_default LIVE_AI_TEST_MODE                     'true'
+  seed_test_default APP_BASE_URL                          'http://127.0.0.1:5500'
+  seed_test_default API_BASE_URL                          'http://127.0.0.1:4000'
+  green "  ✓ test-mode .env ready (LS + Perplexity API calls return synthetic responses)"
+  yellow "  ⚠ PRODUCTION: server.js refuses to boot with any *_TEST_MODE=true"
+else
+  yellow "  → Production-shape .env detected. /payments and /licenses will"
+  yellow "    fail until you set the LEMONSQUEEZY_* values. For local demo, re-run:"
+  yellow "        bash scripts/bootstrap.sh --test-mode"
 fi
 
 # ── 6. DB migrations + schema verify ───────────────────────────────────
