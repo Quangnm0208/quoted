@@ -1,0 +1,18 @@
+# Cloudflare Pages redirects + rewrites.
+# Syntax: https://developers.cloudflare.com/pages/configuration/redirects/
+
+# Strip .html so /pricing renders pricing.html (mirrors `serve -n` local DX).
+/pricing       /pricing.html       200
+/docs          /docs.html          200
+/faq           /faq.html           200
+/blog          /blog.html          200
+/changelog     /changelog.html     200
+/success       /success.html       200
+
+# Lemon Squeezy redirects the buyer back to APP_BASE_URL/success?order_id=... —
+# rewrite both with and without trailing slash to the success page.
+/success/*     /success.html       200
+
+# 404 fallback (Cloudflare serves /404.html automatically when path 404s, but
+# being explicit keeps the redirect spec readable).
+/*             /404.html           404

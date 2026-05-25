@@ -322,7 +322,7 @@
           <span class="per">/month</span>
         </div>
         <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$190 billed yearly · save $38">billed monthly</div>
-        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary cta">Start Starter</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary cta" data-checkout-plan="pro-monthly">Start Pro</a>
         <div class="feats">
           <ul>
             <li>Everything in Free</li>
@@ -345,7 +345,7 @@
           <span class="per">/month</span>
         </div>
         <div class="price-sub" data-price-sub data-monthly="billed monthly" data-yearly="$290 billed yearly · save $58">billed monthly</div>
-        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary cta">Start Pro</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary cta" data-checkout-plan="agency-monthly">Start Agency</a>
         <div class="feats">
           <ul>
             <li>Everything in Starter</li>
@@ -403,12 +403,12 @@
       <div class="dm-head dm-col dm-col-rec" data-plan="starter">
         <div class="dm-plan-name">Starter <span class="rec-badge">Recommended</span></div>
         <div class="dm-plan-price"><span data-price data-monthly="$19" data-yearly="$15.83">$19</span><small>/month</small></div>
-        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Start Starter</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-primary btn-sm" data-checkout-plan="pro-monthly">Start Pro</a>
       </div>
       <div class="dm-head dm-col" data-plan="pro">
         <div class="dm-plan-name">Pro</div>
         <div class="dm-plan-price"><span data-price data-monthly="$29" data-yearly="$24.17">$29</span><small>/month</small></div>
-        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Start Pro</a>
+        <a href="https://wordpress.org/plugins/quoted/" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" data-checkout-plan="agency-monthly">Start Agency</a>
       </div>
 
       <!-- Group: Limits -->
@@ -684,6 +684,7 @@
 </script>
 
 <script src="assets/shared.js"></script>
+<script src="assets/checkout.js"></script>
 <script>
   document.querySelectorAll('#billing-toggle button').forEach(btn => {
     btn.addEventListener('click', () => {

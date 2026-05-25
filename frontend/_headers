@@ -1,0 +1,24 @@
+# Cloudflare Pages headers — applied to every response from quotedeasy.com.
+# Syntax: https://developers.cloudflare.com/pages/configuration/headers/
+#
+# We can't set a CSP on the marketing site that's strict enough to satisfy
+# both inline <style> blocks (used for per-page CSS) and LS hosted-checkout
+# redirects (we use top-level navigation, so no checkout-overlay script
+# is loaded — connect-src only needs to allow our own API for /payments/checkout).
+
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: interest-cohort=(), browsing-topics=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://api.quotedeasy.com; form-action 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+
+# Cache static assets aggressively.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Don't cache the success page (timestamps + license info shouldn't be edge-cached).
+/success.html
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow

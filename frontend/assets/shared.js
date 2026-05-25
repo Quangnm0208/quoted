@@ -18,9 +18,14 @@
   }
 
   // ── Site config (mirrors content/site.json) ──────────────
+  //
+  // apiBaseUrl is read by assets/checkout.js when Pro/Agency CTAs are clicked.
+  // Override per environment by setting window.QuotedSite = { apiBaseUrl: '…' }
+  // BEFORE this script loads, or by editing the value here.
   const SITE = {
     name: 'Quoted',
     url: 'https://quotedeasy.com',
+    apiBaseUrl: (window.QuotedSite && window.QuotedSite.apiBaseUrl) || 'https://api.quotedeasy.com',
     wordpressPluginUrl: 'https://wordpress.org/plugins/quoted/',
     // Header nav — matches user spec
     nav: [
@@ -368,6 +373,13 @@
     r.style.setProperty('--q-tilt-scale', String(t.tilt));
   }
   window.QuotedTweaks = { get: getTweaks, set: setTweaks, apply: applyTweaks };
+  // Expose runtime config so assets/checkout.js (and any future per-page
+  // script) can read the resolved API base URL without re-implementing
+  // the override chain.
+  window.QuotedSite = Object.assign(window.QuotedSite || {}, {
+    apiBaseUrl: SITE.apiBaseUrl,
+    url: SITE.url,
+  });
 
   function renderTweaksPanel() {
     let panel = document.getElementById('tweaks-panel');
