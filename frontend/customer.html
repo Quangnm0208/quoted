@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quoted — My Dashboard</title>
+<meta name="description" content="Your Quoted dashboard. License status, connected sites, sync activity, AI bot crawls.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<style>
+  :root {
+    --q-bg: #fafafa; --q-surface: #fff; --q-border: #e5e7eb; --q-text: #111827;
+    --q-muted: #6b7280; --q-primary: #3b3fbf; --q-primary-ink: #1e2078;
+    --q-success: #10b981; --q-warning: #f59e0b; --q-danger: #ef4444;
+    --q-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --q-font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: var(--q-font); background: var(--q-bg); color: var(--q-text); margin: 0; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 24px 0 12px; }
+  .lead { color: var(--q-muted); margin: 0 0 32px; }
+  .card { background: var(--q-surface); border: 1px solid var(--q-border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 140px; }
+  .stat-label { font-size: 12px; color: var(--q-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat-value { font-size: 28px; font-weight: 600; margin-top: 4px; }
+  .stat-sub { font-size: 12px; color: var(--q-muted); margin-top: 4px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .badge.active { background: #d1fae5; color: #065f46; }
+  .badge.warning { background: #fef3c7; color: #92400e; }
+  .badge.danger { background: #fee2e2; color: #991b1b; }
+  .badge.muted { background: #e5e7eb; color: #374151; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--q-border); }
+  th { font-weight: 600; color: var(--q-muted); font-size: 12px; text-transform: uppercase; }
+  .mono { font-family: var(--q-font-mono); font-size: 13px; }
+  .muted { color: var(--q-muted); }
+  input[type="text"], input[type="password"] {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--q-border);
+    border-radius: 8px; font-size: 14px; font-family: var(--q-font-mono);
+  }
+  .btn {
+    background: var(--q-primary); color: #fff; border: 0; padding: 10px 20px;
+    border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .btn:hover { background: var(--q-primary-ink); }
+  .btn:disabled { background: var(--q-muted); cursor: not-allowed; }
+  .btn-secondary { background: transparent; color: var(--q-primary); border: 1px solid var(--q-border); }
+  .error { background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 14px; }
+  .checklist { list-style: none; padding: 0; margin: 0; }
+  .checklist li { padding: 8px 0; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .check-icon { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+  .check-icon.done { background: #d1fae5; color: #065f46; }
+  .check-icon.pending { background: #e5e7eb; color: #6b7280; }
+  .hidden { display: none; }
+  header.brand { padding: 16px 24px; border-bottom: 1px solid var(--q-border); background: var(--q-surface); }
+  header.brand .wrap { padding: 0; max-width: 960px; }
+  .brand-name { font-weight: 600; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <div class="wrap">
+    <a href="/" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+      <span class="brand-name">Quoted</span>
+      <span class="muted" style="font-size:13px;">— My Dashboard</span>
+    </a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- LOGIN STATE -->
+  <div id="login-card" class="card">
+    <h1>Sign in with your license key</h1>
+    <p class="lead">Paste the license key from your purchase email. Read-only access to your account, sites, and sync status.</p>
+    <form id="login-form">
+      <label class="muted" for="license-input" style="font-size:13px;display:block;margin-bottom:6px;">License key</label>
+      <input id="license-input" type="text" placeholder="A1B2-C3D4-E5F6-..." autocomplete="off" required>
+      <div id="login-error" class="error hidden"></div>
+      <div style="margin-top:16px;">
+        <button class="btn" type="submit">Show my dashboard →</button>
+      </div>
+    </form>
+    <p class="muted" style="font-size:12px;margin-top:24px;">
+      Don't have a key yet? <a href="/pricing.html">See pricing</a> or <a href="mailto:support@quotedeasy.com">contact support</a>.
+    </p>
+  </div>
+
+  <!-- DASHBOARD STATE -->
+  <div id="dashboard" class="hidden">
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+      <div>
+        <h1 id="d-greeting">Your dashboard</h1>
+        <p class="lead" id="d-customer-line"></p>
+      </div>
+      <div>
+        <button id="d-logout" class="btn btn-secondary" type="button">Sign out</button>
+        <button id="d-refresh" class="btn" type="button">Refresh</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Setup checklist</h2>
+      <ul id="d-checklist" class="checklist"></ul>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Account</h2>
+      <div class="row">
+        <div class="stat">
+          <div class="stat-label">License</div>
+          <div id="d-license-status"></div>
+          <div class="stat-sub mono" id="d-license-key"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Plan</div>
+          <div id="d-plan"></div>
+          <div class="stat-sub" id="d-renews"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Sites used</div>
+          <div class="stat-value" id="d-sites-used"></div>
+          <div class="stat-sub" id="d-sites-limit"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Posts synced</div>
+          <div class="stat-value" id="d-posts"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Your WordPress sites</h2>
+      <div id="d-sites-area">
+        <p class="muted">No sites connected yet. Install the Quoted plugin in WordPress and paste your license key.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">AI bot activity (last 7 days)</h2>
+      <div class="row">
+        <div class="stat">
+          <div class="stat-label">Crawls</div>
+          <div class="stat-value" id="d-crawls"></div>
+          <div class="stat-sub">GPTBot · ClaudeBot · PerplexityBot · etc.</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Active sites</div>
+          <div class="stat-value" id="d-active"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="d-billing-card" style="display:none;">
+      <h2 style="margin-top:0;">Billing</h2>
+      <p>Update payment method, change plan, or cancel:</p>
+      <a id="d-billing-link" class="btn" target="_blank" rel="noopener">Manage billing →</a>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  function apiBase() {
+    var meta = document.querySelector('meta[name="quoted-cms-api"]');
+    if (meta && meta.content) return meta.content.replace(/\/+$/, '');
+    if (window.QUOTED_CMS_API_BASE) return window.QUOTED_CMS_API_BASE.replace(/\/+$/, '');
+    var devPorts = ['3000', '5173', '5500', '8080'];
+    if (window.location.protocol.startsWith('http') && devPorts.indexOf(window.location.port) !== -1) {
+      return 'http://127.0.0.1:4000';
+    }
+    return window.location.origin;
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
+  }); }
+
+  function badge(label, kind) {
+    return '<span class="badge ' + (kind || 'muted') + '">' + esc(label) + '</span>';
+  }
+
+  function statusBadge(s) {
+    if (s === 'active' || s === 'trialing') return badge(s, 'active');
+    if (s === 'cancelled' || s === 'expired' || s === 'disabled') return badge(s, 'danger');
+    if (s === 'past_due' || s === 'paused' || s === 'pending') return badge(s, 'warning');
+    return badge(s || '—', 'muted');
+  }
+
+  function fmtDate(s) {
+    if (!s) return '—';
+    try {
+      var d = new Date(s.replace(' ', 'T') + (s.includes('Z') ? '' : 'Z'));
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch { return s; }
+  }
+
+  function relativeTime(s) {
+    if (!s) return 'never';
+    try {
+      var t = new Date(s.replace(' ', 'T') + 'Z').getTime();
+      var diff = Date.now() - t;
+      if (diff < 0) return 'in the future';
+      var min = Math.floor(diff / 60000);
+      if (min < 1) return 'just now';
+      if (min < 60) return min + ' min ago';
+      var hr = Math.floor(min / 60);
+      if (hr < 24) return hr + 'h ago';
+      var d = Math.floor(hr / 24);
+      return d + 'd ago';
+    } catch { return s; }
+  }
+
+  function saveKey(k) { try { sessionStorage.setItem('quoted_license_key', k); } catch {} }
+  function loadKey()  { try { return sessionStorage.getItem('quoted_license_key'); } catch { return null; } }
+  function clearKey() { try { sessionStorage.removeItem('quoted_license_key'); } catch {} }
+
+  async function fetchDashboard(key) {
+    var res = await fetch(apiBase() + '/api/customer/dashboard', {
+      headers: { 'Authorization': 'License ' + key },
+    });
+    var body = await res.json().catch(function() { return null; });
+    if (!res.ok) {
+      var msg = (body && body.error && body.error.message) || ('HTTP ' + res.status);
+      var err = new Error(msg);
+      err.code = body && body.error && body.error.code;
+      throw err;
+    }
+    return body;
+  }
+
+  function renderChecklist(items) {
+    var ul = $('d-checklist');
+    ul.innerHTML = items.map(function(item) {
+      return '<li>' +
+        '<span class="check-icon ' + (item.done ? 'done' : 'pending') + '">' +
+        (item.done ? '✓' : '○') +
+        '</span>' +
+        '<span>' + esc(item.label) + '</span>' +
+        '</li>';
+    }).join('');
+  }
+
+  function renderSites(sites) {
+    var area = $('d-sites-area');
+    if (!sites || sites.length === 0) {
+      area.innerHTML = '<p class="muted">No sites connected yet. Install the Quoted plugin in WordPress and paste your license key.</p>';
+      return;
+    }
+    area.innerHTML = '<table><thead><tr>' +
+      '<th>Domain</th><th>Status</th><th>Posts</th><th>Crawls (7d)</th>' +
+      '<th>WP / Plugin</th><th>Last seen</th>' +
+      '</tr></thead><tbody>' +
+      sites.map(function(s) {
+        return '<tr>' +
+          '<td><strong>' + esc(s.domain) + '</strong>' +
+          (s.site_name ? '<br><span class="muted" style="font-size:12px;">' + esc(s.site_name) + '</span>' : '') +
+          '</td>' +
+          '<td>' + (s.is_active ? badge('active', 'active') : badge('inactive', 'danger')) + '</td>' +
+          '<td>' + (s.post_count || 0) + '</td>' +
+          '<td>' + (s.crawls_7d || 0) + '</td>' +
+          '<td class="muted" style="font-size:12px;">' + esc(s.wp_version || '?') + ' / ' + esc(s.plugin_version || '?') + '</td>' +
+          '<td class="muted" style="font-size:12px;">' + relativeTime(s.last_seen_at) + '</td>' +
+          '</tr>';
+      }).join('') +
+      '</tbody></table>';
+  }
+
+  function renderDashboard(data) {
+    $('login-card').classList.add('hidden');
+    $('dashboard').classList.remove('hidden');
+
+    var name = (data.customer && (data.customer.name || data.customer.email)) || 'there';
+    $('d-greeting').textContent = 'Hi ' + name.split('@')[0].split(/\s+/)[0] + ' 👋';
+    $('d-customer-line').textContent = data.customer && data.customer.email
+      ? data.customer.email
+      : '';
+
+    // License + plan
+    $('d-license-status').innerHTML = statusBadge(data.license.status);
+    $('d-license-key').textContent = data.license.key_short ? ('Key: ' + data.license.key_short) : '';
+    $('d-plan').innerHTML = data.subscription ? statusBadge(data.subscription.plan_id) : '<span class="muted">—</span>';
+    $('d-renews').textContent = data.subscription && data.subscription.renews_at
+      ? ('Renews ' + fmtDate(data.subscription.renews_at))
+      : (data.subscription && data.subscription.ends_at ? ('Ends ' + fmtDate(data.subscription.ends_at)) : '');
+
+    // Stats
+    $('d-sites-used').textContent = data.aggregates.sites_total + '';
+    $('d-sites-limit').textContent = 'of ' + (data.license.activation_limit || 1) + ' allowed';
+    $('d-posts').textContent = (data.aggregates.posts_synced || 0).toLocaleString();
+    $('d-crawls').textContent = (data.aggregates.bot_crawls_7d || 0).toLocaleString();
+    $('d-active').textContent = (data.aggregates.sites_active || 0) + '';
+
+    renderChecklist(data.setup_checklist);
+    renderSites(data.sites);
+
+    // Billing CTA (if Lemon Squeezy provided an update URL)
+    if (data.subscription && data.subscription.update_payment_url) {
+      $('d-billing-card').style.display = '';
+      $('d-billing-link').href = data.subscription.update_payment_url;
+    }
+  }
+
+  async function attemptLogin(key) {
+    $('login-error').classList.add('hidden');
+    try {
+      var data = await fetchDashboard(key);
+      saveKey(key);
+      renderDashboard(data);
+    } catch (err) {
+      $('login-error').textContent = err.message || 'Could not load dashboard.';
+      $('login-error').classList.remove('hidden');
+      clearKey();
+    }
+  }
+
+  // Form submit
+  $('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var k = $('license-input').value.trim();
+    if (!k) return;
+    attemptLogin(k);
+  });
+
+  // Logout
+  $('d-logout').addEventListener('click', function() {
+    clearKey();
+    $('dashboard').classList.add('hidden');
+    $('login-card').classList.remove('hidden');
+    $('license-input').value = '';
+  });
+
+  // Refresh
+  $('d-refresh').addEventListener('click', function() {
+    var k = loadKey();
+    if (k) attemptLogin(k);
+  });
+
+  // Auto-login if key in session
+  var existing = loadKey();
+  if (existing) attemptLogin(existing);
+})();
+</script>
+
+</body>
+</html>

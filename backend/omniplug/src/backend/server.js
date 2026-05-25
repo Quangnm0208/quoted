@@ -121,6 +121,10 @@ import llmsContentRouter from './modules/plugin-runtime/llms-content/llms-conten
 // customers/subscriptions/licenses/wp-sites/bot-crawls/posts/citations
 import quotedSaasAdmin from './modules/plugin-runtime/quoted-admin/quoted-admin.controller.js';
 
+// Quoted customer portal (v0.6.4) — customer self-service dashboard.
+// License-key bearer auth; read-only; mounted at /api/customer/*
+import quotedCustomerPortal from './modules/plugin-runtime/customer-portal/customer-portal.controller.js';
+
 // Quoted commercial layer (v0.4.0) — payments + licenses.
 import {
   paymentsRouter as quotedPaymentsRouter,
@@ -432,6 +436,12 @@ app.use('/api/payments',                       quotedPaymentsRouter);
 app.use('/api/payments/webhook', quotedWebhookRouter);
 app.use('/api/products',                       quotedProductsRouter);
 app.use('/api/v1/licenses',                    quotedLicensesRouter);
+
+// Customer portal (v0.6.4) — mounted BEFORE the /api/v1 requireApiKey
+// gate. License key in Authorization: License header authenticates the
+// customer to their OWN data. No JWT, no signup — see
+// customer-portal.controller.js for rationale.
+app.use('/api/customer', quotedCustomerPortal);
 
 app.use('/api/v1/wp-sites',  wpSitesRouter);
 app.use('/api/v1/bot-crawls', botCrawlsRouter);

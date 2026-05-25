@@ -18,6 +18,7 @@
 
 import { Router } from 'express';
 import { asyncHandler } from '../../../../core/lib/asyncHandler.js';
+import { recordAudit } from '../../../../core/lib/audit.js';
 import db from '../../../../core/db/connection.js';
 
 export const adminRouter = Router();
@@ -186,6 +187,42 @@ adminRouter.get('/citations', asyncHandler((req, res) => {
   `).all(limit, offset);
   const total = db.prepare('SELECT COUNT(*) AS c FROM citations WHERE tenant_id = 1').get().c;
   res.json({ rows, limit, offset, total });
+}));
+
+// ─── Revoke a WP site (force-disconnect compromised installation) ───
+// SaaS threat T10 mitigation — see docs/SECURITY_THREAT_MODEL.md.
+//
+// Sets is_active=0 + clears license_jti (the plugin's JWT carries this
+// jti; once cleared, the next plugin request fails JWT-jti check and
+// the plugin is forced through re-activation).
+//
+// Audit-logged as `wp_site.revoke` for incident-response trail.
+adminRouter.post('/wp-sites/:id/revoke', asyncHandler((req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: { code: 'INVALID_ID', message: 'wp_site id must be a positive integer.' } });
+  }
+  const reason = String(req.body?.reason || 'manual_operator_action').slice(0, 200);
+  const row = db.prepare('SELECT id, domain FROM wp_sites WHERE id = ? AND tenant_id = 1').get(id);
+  if (!row) {
+    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'WP site not found.' } });
+  }
+  const result = db.prepare(`
+    UPDATE wp_sites
+    SET is_active = 0, license_jti = NULL, updated_at = datetime('now')
+    WHERE id = ? AND tenant_id = 1
+  `).run(id);
+  // Audit trail — uses the standard helper so schema/columns stay in sync
+  // with the rest of OmniPlug (metadata_json, not metadata; no user_email
+  // column — the auditContextFromRequest helper handles the mapping).
+  try {
+    recordAudit(req, 'wp_site.revoke', {
+      entityType: 'wp_site',
+      entityId: id,
+      metadata: { domain: row.domain, reason },
+    });
+  } catch { /* audit failure must not block the revocation */ }
+  res.json({ revoked: true, wp_site_id: id, domain: row.domain, changes: result.changes });
 }));
 
 // ─── Webhook events log ─────────────────────────────────────────────

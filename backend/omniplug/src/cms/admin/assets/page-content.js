@@ -47,6 +47,7 @@ export async function renderPage(page) {
     wpsites: renderWpSites,
     botcrawls: renderBotCrawls,
     posts: renderQuotedPosts,
+    webhookevents: renderWebhookEvents,
   };
   const fn = renderers[page] || renderDashboard;
   try {
@@ -78,6 +79,7 @@ export function pageTitle(page) {
     wpsites: 'WP Sites',
     botcrawls: 'Bot Crawls',
     posts: 'Synced Posts',
+    webhookevents: 'Webhook Events',
   }[page] || 'Dashboard';
 }
 
@@ -702,18 +704,18 @@ async function renderWpSites() {
   const rows = d.rows || [];
   return `
     ${pageHeader('WP Sites', `<span class="muted">${d.active || 0} active / ${d.total || 0} total</span>`)}
-    ${noticeBanner('Mỗi row = 1 cài đặt WordPress plugin Quoted của khách. Tạo qua POST /api/v1/wp-sites/register khi khách activate license. Đây là số liệu quan trọng nhất cho product manager — bao nhiêu site đang LIVE dùng Quoted.')}
+    ${noticeBanner('Mỗi row = 1 cài đặt WordPress plugin Quoted của khách. Revoke = force-disconnect (xoá JWT, set inactive). Khách phải re-activate license. Dùng khi nghi ngờ site bị compromise.')}
     ${rows.length === 0 ? emptyState('Chưa có WP site nào đăng ký. Khách mua → email license → cài plugin → Activate → site xuất hiện ở đây.') : `
       <div class="panel">
         <table class="table">
-          <thead><tr><th>Domain</th><th>Plan</th><th>Customer</th><th>Posts</th><th>Crawls 7d</th><th>WP / Plugin ver</th><th>Last seen</th></tr></thead>
+          <thead><tr><th>Domain</th><th>Plan</th><th>Customer</th><th>Posts</th><th>Crawls 7d</th><th>WP / Plugin</th><th>Last seen</th><th></th></tr></thead>
           <tbody>
             ${rows.map(s => `
-              <tr>
+              <tr data-wp-site-id="${s.id}" data-wp-site-domain="${escapeHtml(s.domain)}">
                 <td>
                   <strong>${escapeHtml(s.domain)}</strong>
                   ${s.site_name ? `<br><span class="muted" style="font-size:12px;">${escapeHtml(s.site_name)}</span>` : ''}
-                  ${s.is_active ? '' : '&nbsp;' + badge('inactive', 'danger')}
+                  ${s.is_active ? '' : '&nbsp;' + badge('revoked', 'danger')}
                 </td>
                 <td>${badge(s.plan || 'free', s.plan === 'free' ? 'warning' : 'active')}</td>
                 <td class="muted" style="font-size:12px;">${escapeHtml(s.customer_email || s.admin_email || '—')}</td>
@@ -721,6 +723,39 @@ async function renderWpSites() {
                 <td>${s.crawls_7d > 0 ? `<strong>${s.crawls_7d}</strong>` : '<span class="muted">0</span>'}</td>
                 <td class="muted mono" style="font-size:12px;">${escapeHtml(s.wp_version || '?')} / ${escapeHtml(s.plugin_version || '?')}</td>
                 <td class="muted" style="font-size:12px;">${fmtDate(s.last_seen_at)}</td>
+                <td>${s.is_active ? `<button class="btn-link danger-text js-revoke-site" data-wp-site-id="${s.id}" type="button">Revoke</button>` : '<span class="muted">—</span>'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
+  `;
+}
+
+// ── Webhook Events / Failures ─────────────────────────────────────
+async function renderWebhookEvents() {
+  const d = await api('/api/admin/quoted/webhook-events').catch(() => ({ rows: [] }));
+  const rows = d.rows || [];
+  const showFailedOnly = (rows.filter(r => !r.processed || !r.signature_valid || r.error_message));
+  return `
+    ${pageHeader('Webhook Events', `<span class="muted">${d.total || 0} total · ${d.failures || 0} failures</span>`)}
+    ${noticeBanner(`Lemon Squeezy webhook delivery log. Failures = signature_valid=0 OR (processed=0 + error_message). Failures > 0 cần check LS dashboard + retry. Tham khảo INCIDENT_RESPONSE.md Runbook 5.`, d.failures > 0 ? 'warning' : 'info')}
+
+    ${rows.length === 0 ? emptyState('Chưa có webhook event nào. Khi khách checkout, LS sẽ POST event đến /api/payments/webhook/lemon-squeezy.') : `
+      <div class="panel">
+        <table class="table">
+          <thead><tr><th>Event</th><th>Provider event_id</th><th>Sig</th><th>Processed</th><th>Received</th><th>Processed at</th><th>Error</th></tr></thead>
+          <tbody>
+            ${rows.map(e => `
+              <tr>
+                <td><strong>${escapeHtml(e.event_name)}</strong></td>
+                <td class="muted mono" style="font-size:12px;">${escapeHtml(e.event_id || '—')}</td>
+                <td>${e.signature_valid ? badge('ok', 'active') : badge('bad', 'danger')}</td>
+                <td>${e.processed ? badge('done', 'active') : badge('pending', 'warning')}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(e.received_at)}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(e.processed_at)}</td>
+                <td class="danger-text" style="font-size:12px;">${escapeHtml(e.error_message || '')}</td>
               </tr>
             `).join('')}
           </tbody>

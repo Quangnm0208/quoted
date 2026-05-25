@@ -30,7 +30,37 @@ export function bindPageContentHandlers(root) {
       await handleSaveSiteConfig(siteBtn);
       return;
     }
+    const revokeBtn = event.target.closest('.js-revoke-site');
+    if (revokeBtn) {
+      event.preventDefault();
+      await handleRevokeSite(revokeBtn);
+      return;
+    }
   });
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// WP site revoke (wp-sites.html)
+// ─────────────────────────────────────────────────────────────────────
+
+async function handleRevokeSite(btn) {
+  const id = btn.getAttribute('data-wp-site-id');
+  const row = btn.closest('[data-wp-site-domain]');
+  const domain = row?.getAttribute('data-wp-site-domain') || '(this site)';
+  const reason = window.prompt(
+    `Revoke plugin access for ${domain}?\n\nThis sets the site inactive + clears its JWT.\nThe customer must re-activate their license from the plugin to reconnect.\n\nReason (audit log):`,
+    'operator-manual'
+  );
+  if (reason === null) return;
+  setBusy(btn, true);
+  try {
+    await api(`/api/admin/quoted/wp-sites/${id}/revoke`, { method: 'POST', body: { reason } });
+    toast(`Revoked ${domain}`, 'success');
+    setTimeout(() => location.reload(), 600);
+  } catch (err) {
+    toast(`Revoke failed: ${err.message}`, 'error');
+    setBusy(btn, false);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────

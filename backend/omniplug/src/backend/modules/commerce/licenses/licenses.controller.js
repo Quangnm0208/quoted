@@ -31,10 +31,26 @@ function activateRateLimit(req, res, next) {
   // set LEMONSQUEEZY_TEST_MODE=true.
   if (process.env.LEMONSQUEEZY_TEST_MODE === 'true') return next();
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
-  if (tryAcquire(ip, 5)) return next();
-  return res.status(429).json({
-    error: { code: 'RATE_LIMITED', message: 'Too many activation attempts. Try again in a minute.' },
-  });
+  // Per-IP bucket (5/min): stops a single attacker scanning many keys.
+  if (!tryAcquire(ip, 5)) {
+    return res.status(429).json({
+      error: { code: 'RATE_LIMITED', message: 'Too many activation attempts from this IP. Try again in a minute.' },
+    });
+  }
+  // Per-license bucket (3/min): stops distributed attempts to brute one
+  // specific key across many IPs. The key is hashed before bucket lookup
+  // so the rate-limiter Map never holds plaintext keys.
+  // SaaS threat T8 — see docs/SECURITY_THREAT_MODEL.md.
+  const lic = req.body?.license_key;
+  if (lic && typeof lic === 'string') {
+    const licHash = 'lic:' + Buffer.from(lic).toString('base64url').slice(0, 16);
+    if (!tryAcquire(licHash, 3)) {
+      return res.status(429).json({
+        error: { code: 'RATE_LIMITED_LICENSE', message: 'Too many activation attempts for this license. Try again in a minute.' },
+      });
+    }
+  }
+  return next();
 }
 
 function sendError(res, next, err) {

@@ -150,6 +150,7 @@ export async function renderShell(activeTab, pageTitle) {
       { id: 'wpsites', label: 'WP Sites', href: '/admin/wp-sites.html', icon: icon.tenants },
       { id: 'botcrawls', label: 'Bot Crawls', href: '/admin/bot-crawls.html', icon: icon.search },
       { id: 'posts', label: 'Synced Posts', href: '/admin/posts.html', icon: icon.articles },
+      { id: 'webhookevents', label: 'Webhook Events', href: '/admin/webhook-events.html', icon: icon.audit },
     ] },
     { label: 'Marketing CMS', items: [
       { id: 'pages', label: 'Pages (hero, promos)', href: '/admin/pages.html', icon: icon.sections },
@@ -230,7 +231,7 @@ export async function renderShell(activeTab, pageTitle) {
 
 // Bump on every functional admin UI change so the user sees a new
 // stamp in the sidebar footer and knows the file isn't a stale cache.
-export const ADMIN_BUILD = 'M3';
+export const ADMIN_BUILD = 'M3.1';
 
 export function themeSwitcher() {
   const current = getTheme();

@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.4] — 2026-05-25 — Customer portal + WP-site revoke + webhook-events admin view
+
+### Added
+- **Customer-facing dashboard** at `frontend/customer.html` + backend
+  `/api/customer/dashboard`. Customer pastes their license key →
+  see their license status, plan, sites, post sync count, bot crawls 7d,
+  setup checklist. No password, no signup — license key IS the bearer
+  credential (master prompt §7: 1–2 min onboarding). Read-only;
+  strictly scoped to the customer resolved from the key (verified
+  no-leak in audit). Per-IP rate limit 60/min via shared limiter.
+- **Plugin JWT revoke** — `POST /api/admin/quoted/wp-sites/:id/revoke`
+  with `{reason}` body. Sets `is_active=0` + clears `license_jti` →
+  next plugin request fails JWT-jti check → forces re-activation.
+  SaaS threat T10 mitigation. Audit-logged as `wp_site.revoke`.
+- **WP Sites admin** gets per-row Revoke button with confirmation +
+  reason prompt + toast + auto-reload.
+- **Webhook Events admin tab** — new `/admin/webhook-events.html`
+  showing every LS webhook delivery (event_name, event_id,
+  signature_valid, processed, received_at, processed_at, error).
+  Failures count surfaces in dashboard header.
+- **Per-license rate limit** — `activateRateLimit` now also enforces
+  3 attempts/min per license key (hashed before bucket lookup). Stops
+  distributed brute-force across many IPs against one specific key.
+  SaaS threat T8 enhanced.
+
+### Tests
+- `npm test`: 19/19 still green.
+- `bash scripts/security-smoke.sh`: 9/9 still green.
+- Live-verified end-to-end: customer portal auth (401/401/200 with
+  correct scope), site revoke (DB updated + customer dashboard
+  reflects + audit_log entry), webhook events endpoint returns
+  proper shape.
+
+### Bumps
+- `ADMIN_BUILD` → M3.1 (sidebar footer stamp visible on next deploy)
+- `package.json` 0.6.3 → 0.6.4
+
 ## [0.6.3] — 2026-05-25 — P1 cancel-fix + release engineering + dev rate-limit exemption
 
 ### Fixed
