@@ -1,0 +1,27 @@
+{
+  "name": "quoted",
+  "version": "0.4.0",
+  "description": "Quoted — make your WordPress site AI-readable. Monorepo for backend (Node + SQLite + OmniPlug), marketing site (static), WP plugin (PHP), and JS SDK (npm).",
+  "private": true,
+  "workspaces": [
+    "sdk/js-client"
+  ],
+  "scripts": {
+    "bootstrap": "bash scripts/bootstrap.sh",
+    "dev": "bash scripts/dev.sh",
+    "test": "bash scripts/test-all.sh",
+    "check": "cd backend/omniplug && node scripts/check-sql-patterns.mjs && node --env-file=.env scripts/verify-schema.js",
+    "migrate": "cd backend/omniplug && node --env-file=.env src/core/db/migrate.js",
+    "be": "cd backend/omniplug && node --env-file=.env src/backend/server.js",
+    "fe": "cd frontend && node node_modules/.bin/serve -l 5500 -n"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muahangngayvn/quoted.git"
+  },
+  "license": "GPL-2.0-or-later",
+  "author": "Nguyễn Mạnh Quang <quangnm0208@gmail.com>",
+  "engines": {
+    "node": ">=22 <24"
+  }
+}

@@ -51,34 +51,40 @@ quoted/
 
 ---
 
-## Local run — one terminal each
+## Local run — 3 commands
 
-You need **Node 22.x** (the backend pins `>=22 <24`). Check with `node --version`.
-
-### Terminal 1 — Backend (port 4000)
+Pre-req: **Node 22.x** + `python3` + `make` + `g++` (the last three are for
+`better-sqlite3`'s native build; standard on Ubuntu/Debian via `build-essential`).
 
 ```bash
-cd backend/omniplug
-npm install                                  # one-time
-# .env ships with safe local defaults; LICENSE_PUBLIC_KEY_PATH points at
-# keys/op-license-pub.pem. To generate a fresh keypair instead, see "License
-# keys" below.
-node --env-file=.env src/core/db/migrate.js  # runs migrations 001-029
-node --env-file=.env scripts/verify-schema.js
-node --env-file=.env src/backend/server.js   # boots on :4000
+npm run bootstrap     # one-time: install deps, copy .env, run migrations
+npm run dev           # start backend (:4000) + frontend (:5500)
+npm test              # run every test suite + lint (18 suites, ~10s)
 ```
+
+That's it. The default `.env` ships in **`LEMONSQUEEZY_TEST_MODE=true`** so
+checkout → webhook → license activation → site registration all work
+end-to-end against a synthetic LS — you can demo the whole purchase flow
+locally without any Lemon Squeezy account.
 
 Visit:
-- Admin UI: <http://localhost:4000/admin/> — login `admin@quoted.local` / `ChangeMe123!`
-- Health: <http://localhost:4000/api/health>
+- Marketing site: <http://127.0.0.1:5500/>  •  pricing: <http://127.0.0.1:5500/pricing>
+- Backend health: <http://127.0.0.1:4000/api/health>
+- OmniPlug admin: <http://127.0.0.1:4000/admin/>  (login `admin@quoted.local` / `ChangeMe123!`)
 
-### Terminal 2 — Frontend (port 5500)
+> The scripts default to `127.0.0.1` not `localhost` — some fresh container
+> environments don't resolve `localhost` to IPv4 (AAAA lookup first).
 
-```bash
-cd frontend
-npm install                                  # one-time
-npm run dev                                  # serve on :5500
-```
+### What the scripts do
+
+| Script | What it runs |
+|---|---|
+| `npm run bootstrap` | Node-version + build-tools check → `npm install` in backend/, frontend/, sdk/ → copy `.env.example` → `npm run migrate` → `verify-schema.js` |
+| `npm run dev` | Pre-flight (deps + .env present) → migrate → start BE + FE in foreground with `[BE]`/`[FE]` prefixed logs. Ctrl-C kills both. |
+| `npm test` | SQL lint + schema verifier + 18 upstream smoke + 8 OmniPlug regression + 15 commercial + 1 PHP plugin test + 4 SDK smoke. Auto-starts BE if not running. |
+| `npm run check` | Subset of test — SQL lint + schema verifier only (fast CI gate). |
+| `npm run migrate` | DB migrations only — useful after pulling new commits. |
+| `npm run be` / `npm run fe` | Run one surface in isolation. |
 
 Visit:
 - <http://localhost:5500/> — Home
