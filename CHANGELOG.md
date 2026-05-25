@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-25 — Commercial layer
+
+### Added
+- Backend `payments/` module — `/api/payments/checkout` (Mode A hosted-URL),
+  `/api/payments/webhook/lemon-squeezy` (HMAC + idempotency), `/api/products/plans`.
+- Backend `licenses/` module — `/api/v1/licenses/{activate,validate,deactivate}`
+  proxying the Lemon Squeezy License API server-side. Plugin holds no LS keys.
+- 7 new schema migrations (030–036): `customers`, `orders`, `subscriptions`,
+  `customer_licenses`, `entitlements`, `webhook_events`, plus `wp_sites` link
+  columns.
+- Frontend `success.html` post-checkout landing page + `assets/checkout.js`
+  wiring `[data-checkout-plan]` CTAs to `/api/payments/checkout`. Cloudflare
+  Pages `_headers` (CSP) + `_redirects` (pretty URLs).
+- WP plugin `includes/class-quoted-backend-client.php` — thin client for our
+  backend API (no LS dependency).
+- 15 new commercial-flow tests (T-PAY × 9, T-LIC × 5, T-E2E × 1) in
+  `tests/quoted-test-*.mjs`.
+- `docs/ARCHITECTURE-COMMERCIAL.md` — ADR explaining LS-proxy choice.
+- `docs/SYSTEM-AUDIT.md` — 12-area system audit from this pass.
+- `docs/FRONTEND-AUDIT.md` — frontend audit from this pass.
+
+### Changed
+- WP plugin `class-quoted-license.php` rewritten (288 → 203 lines): now calls
+  our backend's `/api/v1/licenses/*` instead of `api.lemonsqueezy.com` direct.
+  Public interface (`activate`, `validate`, `deactivate`, `is_connected`,
+  `current_plan`) preserved.
+- `POST /api/v1/wp-sites/register` now requires `{ activation_token, domain, … }`
+  (was `{ license_key, domain, … }`). Legacy envelope path removed.
+- Marketing CTAs in `index.html` + `pricing.html` say "Start Pro"/"Start Agency"
+  (was "Start Starter"/"Start Pro") to match backend plan vocabulary.
+
+### Removed
+- `qtd_(live|test)_<jwt>` envelope flow: `verifyQuotedLicense` +
+  `isQuotedLicenseRevoked` in `wp-sites/quoted-licenses.js`.
+- `scripts/qtd-license-sign.js` (was a never-shipped operator CLI).
+
+### Fixed
+- `upsertCustomerByLemon` dual-key conflict (email + lemon_customer_id):
+  rewrote as explicit find-by-lemon-id → find-by-email → update-or-insert.
+- llms-content endpoint stripped `www.` prefix and rejected empty
+  `X-Quoted-Domain` headers (was silently falling back to Host tenant).
+- `/api/v1/wp-sites/register` rate-limited (5/min/IP, was unlimited).
+- SQL pattern lint false-positive on `markdown.serializer.js` JSDoc.
+
+## [0.3.0] — 2026-05-22
+
 ## [0.1.0] — 2026-05-23
 
 ### Initial Phase 0 Scaffold

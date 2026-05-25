@@ -1,8 +1,8 @@
-# Quoted MVP v0.1.0 — AI Citation Plugin for WordPress
+# Quoted v0.4.0 — Commercial WordPress Plugin + Backend
 
 **Owner:** Nguyễn Mạnh Quang &lt;quangnm0208@gmail.com&gt;
-**Status:** Phase 0 scaffold — production-bound, not yet deployed
-**Date packaged:** 2026-05-23
+**Status:** Commercial layer wired (Lemon Squeezy proxy + webhook + license activate). Test-mode end-to-end green; production gated on LS credentials.
+**Date packaged:** 2026-05-25
 
 This package contains the complete buildable scaffold for the Quoted product:
 a WordPress plugin (PHP) + backend extensions to the existing OmniPlug CMS Core
@@ -164,10 +164,109 @@ zip -r quoted.zip wp-plugin/ -x "*.DS_Store"
 # Upload via WP Admin → Plugins → Add New → Upload
 ```
 
-Then in `wp-admin → Plugins → Quoted → Settings`:
-1. Backend URL: `http://localhost:4000`
-2. License key: paste the contents of `backend/omniplug/keys/<your>.qtd-license.txt`
-3. Click **Connect**.
+Then in `wp-admin → Settings → Quoted`:
+1. Backend URL: `http://localhost:4000` (or your production API URL)
+2. License key: the UUID from your purchase confirmation email
+3. Click **Activate**
+
+The plugin contacts our backend, which proxies to the Lemon Squeezy License API,
+returns an activation token, and auto-registers the WP site. You'll see "Active"
+with your plan name and feature list.
+
+---
+
+## Full purchase-to-activation flow (commercial — v0.4.0)
+
+```
+Visitor          Frontend             Backend              Lemon Squeezy        WP Plugin
+   │              :5500                :4000                 (hosted)              (any WP)
+   │
+   │ click "Start Pro"
+   ├─────────────►│
+   │              │ POST /api/payments/checkout {plan}
+   │              ├─────────────────────►│
+   │              │                      │ resolve hosted URL from env
+   │              │◄─ {checkout_url} ────┤
+   │              │                      │
+   │ window.location = checkout_url      │
+   │◄─────────────┤
+   ├─────────────────────────────────────────────────────►│
+   │ pay (credit card / Apple Pay)                         │
+   │                                                       │
+   │ ──────── LS sends webhook ─────────►│                 │
+   │                                     │ POST /api/payments/webhook/lemon-squeezy
+   │                                     │ HMAC verified, idempotent
+   │                                     │ creates customer/order/sub/license/entitlement
+   │                                                       │
+   │ ──────── LS sends receipt email with license UUID ──────►│
+   │ ──────── LS redirects buyer to /success.html ───────►│
+   │
+   │                                                                ┌─────────────┐
+   │                                                                │ admin pastes│
+   │                                                                │ license UUID│
+   │                                                                │ + Activate  │
+   │                                                                └──────┬──────┘
+   │                                     │ POST /api/v1/licenses/activate │
+   │                                     │◄───────────────────────────────┤
+   │                                     │ proxy to LS License API
+   │                                     │ → activation_token (HS256)
+   │                                     │────────────────────────────────►│
+   │                                     │                                  │
+   │                                     │ POST /api/v1/wp-sites/register   │
+   │                                     │◄─────────────────────────────────┤
+   │                                     │ → plugin JWT (24h)
+   │                                     │────────────────────────────────►│
+   │                                     │                                  │ Pro features unlocked.
+```
+
+For the architecture rationale (LS-proxy vs hybrid, Mode A vs B), see
+[docs/ARCHITECTURE-COMMERCIAL.md](docs/ARCHITECTURE-COMMERCIAL.md).
+
+### Test the commercial layer locally
+
+Backend `.env` ships with `LEMONSQUEEZY_TEST_MODE=true` + placeholder
+LS env vars. With those set, every LS License API call returns a
+synthetic success response, so the full flow works without real LS
+credentials.
+
+```bash
+cd backend/omniplug
+node --env-file=.env tests/quoted-test-payments-checkout.mjs       # T-PAY-1..3
+node --env-file=.env tests/quoted-test-payments-webhook.mjs        # T-PAY-4..9 (HMAC + idempotency)
+node --env-file=.env tests/quoted-test-licenses-activation.mjs     # T-LIC-1..5
+node --env-file=.env tests/quoted-test-e2e-purchase-to-activation.mjs  # T-E2E-1
+```
+
+Expected: 15/15 pass.
+
+### Deploy to production (Lemon Squeezy + Fly.io + Cloudflare Pages)
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full checklist. Quick summary:
+
+1. **Lemon Squeezy setup** (one-time, ~15 min)
+   - Create products: "Quoted Pro", "Quoted Agency"
+   - Create 4 variants (Pro Monthly $19, Pro Yearly $190, Agency Monthly $29, Agency Yearly $290)
+   - Enable license keys on each variant
+   - Create webhook → URL `https://api.quotedeasy.com/api/payments/webhook/lemon-squeezy`
+   - Copy: API key, store ID, webhook secret, 4 variant IDs, 4 hosted checkout URLs
+
+2. **Backend (Fly.io)**
+   ```bash
+   flyctl secrets set \
+     JWT_SECRET="$(openssl rand -hex 32)" \
+     LEMONSQUEEZY_API_KEY=eyJ0... \
+     LEMONSQUEEZY_STORE_ID=12345 \
+     LEMONSQUEEZY_WEBHOOK_SECRET=whsec_... \
+     LEMONSQUEEZY_VARIANT_PRO_MONTHLY=98765 \
+     ... (all 4 variants + 4 checkout URLs)
+   flyctl deploy
+   ```
+   **Do not set `LEMONSQUEEZY_TEST_MODE=true` in production** — it would skip license verification.
+
+3. **Frontend (Cloudflare Pages)**
+   - Connect GitHub repo, root dir = `frontend/`, no build step
+   - Custom domain → `quotedeasy.com`
+   - `_headers` and `_redirects` are picked up automatically
 
 ---
 
