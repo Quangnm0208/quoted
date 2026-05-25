@@ -37,14 +37,20 @@ if ! curl -fsS -o /dev/null "$BASE/api/health"; then
   ( cd backend/omniplug && nohup node --env-file=.env src/backend/server.js > /tmp/quoted-be-test.log 2>&1 ) &
   BE_PID=$!
   BE_STARTED_HERE=1
-  for i in 1 2 3 4 5 6 7 8 9 10; do
+  # Wait up to 30s — fresh-bootstrap machines need time for bcrypt admin
+  # password hashing + migration replay before the listen() resolves.
+  for i in $(seq 1 30); do
     sleep 1
     curl -fsS -o /dev/null "$BASE/api/health" && break
   done
   if ! curl -fsS -o /dev/null "$BASE/api/health"; then
-    echo "✗ Backend failed to start. See /tmp/quoted-be-test.log"
+    echo "✗ Backend failed to start after 30s. See /tmp/quoted-be-test.log"
     exit 1
   fi
+  # Extra grace period for the smoke test — health responds while migrations
+  # may still be finishing on the first request. 2s eliminates the cold-start
+  # race observed on first-run after bootstrap.
+  sleep 2
 fi
 
 cleanup() {
