@@ -30,12 +30,14 @@ function registerRateLimit(req, res, next) {
 }
 
 const registerSchema = z.object({
-  license_key:    z.string().min(20).max(8200),
-  domain:         z.string().min(3).max(253),
-  wp_version:     z.string().max(20).optional(),
-  plugin_version: z.string().max(20).optional(),
-  site_name:      z.string().max(200).optional(),
-  admin_email:    z.string().email().max(254).optional(),
+  // v0.4.0: legacy `license_key` envelope removed. Plugin must call
+  // /api/v1/licenses/activate first to obtain activation_token.
+  activation_token: z.string().min(20).max(2000),
+  domain:           z.string().min(3).max(253),
+  wp_version:       z.string().max(20).optional(),
+  plugin_version:   z.string().max(20).optional(),
+  site_name:        z.string().max(200).optional(),
+  admin_email:      z.string().email().max(254).optional(),
 });
 
 const postSyncSchema = z.object({

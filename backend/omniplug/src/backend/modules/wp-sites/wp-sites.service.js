@@ -1,12 +1,26 @@
 /**
  * wp-sites service — business logic for plugin registration & sync.
+ *
+ * v0.4.0: registration now requires a valid activation_token (minted by
+ * /api/v1/licenses/activate). The legacy qtd_live_* envelope path is
+ * removed. Plugin flow:
+ *
+ *   1. Customer pays via LS hosted checkout → webhook creates entitlement.
+ *   2. Plugin POSTs to /api/v1/licenses/activate with license key →
+ *      receives activation_token + plan + features.
+ *   3. Plugin POSTs to /api/v1/wp-sites/register with activation_token →
+ *      tenant + wp_site row created/updated, returns plugin JWT for
+ *      subsequent sync/dashboard calls.
  */
 
-import { verifyQuotedLicense, isQuotedLicenseRevoked, signPluginJwt } from './quoted-licenses.js';
+import { signPluginJwt } from './quoted-licenses.js';
 import { resolveOrCreateTenant } from './tenancy-quoted.js';
 import * as repo from './wp-sites.repository.js';
 import { quotedPostsRepository } from './quoted-posts.repository.js';
 import * as crawlsRepo from '../bot-crawls/bot-crawls.repository.js';
+import { decodeActivationToken } from '../licenses/licenses.service.js';
+import { entitlementRepo } from '../payments/entitlement.repository.js';
+import db from '../../../core/db/connection.js';
 
 const JWT_TTL_HOURS = Number(process.env.QUOTED_JWT_TTL_HOURS || 24);
 const FREE_POST_LIMIT = Number(process.env.QUOTED_FREE_POST_LIMIT || 50);
@@ -24,57 +38,48 @@ function normalizeDomain(domain) {
 }
 
 /**
- * Map an OmniPlug license plan onto the Quoted plan vocabulary used by
- * quotas + dashboards. OmniPlug knows: community | lite | standard | pro | pro_plus.
- * Quoted Phase 0 uses: free | pro | agency.
+ * Map our commercial plan_id to the Quoted plan vocabulary used by quotas.
+ * pro-* → pro; agency-* → agency; anything else → free.
  */
-function mapPlan(opPlan) {
-  switch (opPlan) {
-    case 'community': return 'free';
-    case 'lite':      return 'free';
-    case 'standard':  return 'pro';
-    case 'pro':       return 'pro';
-    case 'pro_plus':  return 'agency';
-    default:          return 'free';
-  }
+function planTierFromPlanId(planId) {
+  if (!planId) return 'free';
+  if (planId.startsWith('agency-')) return 'agency';
+  if (planId.startsWith('pro-')) return 'pro';
+  return 'free';
+}
+
+function lookupLicenseById(id) {
+  return db.prepare(`SELECT * FROM customer_licenses WHERE id = ?`).get(id) || null;
 }
 
 export async function register(payload) {
-  const { license_key, domain } = payload;
+  const { activation_token, domain } = payload;
   const normalizedDomain = normalizeDomain(domain);
 
-  // 1+2. Format + signature
-  const claims = verifyQuotedLicense(license_key);
-
-  // 3. Revocation
-  if (isQuotedLicenseRevoked(claims.jti)) {
-    throw err('LICENSE_REVOKED', 'This license has been revoked.', 410);
+  // 1. Verify activation_token (minted by /api/v1/licenses/activate).
+  const claims = decodeActivationToken(activation_token);
+  if (!claims) {
+    throw err('TOKEN_INVALID', 'Activation token invalid or expired. Re-activate the license.', 401);
   }
 
-  // 4. Expiry (verifyLicense already throws LICENSE_EXPIRED, but be defensive)
-  if (claims.exp && claims.exp * 1000 < Date.now()) {
-    throw err('LICENSE_EXPIRED', 'This license has expired.', 410);
+  // 2. Re-check entitlement (a license can be revoked between activate and register).
+  const license = lookupLicenseById(claims.license_id);
+  if (!license) throw err('LICENSE_NOT_FOUND', 'License no longer exists.', 404);
+  if (license.status === 'disabled') throw err('LICENSE_DISABLED', 'License has been disabled.', 410);
+  if (license.status === 'expired')  throw err('LICENSE_EXPIRED', 'License has expired.', 410);
+  const entitlement = entitlementRepo.findEntitlementByLicense(license.id);
+  if (!entitlement || entitlement.status !== 'active') {
+    throw err('ENTITLEMENT_INACTIVE', 'Subscription is not active.', 410);
   }
 
-  // 5. Domain match — OmniPlug license uses `signed_for`
-  const claimDomain = normalizeDomain(claims.signed_for || claims.domain || '');
-  if (claimDomain && claimDomain !== normalizedDomain) {
-    throw err(
-      'DOMAIN_MISMATCH',
-      'License domain does not match this WordPress site.',
-      403,
-      { expected: claimDomain, got: normalizedDomain },
-    );
-  }
-
-  // 6. Tenant
+  // 3. Tenant.
   const tenant = resolveOrCreateTenant({
     domain: normalizedDomain,
     name: payload.site_name || normalizedDomain,
   });
 
-  // 7. WP site row
-  const plan = mapPlan(claims.plan);
+  // 4. WP site row — link to customer_id + customer_license_id.
+  const plan = planTierFromPlanId(claims.plan_id);
   const wpSite = repo.upsertWpSite({
     tenantId:      tenant.id,
     domain:        normalizedDomain,
@@ -83,10 +88,12 @@ export async function register(payload) {
     wpVersion:     payload.wp_version || null,
     pluginVersion: payload.plugin_version || null,
     plan,
-    licenseJti:    claims.jti || null,
+    licenseJti:    null,                // qtd_live_* jti deprecated
+    customerId:    claims.customer_id,
+    customerLicenseId: claims.license_id,
   });
 
-  // 8. Plugin-side JWT
+  // 5. Plugin-side JWT (for /posts/sync, /bot-crawls/batch, /dashboard).
   const jwt = signPluginJwt({
     sub:        `wp_site:${wpSite.id}`,
     tenant_id:  tenant.id,

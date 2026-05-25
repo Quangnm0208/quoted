@@ -117,6 +117,14 @@ import citationsRouter from './modules/citations/citations.controller.js';
 import liveAiTestRouter from './modules/live-ai-test/live-ai-test.controller.js';
 import llmsContentRouter from './modules/llms-content/llms-content.controller.js';
 
+// Quoted commercial layer (v0.4.0) — payments + licenses.
+import {
+  paymentsRouter as quotedPaymentsRouter,
+  webhookRouter  as quotedWebhookRouter,
+  productsRouter as quotedProductsRouter,
+} from './modules/payments/payments.controller.js';
+import quotedLicensesRouter from './modules/licenses/licenses.controller.js';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ===== 1. Wire domain event subscribers =====
@@ -190,6 +198,13 @@ function normalizeLicenseBodyParserError(err, req, res, next) {
 app.use('/api/admin/license', express.json({ limit: LICENSE_BODY_LIMIT }));
 app.use('/api/admin/license', express.urlencoded({ extended: true, limit: LICENSE_BODY_LIMIT }));
 app.use('/api/admin/license', normalizeLicenseBodyParserError);
+
+// CRITICAL: the Lemon Squeezy webhook MUST receive the raw body so HMAC
+// verification can compute against the exact bytes LS signed. Mount the
+// raw-body parser BEFORE the global express.json() so the JSON parser
+// doesn't consume the stream first. Limit 1 MB (LS payloads are ~5 KB).
+app.use('/api/payments/webhook/lemon-squeezy', express.raw({ type: '*/*', limit: '1mb' }));
+
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
@@ -380,6 +395,16 @@ app.get('/api/v1/health/legacy-traffic', (req, res) => {
 // with its own HS256 plugin-JWT (minted at /wp-sites/register) instead of an
 // op_live_* API key. The /register endpoint itself is public — license signature
 // is the proof of identity.
+// ===== Commercial layer (v0.4.0) =====
+// Mounted BEFORE the /api/v1 requireApiKey gate. /api/payments/* is
+// pre-purchase (no auth); /api/v1/licenses/* uses its own activation_token
+// (decoded inside the router). /api/payments/webhook/lemon-squeezy uses
+// HMAC against the raw body.
+app.use('/api/payments',                       quotedPaymentsRouter);
+app.use('/api/payments/webhook/lemon-squeezy', quotedWebhookRouter);
+app.use('/api/products',                       quotedProductsRouter);
+app.use('/api/v1/licenses',                    quotedLicensesRouter);
+
 app.use('/api/v1/wp-sites',  wpSitesRouter);
 app.use('/api/v1/bot-crawls', botCrawlsRouter);
 app.use('/api/v1/citations',  citationsRouter);

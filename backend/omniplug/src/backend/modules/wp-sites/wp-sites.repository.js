@@ -27,9 +27,9 @@ const stmt = lazyPrepare(() => ({
   insert: db.prepare(`
     INSERT INTO wp_sites
       (tenant_id, domain, site_name, admin_email, wp_version, plugin_version,
-       plan, license_jti, last_seen_at)
+       plan, license_jti, customer_id, customer_license_id, last_seen_at)
     VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
   `),
 
   update: db.prepare(`
@@ -40,6 +40,8 @@ const stmt = lazyPrepare(() => ({
       plugin_version = ?,
       plan = ?,
       license_jti = ?,
+      customer_id = ?,
+      customer_license_id = ?,
       last_seen_at = datetime('now'),
       updated_at = datetime('now'),
       is_active = 1
@@ -76,18 +78,22 @@ export function findByDomain(domain) {
  */
 export function upsertWpSite({
   tenantId, domain, siteName, adminEmail, wpVersion, pluginVersion,
-  plan = 'free', licenseJti = null,
+  plan = 'free', licenseJti = null, customerId = null, customerLicenseId = null,
 }) {
   const s = stmt();
   const existing = s.findByTenantDomain.get(tenantId, domain);
 
   if (existing) {
-    s.update.run(siteName, adminEmail, wpVersion, pluginVersion, plan, licenseJti, existing.id);
+    s.update.run(
+      siteName, adminEmail, wpVersion, pluginVersion, plan, licenseJti,
+      customerId, customerLicenseId, existing.id,
+    );
     return s.findById.get(existing.id);
   }
 
   const result = s.insert.run(
     tenantId, domain, siteName, adminEmail, wpVersion, pluginVersion, plan, licenseJti,
+    customerId, customerLicenseId,
   );
   return s.findById.get(result.lastInsertRowid);
 }
