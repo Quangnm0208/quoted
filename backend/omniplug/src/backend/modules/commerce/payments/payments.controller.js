@@ -22,19 +22,14 @@
  */
 
 import { Router } from 'express';
-import { z } from 'zod';
 import { tryAcquire } from '../../../../core/lib/rateLimiterIp.js';
+import { CheckoutRequest } from '../../_contracts/index.js';
 import * as service from './payments.service.js';
 import { getProvider } from '../providers/index.js';
 import * as eventStore from './webhook-events.repository.js';
 
 // ─── /api/payments ────────────────────────────────────────────────────
 export const paymentsRouter = Router();
-
-const checkoutSchema = z.object({
-  plan: z.string().min(1).max(64),
-  email: z.string().email().max(254).optional(),
-});
 
 function checkoutRateLimit(req, res, next) {
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
@@ -46,7 +41,7 @@ function checkoutRateLimit(req, res, next) {
 
 paymentsRouter.post('/checkout', checkoutRateLimit, async (req, res, next) => {
   try {
-    const parsed = checkoutSchema.safeParse(req.body);
+    const parsed = CheckoutRequest.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
         error: { code: 'INVALID_REQUEST', message: 'Checkout payload invalid', details: parsed.error.flatten() },

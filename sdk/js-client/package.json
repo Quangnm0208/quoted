@@ -1,0 +1,43 @@
+{
+  "name": "@quoted/sdk",
+  "version": "0.4.0",
+  "description": "Quoted SDK — typed JavaScript client for the Quoted backend (payments + licenses + WP plugin runtime).",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/smoke.test.mjs"
+  },
+  "keywords": [
+    "quoted",
+    "wordpress",
+    "llms.txt",
+    "ai-visibility",
+    "lemon-squeezy",
+    "license"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muahangngayvn/quoted.git",
+    "directory": "sdk/js-client"
+  },
+  "license": "GPL-2.0-or-later",
+  "author": "Nguyễn Mạnh Quang <quangnm0208@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  }
+}
