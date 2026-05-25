@@ -1,0 +1,26 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# Node (used by .pot extractor + zip builder)
+node_modules/
+package-lock.json
+
+# Local-only working copies (not part of the shipped plugin)
+.docker-local/
+*.local
+
+# Build / release artefacts
+quoted-*.zip
+dist/
+release/
+
+# Backup / draft files
+*.bak
+*.orig
