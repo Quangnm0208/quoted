@@ -1,6 +1,6 @@
 {
   "name": "quoted",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Quoted — make your WordPress site AI-readable. Monorepo for backend (Node + SQLite + OmniPlug), marketing site (static), WP plugin (PHP), and JS SDK (npm).",
   "private": true,
   "workspaces": [
