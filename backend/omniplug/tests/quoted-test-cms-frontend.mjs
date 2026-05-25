@@ -52,3 +52,12 @@ test('T-CMS-FE-4: unknown page_key returns empty sections, not 500', async () =>
   assert.ok(Array.isArray(body.sections));
   assert.equal(body.sections.length, 0);
 });
+
+test('T-CMS-FE-5: programs (promotions) section header is CMS-editable', async () => {
+  const { body } = await get('/api/public/pages/quoted_home');
+  const programs = (body.sections || []).find(s => s.key === 'programs');
+  assert.ok(programs, 'programs section missing — migration 038 not applied?');
+  assert.ok(typeof programs.title === 'string' && programs.title.length > 0, 'programs.title required');
+  assert.ok(typeof programs.subtitle === 'string' && programs.subtitle.length > 0, 'programs.subtitle required');
+  assert.ok(programs.payload && typeof programs.payload.eyebrow === 'string', 'programs.payload.eyebrow required');
+});

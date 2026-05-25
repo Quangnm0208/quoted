@@ -64,6 +64,7 @@ old copy will keep showing on the site (no harm done).
 | Surface | Status | When |
 |---|---|---|
 | Home page sections after the hero (the shift demo, how-it-works, pricing cards, FAQ, etc.) | Static HTML | Milestone 2 |
+| The 6 promotion **cards** under the "Programs" header (Early bird, Money-back, Switch & save, Partner, Non-profit, Refer) | Static HTML — only the section header is CMS-editable today | Milestone 2 (needs a small list-renderer in `cms.js`) |
 | `/pricing`, `/faq`, `/success` pages | Static HTML | Milestone 3 |
 | `/docs`, `/blog`, `/changelog` lists | Static HTML | Milestone 4 |
 | Header logo, footer text, social links | Static HTML | Milestone 5 |
@@ -80,6 +81,7 @@ edit them the same way.
 | Task | Where in the admin |
 |---|---|
 | Edit homepage hero copy | **Pages** → `quoted_home` → `hero` |
+| Edit promotions/programs header (eyebrow chip, heading, lead) | **Pages** → `quoted_home` → `programs` |
 | Hide a section temporarily | Open the section → toggle `is_visible` off → save. Refresh site — section disappears, fallback HTML still rendered if any. |
 | See who changed what | **Audit log** — every section edit is recorded |
 | Upload an image to use later | **Media library** — for milestone 1 the upload works; wiring it onto the hero is milestone 6 |

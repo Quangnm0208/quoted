@@ -106,7 +106,8 @@ now includes the dev port `5500`. Production deploys must set
 | # | Slice | Status |
 |---|---|---|
 | 1 | Hero on `index.html` end-to-end + helper + seed + test + CEO guide | ✅ done |
-| 2 | Remaining `index.html` sections (`the_shift`, `how_it_works`, `live_demo`, `product`, `pricing`, `programs`, `testimonials`, `faq`, `final_cta`) | ⏳ next |
+| 1b | Programs/promotions section **header** (eyebrow, h2, lead) — cards still static | ✅ done |
+| 2 | Remaining `index.html` sections (`the_shift`, `how_it_works`, `live_demo`, `product`, `pricing`, `testimonials`, `faq`, `final_cta`) **and** the 6 promotion CARDS (needs a list-renderer in `cms.js`) | ⏳ next |
 | 3 | `pricing.html`, `faq.html`, `success.html` | ⏳ next |
 | 4 | `docs.html`, `blog.html`, `changelog.html` (article-list rendering) | ⏳ next |
 | 5 | Site settings (logo, footer, social links) wired into header/footer partials | ⏳ next |
