@@ -109,6 +109,19 @@ export const env = {
   FEATURE_WEBHOOKS: bool('FEATURE_WEBHOOKS', false),
   FEATURE_API_KEYS: bool('FEATURE_API_KEYS', false),
   FEATURE_CRM: bool('FEATURE_CRM', false),
+
+  // Quoted commercial-overlay feature flags. Two routes are Phase 0
+  // stubs (citations returns [], live-ai-test returns 501). They mount
+  // only when explicitly enabled — keeps the core API surface clean for
+  // installs that don't want to expose stub endpoints.
+  // Quoted commercial-overlay feature flags.
+  // Both default ON — modules are real, gated only by absence of upstream
+  // API keys (citations needs PERPLEXITY_API_KEY or TAVILY_API_KEY;
+  // live-ai-test needs PERPLEXITY_API_KEY). Without keys, /query and
+  // /sync-citations return a clear 503 PROVIDER_NOT_CONFIGURED instead
+  // of working against test data. Set =false to remove the routes entirely.
+  FEATURE_CITATIONS:    bool('FEATURE_CITATIONS', true),
+  FEATURE_LIVE_AI_TEST: bool('FEATURE_LIVE_AI_TEST', true),
 };
 
 // Validate JWT_SECRET strength in production

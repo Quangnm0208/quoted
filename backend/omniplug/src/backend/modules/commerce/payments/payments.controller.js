@@ -32,6 +32,9 @@ import * as eventStore from './webhook-events.repository.js';
 export const paymentsRouter = Router();
 
 function checkoutRateLimit(req, res, next) {
+  // Test mode skips the IP rate limit so CI can fire many calls from 127.0.0.1
+  // without hitting 429. Production must not set this.
+  if (process.env.LEMONSQUEEZY_TEST_MODE === 'true') return next();
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
   if (tryAcquire(ip, 10)) return next();
   return res.status(429).json({

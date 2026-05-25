@@ -133,6 +133,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 //   migrate -> verify-schema -> server
 // This module assumes the database is already migrated and verified.
 // Subscribers are sync; registration is cheap.
+
+// HARD GATE: refuse to boot in production with LEMONSQUEEZY_TEST_MODE on.
+// The test-mode branch in commerce/providers/lemon-squeezy/ls.client.js
+// returns synthetic License API responses — fine for local dev, catastrophic
+// in production (every license "activates" without LS confirmation, so a
+// fake key would unlock paid features).
+if (env.NODE_ENV === 'production' && process.env.LEMONSQUEEZY_TEST_MODE === 'true') {
+  console.error('[boot] REFUSED: LEMONSQUEEZY_TEST_MODE=true is set in production.');
+  console.error('[boot] In production every License API call MUST hit Lemon Squeezy.');
+  console.error('[boot] Unset LEMONSQUEEZY_TEST_MODE (or set it to false) and redeploy.');
+  process.exit(1);
+}
+
 registerAuditSubscriber();
 registerSeoSubscriber();
 registerIndexingSubscriber();
