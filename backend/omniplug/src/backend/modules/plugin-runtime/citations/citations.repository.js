@@ -8,8 +8,8 @@
  * Removing them would force Phase 2 to redesign the repo from scratch.
  */
 
-import db from '../../../core/db/connection.js';
-import { lazyPrepare } from '../../../core/db/lazyPrepare.js';
+import db from '../../../../core/db/connection.js';
+import { lazyPrepare } from '../../../../core/db/lazyPrepare.js';
 
 const stmt = lazyPrepare(() => ({
   countActiveSince: db.prepare(`

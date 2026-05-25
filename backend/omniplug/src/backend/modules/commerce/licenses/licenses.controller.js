@@ -8,7 +8,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import { tryAcquire } from '../../../core/lib/rateLimiterIp.js';
+import { tryAcquire } from '../../../../core/lib/rateLimiterIp.js';
 import * as service from './licenses.service.js';
 
 const router = Router();

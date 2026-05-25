@@ -30,7 +30,7 @@
 // dispatch by event_name) now lives in payments/payments.controller.js +
 // providers/index.js; this file is purely the LS event handlers.
 
-import db, { transaction } from '../../../../core/db/connection.js';
+import db, { transaction } from '../../../../../core/db/connection.js';
 import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../../entitlements/entitlement.repository.js';
 import { planIdFromVariantId, getPlan } from '../../plans/plans.config.js';
 

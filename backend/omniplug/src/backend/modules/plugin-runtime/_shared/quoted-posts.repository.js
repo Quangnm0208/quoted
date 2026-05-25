@@ -7,8 +7,8 @@
  * the articles list.
  */
 
-import db from '../../../core/db/connection.js';
-import { lazyPrepare } from '../../../core/db/lazyPrepare.js';
+import db from '../../../../core/db/connection.js';
+import { lazyPrepare } from '../../../../core/db/lazyPrepare.js';
 
 const stmt = lazyPrepare(() => ({
   countByTenant: db.prepare(`SELECT COUNT(*) AS n FROM quoted_posts WHERE tenant_id = ?`),

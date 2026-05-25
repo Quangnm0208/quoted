@@ -9,8 +9,8 @@
  * to the wp_sites row instead (see migration 025).
  */
 
-import db from '../../../core/db/connection.js';
-import { tenancy } from '../../../core/lib/tenancy.js';
+import db from '../../../../core/db/connection.js';
+import { tenancy } from '../../../../core/lib/tenancy.js';
 
 function slugifyDomain(domain) {
   return String(domain)

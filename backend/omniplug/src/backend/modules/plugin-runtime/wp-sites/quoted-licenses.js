@@ -10,7 +10,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { env } from '../../../core/config/env.js';
+import { env } from '../../../../core/config/env.js';
 
 export function signPluginJwt(payload, ttlSeconds) {
   return jwt.sign(payload, env.JWT_SECRET, { expiresIn: ttlSeconds });

@@ -20,7 +20,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { env } from '../../../core/config/env.js';
+import { env } from '../../../../core/config/env.js';
 import { getProvider, getProviderForPlan } from '../providers/index.js';
 import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../entitlements/entitlement.repository.js';
 import { planIdFromVariantId, getPlan } from '../plans/plans.config.js';
@@ -231,7 +231,7 @@ export async function deactivate({ token, site_url, license_key }) {
 
 // ─── helper ───────────────────────────────────────────────────────────
 
-import db from '../../../core/db/connection.js';
+import db from '../../../../core/db/connection.js';
 function lookupLicenseById(id) {
   return db.prepare(`SELECT * FROM customer_licenses WHERE id = ?`).get(id) || null;
 }

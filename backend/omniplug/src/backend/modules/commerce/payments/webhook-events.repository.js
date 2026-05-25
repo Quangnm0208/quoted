@@ -6,8 +6,8 @@
  * (already processed → return 200, don't re-run handler logic).
  */
 
-import db from '../../../core/db/connection.js';
-import { lazyPrepare } from '../../../core/db/lazyPrepare.js';
+import db from '../../../../core/db/connection.js';
+import { lazyPrepare } from '../../../../core/db/lazyPrepare.js';
 
 const stmt = lazyPrepare(() => ({
   insertIfNew: db.prepare(`

@@ -18,9 +18,9 @@ import { resolveOrCreateTenant } from './tenancy-quoted.js';
 import * as repo from './wp-sites.repository.js';
 import { quotedPostsRepository } from '../_shared/quoted-posts.repository.js';
 import * as crawlsRepo from '../bot-crawls/bot-crawls.repository.js';
-import { decodeActivationToken } from '../licenses/licenses.service.js';
-import { entitlementRepo } from '../entitlements/entitlement.repository.js';
-import db from '../../../core/db/connection.js';
+import { decodeActivationToken } from '../../commerce/licenses/licenses.service.js';
+import { entitlementRepo } from '../../commerce/entitlements/entitlement.repository.js';
+import db from '../../../../core/db/connection.js';
 
 const JWT_TTL_HOURS = Number(process.env.QUOTED_JWT_TTL_HOURS || 24);
 const FREE_POST_LIMIT = Number(process.env.QUOTED_FREE_POST_LIMIT || 50);

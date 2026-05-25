@@ -23,7 +23,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import { tryAcquire } from '../../../core/lib/rateLimiterIp.js';
+import { tryAcquire } from '../../../../core/lib/rateLimiterIp.js';
 import * as service from './payments.service.js';
 import { getProvider } from '../providers/index.js';
 import * as eventStore from './webhook-events.repository.js';

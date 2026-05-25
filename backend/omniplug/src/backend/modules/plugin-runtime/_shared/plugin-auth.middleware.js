@@ -15,7 +15,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { env } from '../../../core/config/env.js';
+import { env } from '../../../../core/config/env.js';
 
 function reject(res, code, message, status = 401) {
   return res.status(status).json({ error: { code, message } });

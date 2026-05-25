@@ -111,19 +111,19 @@ import { maskLeadsForPlan } from '../core/middleware/softLock.js';
 import { loadPublicKey } from '../core/lib/licenseKey.js';
 
 // Quoted (v0.1.0 overlay) — WP plugin endpoints + public llms.txt
-import wpSitesRouter, { dashboardRouter as quotedDashboardRouter } from './modules/wp-sites/wp-sites.controller.js';
-import botCrawlsRouter from './modules/bot-crawls/bot-crawls.controller.js';
-import citationsRouter from './modules/citations/citations.controller.js';
-import liveAiTestRouter from './modules/live-ai-test/live-ai-test.controller.js';
-import llmsContentRouter from './modules/llms-content/llms-content.controller.js';
+import wpSitesRouter, { dashboardRouter as quotedDashboardRouter } from './modules/plugin-runtime/wp-sites/wp-sites.controller.js';
+import botCrawlsRouter from './modules/plugin-runtime/bot-crawls/bot-crawls.controller.js';
+import citationsRouter from './modules/plugin-runtime/citations/citations.controller.js';
+import liveAiTestRouter from './modules/plugin-runtime/live-ai-test/live-ai-test.controller.js';
+import llmsContentRouter from './modules/plugin-runtime/llms-content/llms-content.controller.js';
 
 // Quoted commercial layer (v0.4.0) — payments + licenses.
 import {
   paymentsRouter as quotedPaymentsRouter,
   webhookRouter  as quotedWebhookRouter,
   productsRouter as quotedProductsRouter,
-} from './modules/payments/payments.controller.js';
-import quotedLicensesRouter from './modules/licenses/licenses.controller.js';
+} from './modules/commerce/payments/payments.controller.js';
+import quotedLicensesRouter from './modules/commerce/licenses/licenses.controller.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

@@ -6,8 +6,8 @@
  * tenants schema — see migration 025).
  */
 
-import db from '../../../core/db/connection.js';
-import { lazyPrepare } from '../../../core/db/lazyPrepare.js';
+import db from '../../../../core/db/connection.js';
+import { lazyPrepare } from '../../../../core/db/lazyPrepare.js';
 
 const stmt = lazyPrepare(() => ({
   findById: db.prepare(`SELECT * FROM wp_sites WHERE id = ?`),

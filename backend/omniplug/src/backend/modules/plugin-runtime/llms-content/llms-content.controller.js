@@ -8,7 +8,7 @@
  */
 
 import { Router } from 'express';
-import { tenancy } from '../../../core/lib/tenancy.js';
+import { tenancy } from '../../../../core/lib/tenancy.js';
 import { quotedPostsRepository } from '../_shared/quoted-posts.repository.js';
 import { serializeArticleAsMarkdown, buildSitemapMarkdown } from './markdown.serializer.js';
 

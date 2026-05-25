@@ -8,8 +8,8 @@
  */
 
 import crypto from 'node:crypto';
-import db from '../../../core/db/connection.js';
-import { lazyPrepare } from '../../../core/db/lazyPrepare.js';
+import db from '../../../../core/db/connection.js';
+import { lazyPrepare } from '../../../../core/db/lazyPrepare.js';
 
 const stmt = lazyPrepare(() => ({
   // customers — two-step upsert because we have two unique keys (email +
