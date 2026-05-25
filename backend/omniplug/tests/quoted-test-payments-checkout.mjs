@@ -2,7 +2,7 @@
  * T-PAY-1 .. T-PAY-3 — /api/payments/checkout.
  *
  * Runs against a live backend. The test harness assumes:
- *   - server up on BASE (default http://localhost:4000)
+ *   - server up on BASE (default http://127.0.0.1:4000)
  *   - LEMONSQUEEZY_CHECKOUT_PRO_MONTHLY env set (a test URL)
  *   - LEMONSQUEEZY_API_KEY *not* in any response body
  */
@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-const BASE = process.env.BASE || 'http://localhost:4000';
+const BASE = process.env.BASE || 'http://127.0.0.1:4000';
 
 async function post(path, body) {
   const res = await fetch(BASE + path, {

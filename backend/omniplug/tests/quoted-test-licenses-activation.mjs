@@ -14,7 +14,7 @@ import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 
-const BASE = process.env.BASE || 'http://localhost:4000';
+const BASE = process.env.BASE || 'http://127.0.0.1:4000';
 const SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
 const VARIANT_PRO_MONTHLY = parseInt(process.env.LEMONSQUEEZY_VARIANT_PRO_MONTHLY || '0', 10);
 
