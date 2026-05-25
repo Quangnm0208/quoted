@@ -344,6 +344,16 @@ function trackLegacyPublic(req, res, next) {
 // v1.4.4: attribution headers on ALL public + admin responses
 app.use(attributionHeaders);
 
+// P0.3 (master prompt) — `/api/public/llm` must mount BEFORE the
+// generic `resolveTenantFromHost` chain. The LLM controller resolves
+// tenant from the `X-Quoted-Domain` header (the customer's site
+// domain, not the SaaS API host). If `resolveTenantFromHost` ran first
+// in production strict mode and `api.quotedeasy.com` wasn't itself a
+// tenant.domain row, the request 404s before reaching the controller.
+// trackLegacyPublic is fine to run here too — it only adds a Sunset
+// header + a counter, no tenant gating.
+app.use('/api/public/llm',      trackLegacyPublic, llmsContentRouter);
+
 app.use('/api/public', trackLegacyPublic, resolveTenantFromHost);
 app.use('/api/public/articles', articlesPublic);
 app.use('/api/public/projects', projectsPublic);
@@ -352,11 +362,6 @@ app.use('/api/public/leads',    leadsPublic);
 app.use('/api/public/pages',    pagesPublic);
 app.use('/api/public/jsonld',   seoJsonLd);
 app.use('/api/public/snippet',  snippetPublic);
-
-// Quoted overlay — public llms.txt and per-post markdown. The router
-// resolves tenant via the `X-Quoted-Domain` header (Host fallback handled
-// by softResolveTenant earlier).
-app.use('/api/public/llm',      llmsContentRouter);
 
 // ===== 7. ADMIN API — Auth-based tenant resolution =====
 //
@@ -384,7 +389,11 @@ app.use('/api/admin/error-404', error404Admin);
 app.use('/api/admin/seo',       seoValidatorAdmin);
 
 // Quoted SaaS admin (v0.6.0) — JWT-gated read-only operator views
-app.use('/api/admin/quoted',    quotedSaasAdmin);
+// P0.1 (master prompt): cross-tenant data must require platform admin,
+// not just any tenant admin. requirePlatformAdmin layered AFTER
+// requireAuth + resolveTenantFromAuth (mounted globally on /api/admin).
+import { requirePlatformAdmin } from '../core/middleware/requirePlatformAdmin.js';
+app.use('/api/admin/quoted',    requirePlatformAdmin, quotedSaasAdmin);
 
 // v1.4.4: license admin endpoints (activate / sync-crl / status)
 app.use('/api/admin/license',   licenseAdmin);

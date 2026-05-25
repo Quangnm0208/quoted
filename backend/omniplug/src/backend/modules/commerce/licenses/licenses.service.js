@@ -47,7 +47,23 @@ function siteInstanceName(siteUrl) {
   return String(siteUrl).replace(/^https?:\/\//, '').replace(/\/+$/, '').slice(0, 200);
 }
 
+// P0.2 (master prompt) — activation token MUST be bound to the
+// normalized domain so it cannot be replayed against another site.
+// Rule: strip protocol + path + port + leading "www.", lowercase.
+// `example.com` / `https://example.com/` / `www.EXAMPLE.com` all resolve
+// to `example.com` (single canonical form). Documented + enforced.
+export function normalizeDomain(siteUrl) {
+  if (!siteUrl) return '';
+  let h = String(siteUrl).toLowerCase().trim();
+  h = h.replace(/^https?:\/\//, '');   // strip protocol
+  h = h.split('/')[0];                  // strip path
+  h = h.split(':')[0];                  // strip port
+  if (h.startsWith('www.')) h = h.slice(4);
+  return h;
+}
+
 function mintActivationToken({ customerId, licenseId, planId, siteUrl }) {
+  const normalized_domain = normalizeDomain(siteUrl);
   return jwt.sign(
     {
       sub: `license:${licenseId}`,
@@ -55,6 +71,7 @@ function mintActivationToken({ customerId, licenseId, planId, siteUrl }) {
       license_id: licenseId,
       plan_id: planId,
       site_url: siteUrl,
+      normalized_domain,
     },
     env.JWT_SECRET,
     { expiresIn: ACTIVATION_TOKEN_TTL },
@@ -180,6 +197,23 @@ function finishActivation({ license, customer, planId, plan, site_url }) {
 export function validate({ token, site_url }) {
   const claims = decodeActivationToken(token);
   if (!claims) throw err('TOKEN_INVALID', 'Activation token invalid or expired.', 401);
+
+  // P0.2 — domain binding: a token issued for site A must not validate
+  // on site B (otherwise an attacker who phishes/leaks a token can use
+  // the customer's paid license on their own site). If claims include
+  // a normalized_domain (post-fix tokens), require an exact match.
+  // Pre-fix tokens lack the field — accept for backward compat until
+  // they expire (24h TTL → at most 24h compat window).
+  if (claims.normalized_domain && site_url) {
+    const reqDomain = normalizeDomain(site_url);
+    if (reqDomain !== claims.normalized_domain) {
+      throw err(
+        'LICENSE_DOMAIN_MISMATCH',
+        `This activation token is bound to "${claims.normalized_domain}", not "${reqDomain}".`,
+        403
+      );
+    }
+  }
 
   const license = entitlementRepo.findLicenseByLemonId
     ? null  // (kept for future)

@@ -37,3 +37,4 @@ backend/omniplug/backups/
 backend/omniplug/keys/*.priv.pem
 backend/omniplug/keys/*.qtd-license.txt
 backend/omniplug/.qtd-inner.*.jwt
+/data/

@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.2] — 2026-05-25 — P0 security hardening from master-prompt audit
+
+Acted on the CTO master-prompt P0 items. Four exploitable surfaces hardened
+before paid launch. Security smoke (`scripts/security-smoke.sh`) green 9/9.
+
+### Security fixes
+
+- **P0.1 — Cross-tenant data lockdown.** `/api/admin/quoted/*` (customers,
+  subscriptions, orders, revenue) now requires platform admin (`tenant_id=1`
+  + `role=admin`). Previously gated only by `requireAuth` — any tenant
+  admin would have seen everyone's SaaS data. New middleware
+  `core/middleware/requirePlatformAdmin.js`. Returns 403 PLATFORM_ADMIN_REQUIRED
+  for non-platform users, 401 AUTH_REQUIRED for unauthenticated.
+- **P0.2 — Activation token domain binding + normalization.** Previously
+  `validate({ token, site_url })` decoded the token but did NOT compare
+  `claims.site_url === site_url` — a token issued for `example.com` could
+  be replayed on `attacker.com` to use the customer's paid license on
+  another site. Now: token mint includes `normalized_domain` (lowercase,
+  no-protocol, no-port, no-path, www-stripped). `validate` rejects with
+  403 LICENSE_DOMAIN_MISMATCH if the request site_url normalizes to a
+  different host. Backward-compat: tokens without `normalized_domain` (≤
+  24h old from pre-fix mint) still validate.
+- **P0.3 — Public LLM route mount order.** `/api/public/llm` was mounted
+  AFTER `app.use('/api/public', resolveTenantFromHost)` — in production
+  with strict tenant resolution, the marketing API host would 404 before
+  the LLM controller could resolve the customer's site via the
+  `X-Quoted-Domain` header. Now mounted BEFORE the generic resolver so
+  the LLM controller handles its own tenant resolution.
+- **P0.4 — Production boot preflight.** Added 2 fail-fast checks in
+  `core/config/env.js`:
+  1. `NODE_ENV=production` + `LEMONSQUEEZY_TEST_MODE=true` → throws on
+     boot. Without this, real customers would pay but receive synthetic
+     LS responses → no license, no entitlement, silent revenue loss.
+  2. `NODE_ENV=production` + missing `LEMONSQUEEZY_WEBHOOK_SECRET` →
+     throws on boot. Without it, every webhook returns 401 fail-closed
+     → silent subscription/license update loss.
+
+### Added
+
+- `scripts/security-smoke.sh` — 9-check security smoke test runner
+  covering all 4 P0s. Run after every deploy.
+- `docs/AUDIT_REPORT.md` + `BUG_FIX_LOG.md` + `SMOKE_TEST_REPORT.md` +
+  `SECURITY_REVIEW.md` + `RELEASE_NOTES_v0.6.1.md` (the v0.6.1 audit
+  package — kept for trail).
+
+### Tests
+
+- 19/19 npm test still green (no regression).
+- `bash scripts/security-smoke.sh` → 9/9 pass.
+- requirePlatformAdmin unit test: 5/5 (4 role/tenant combos + no-user).
+
+## [0.6.1] — 2026-05-25 — Formal audit pass + release-eng docs
+
+(See `docs/RELEASE_NOTES_v0.6.1.md`. v0.6.0 audited; 0 P0/P1/P2 found.
+v0.6.2 layered the master-prompt P0 hardening on top.)
+
+## [0.6.0] — 2026-05-25 — Quoted SaaS admin surfaces (M3)
+
+10 new admin endpoints under `/api/admin/quoted/*` for customers,
+subscriptions, licenses, WP sites, bot crawls, posts, citations,
+webhook events + a SaaS-focused dashboard. 6 new admin UI tabs.
+Sidebar restructured into 4 priority groups. Renderer simulator 19/19
+real-data pages.
+
 ## [0.5.0] — 2026-05-25 — Real CMS-driven marketing + functional admin
 
 The marketing site's home page can now be edited from the admin without

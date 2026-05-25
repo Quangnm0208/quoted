@@ -123,3 +123,29 @@ if (isProd && env.ADMIN_INITIAL_PASSWORD === 'ChangeMe123!') {
 if (isProd && env.ADMIN_INITIAL_PASSWORD.length < 12) {
   throw new Error('ADMIN_INITIAL_PASSWORD must be at least 12 characters in production');
 }
+
+// P0.4 (master prompt) — production must refuse to boot in Lemon
+// Squeezy test mode. When TEST_MODE=true, the license/checkout adapters
+// short-circuit with synthetic-success responses for local CI. Letting
+// this run in production means real customers pay but receive fake
+// licenses — silent revenue loss + support fire.
+if (isProd && /^true|1|yes$/i.test(String(process.env.LEMONSQUEEZY_TEST_MODE || ''))) {
+  throw new Error(
+    'LEMONSQUEEZY_TEST_MODE=true is forbidden in production. ' +
+    'This flag makes checkout + license activation return synthetic-success ' +
+    'responses without hitting Lemon Squeezy. Real customers would pay but ' +
+    'get no license. Set LEMONSQUEEZY_TEST_MODE=false (or unset) and restart.'
+  );
+}
+
+// P0.4 — production also requires the Lemon Squeezy webhook secret to
+// be present and non-empty, otherwise the webhook endpoint fails-closed
+// on every event (all real subscription/license updates would be lost).
+if (isProd && !process.env.LEMONSQUEEZY_WEBHOOK_SECRET) {
+  throw new Error(
+    'LEMONSQUEEZY_WEBHOOK_SECRET is required in production. ' +
+    'Without it, every incoming webhook returns 401 BAD_SIGNATURE ' +
+    '(by design — fail-closed). Set the secret from your LS dashboard ' +
+    '→ Settings → Webhooks → Reveal signing secret, then restart.'
+  );
+}
