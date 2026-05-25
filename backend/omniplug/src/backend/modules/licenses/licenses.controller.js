@@ -26,6 +26,10 @@ const tokenBodySchema = z.object({
 });
 
 function activateRateLimit(req, res, next) {
+  // Skip in LS test mode so the e2e + activation tests can fire >5
+  // requests from 127.0.0.1 without hitting 429. Production must not
+  // set LEMONSQUEEZY_TEST_MODE=true.
+  if (process.env.LEMONSQUEEZY_TEST_MODE === 'true') return next();
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
   if (tryAcquire(ip, 5)) return next();
   return res.status(429).json({

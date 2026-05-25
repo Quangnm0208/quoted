@@ -12,16 +12,24 @@ import db from '../../../core/db/connection.js';
 import { lazyPrepare } from '../../../core/db/lazyPrepare.js';
 
 const stmt = lazyPrepare(() => ({
-  // customers
-  upsertCustomerByLemon: db.prepare(`
+  // customers — two-step upsert because we have two unique keys (email +
+  // lemon_customer_id) and SQLite's ON CONFLICT can only target one. The
+  // service calls find-by-lemon-id, then find-by-email, then insert/update
+  // explicitly. See `upsertCustomerByLemon` in the exported repo below.
+  insertCustomer: db.prepare(`
     INSERT INTO customers (email, name, lemon_customer_id)
     VALUES (@email, @name, @lemon_customer_id)
-    ON CONFLICT(email) DO UPDATE SET
-      name = COALESCE(excluded.name, customers.name),
-      lemon_customer_id = COALESCE(excluded.lemon_customer_id, customers.lemon_customer_id),
-      updated_at = datetime('now')
   `),
-  findCustomerByEmail: db.prepare(`SELECT * FROM customers WHERE email = ? COLLATE NOCASE`),
+  updateCustomer: db.prepare(`
+    UPDATE customers SET
+      email = @email,
+      name = COALESCE(@name, name),
+      lemon_customer_id = COALESCE(@lemon_customer_id, lemon_customer_id),
+      updated_at = datetime('now')
+    WHERE id = @id
+  `),
+  findCustomerByEmail:   db.prepare(`SELECT * FROM customers WHERE email = ? COLLATE NOCASE`),
+  findCustomerByLemonId: db.prepare(`SELECT * FROM customers WHERE lemon_customer_id = ?`),
 
   // orders
   upsertOrder: db.prepare(`
@@ -102,13 +110,36 @@ export function shortLicenseKey(uuid) {
 }
 
 export const entitlementRepo = {
+  /**
+   * Upsert with dual-key conflict resolution (email + lemon_customer_id).
+   * Resolution priority: lemon_customer_id (if present) > email.
+   * - Existing row by lemon_customer_id → update email + name.
+   * - Else existing row by email → update name + lemon_customer_id.
+   * - Else insert.
+   */
   upsertCustomerByLemon(data) {
-    stmt().upsertCustomerByLemon.run({
-      email: String(data.email).toLowerCase(),
+    const s = stmt();
+    const email = String(data.email).toLowerCase();
+    const fields = {
+      email,
       name: data.name || null,
       lemon_customer_id: data.lemon_customer_id || null,
-    });
-    return stmt().findCustomerByEmail.get(data.email);
+    };
+
+    let existing = null;
+    if (fields.lemon_customer_id != null) {
+      existing = s.findCustomerByLemonId.get(fields.lemon_customer_id);
+    }
+    if (!existing) {
+      existing = s.findCustomerByEmail.get(email);
+    }
+
+    if (existing) {
+      s.updateCustomer.run({ id: existing.id, ...fields });
+      return s.findCustomerByEmail.get(fields.email);
+    }
+    const info = s.insertCustomer.run(fields);
+    return db.prepare(`SELECT * FROM customers WHERE id = ?`).get(info.lastInsertRowid);
   },
 
   findCustomerByEmail(email) {
