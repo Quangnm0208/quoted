@@ -5,7 +5,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import { authPluginJwt } from '../wp-sites/plugin-auth.middleware.js';
+import { authPluginJwt } from '../_shared/plugin-auth.middleware.js';
 import * as service from './bot-crawls.service.js';
 
 const router = Router();

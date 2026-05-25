@@ -16,7 +16,7 @@
 import { signPluginJwt } from './quoted-licenses.js';
 import { resolveOrCreateTenant } from './tenancy-quoted.js';
 import * as repo from './wp-sites.repository.js';
-import { quotedPostsRepository } from './quoted-posts.repository.js';
+import { quotedPostsRepository } from '../_shared/quoted-posts.repository.js';
 import * as crawlsRepo from '../bot-crawls/bot-crawls.repository.js';
 import { decodeActivationToken } from '../licenses/licenses.service.js';
 import { entitlementRepo } from '../payments/entitlement.repository.js';

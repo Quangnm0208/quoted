@@ -7,7 +7,7 @@
  */
 
 import { Router } from 'express';
-import { authPluginJwt } from '../wp-sites/plugin-auth.middleware.js';
+import { authPluginJwt } from '../_shared/plugin-auth.middleware.js';
 
 const router = Router();
 

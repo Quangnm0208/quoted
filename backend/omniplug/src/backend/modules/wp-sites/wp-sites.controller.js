@@ -6,7 +6,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import { authPluginJwt } from './plugin-auth.middleware.js';
+import { authPluginJwt } from '../_shared/plugin-auth.middleware.js';
 import { tryAcquire } from '../../../core/lib/rateLimiterIp.js';
 import * as service from './wp-sites.service.js';
 
