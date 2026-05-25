@@ -397,5 +397,75 @@
     });
   });
 </script>
+
+<!-- v0.7.0 CMS-driven blog list. Fetches /api/public/articles and prepends
+     real CMS posts above the static example cards. Static cards remain as
+     fallback when the CMS is empty or unreachable (graceful degradation). -->
+<script>
+(function() {
+  'use strict';
+  function apiBase() {
+    var meta = document.querySelector('meta[name="quoted-cms-api"]');
+    if (meta && meta.content) return meta.content.replace(/\/+$/, '');
+    if (window.QUOTED_CMS_API_BASE) return window.QUOTED_CMS_API_BASE.replace(/\/+$/, '');
+    var devPorts = ['3000', '5173', '5500', '8080'];
+    if (window.location.protocol.startsWith('http') && devPorts.indexOf(window.location.port) !== -1) {
+      return 'http://127.0.0.1:4000';
+    }
+    return window.location.origin;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
+    });
+  }
+  function fmt(d) {
+    if (!d) return '';
+    try {
+      return new Date(d.replace(' ', 'T') + (d.includes('Z') ? '' : 'Z'))
+        .toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch { return d; }
+  }
+
+  fetch(apiBase() + '/api/public/articles?limit=50')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (!data || !Array.isArray(data.rows) || data.rows.length === 0) return;
+      var grid = document.getElementById('post-grid');
+      if (!grid) return;
+      // Hide the static example cards once we have real CMS content — keeps
+      // the page focused on real posts. To always show static examples too,
+      // remove the next 3 lines.
+      var staticCards = grid.querySelectorAll('.post-card');
+      staticCards.forEach(function(c) { c.style.display = 'none'; });
+
+      var html = data.rows.map(function(a) {
+        var url = '/blog-post.html?slug=' + encodeURIComponent(a.slug);
+        return '<article class="post-card" data-from-cms="1">' +
+          '<a href="' + url + '" style="text-decoration:none;color:inherit;">' +
+            '<h3 style="margin:0 0 8px;">' + esc(a.title) + '</h3>' +
+            (a.excerpt ? '<p style="color:var(--q-text-muted,#666);margin:0 0 12px;">' + esc(a.excerpt) + '</p>' : '') +
+            '<div style="font-size:12px;color:var(--q-text-muted,#999);">' +
+              fmt(a.published_at || a.updated_at) +
+            '</div>' +
+          '</a>' +
+        '</article>';
+      }).join('');
+
+      // Prepend the CMS articles to the grid (static cards stay below, hidden)
+      grid.insertAdjacentHTML('afterbegin', html);
+
+      // Update empty-state visibility based on whether grid now has visible items
+      var emptyEl = document.getElementById('empty-state');
+      if (emptyEl) emptyEl.style.display = 'none';
+    })
+    .catch(function(err) {
+      // Fail-safe: keep static fallback visible. Dev-only console warn.
+      if (window.console && /(localhost|127\.0\.0\.1)/.test(window.location.hostname)) {
+        console.warn('[quoted-blog] CMS fetch failed:', err && err.message);
+      }
+    });
+})();
+</script>
 </body>
 </html>

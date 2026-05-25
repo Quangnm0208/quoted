@@ -36,7 +36,126 @@ export function bindPageContentHandlers(root) {
       await handleRevokeSite(revokeBtn);
       return;
     }
+    const articleSaveBtn = event.target.closest('.js-article-save');
+    if (articleSaveBtn) {
+      event.preventDefault();
+      await handleArticleSave(articleSaveBtn);
+      return;
+    }
+    const articleActionBtn = event.target.closest('.js-article-action');
+    if (articleActionBtn) {
+      event.preventDefault();
+      await handleArticleAction(articleActionBtn);
+      return;
+    }
   });
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Article editor (article-edit.html) — save / publish / schedule / archive
+// ─────────────────────────────────────────────────────────────────────
+
+function collectArticleForm() {
+  const $ = (id) => document.getElementById(id);
+  return {
+    title: $('f-title')?.value?.trim() || '',
+    slug: $('f-slug')?.value?.trim() || undefined,  // undefined = let server auto-generate
+    excerpt: $('f-excerpt')?.value || '',
+    content_html: $('f-content')?.value || '',
+    cover_media_id: $('f-cover-media-id')?.value ? Number($('f-cover-media-id').value) : null,
+    content_type: $('f-content-type')?.value || 'article',
+    seo_title: $('f-seo-title')?.value || '',
+    seo_description: $('f-seo-description')?.value || '',
+    canonical_url: $('f-canonical-url')?.value || '',
+    og_title: $('f-og-title')?.value || '',
+    og_description: $('f-og-description')?.value || '',
+    schema_type: $('f-schema-type')?.value || 'Article',
+    robots_index: !!$('f-robots-index')?.checked,
+    robots_follow: !!$('f-robots-follow')?.checked,
+  };
+}
+
+async function handleArticleSave(btn) {
+  const form = btn.closest('#article-form') || document.getElementById('article-form');
+  const id = form?.getAttribute('data-article-id');
+  const mode = btn.getAttribute('data-mode') || 'draft';
+  const msg = form?.querySelector('[data-save-msg]');
+  const body = collectArticleForm();
+
+  if (!body.title) {
+    if (msg) { msg.textContent = 'Title is required.'; msg.style.color = '#c0392b'; }
+    toast('Title is required', 'error');
+    return;
+  }
+
+  setBusy(btn, true);
+  if (msg) { msg.textContent = 'Saving…'; msg.style.color = ''; }
+  try {
+    let saved;
+    if (id) {
+      saved = await api(`/api/admin/articles/${id}`, { method: 'PATCH', body });
+    } else {
+      saved = await api('/api/admin/articles', { method: 'POST', body });
+    }
+    // If user clicked Publish, fire the publish endpoint after save.
+    if (mode === 'publish' && saved.id) {
+      saved = await api(`/api/admin/articles/${saved.id}/publish`, { method: 'POST' });
+    }
+    if (msg) {
+      msg.textContent = `✓ Saved (status: ${saved.status}). Redirecting…`;
+      msg.style.color = '#1f7a3f';
+    }
+    toast(mode === 'publish' ? 'Published' : 'Saved', 'success');
+    // Redirect: if newly created, go to its edit URL so subsequent saves work.
+    setTimeout(() => {
+      if (saved.id && (!id || mode === 'publish')) {
+        window.location.href = `/admin/article-edit.html?id=${saved.id}`;
+      }
+    }, 500);
+  } catch (err) {
+    if (msg) { msg.textContent = `Error: ${err.message}`; msg.style.color = '#c0392b'; }
+    toast(`Save failed: ${err.message}`, 'error');
+  } finally {
+    setBusy(btn, false);
+  }
+}
+
+async function handleArticleAction(btn) {
+  const action = btn.getAttribute('data-action');
+  const form = btn.closest('#article-form') || document.getElementById('article-form');
+  const id = form?.getAttribute('data-article-id');
+  const msg = form?.querySelector('[data-save-msg]');
+  if (!id) return;
+
+  let body = {};
+  if (action === 'schedule') {
+    const input = document.getElementById('f-scheduled-at');
+    const v = input?.value;  // datetime-local format: "2026-05-30T15:00"
+    if (!v) {
+      toast('Pick a date/time first', 'error');
+      return;
+    }
+    // datetime-local has no timezone; treat as local time, convert to ISO with Z
+    body.scheduled_at = new Date(v).toISOString();
+  } else if (action === 'archive') {
+    if (!window.confirm('Archive this article? It will be hidden from the public site.')) return;
+  }
+
+  setBusy(btn, true);
+  if (msg) { msg.textContent = `${action.charAt(0).toUpperCase() + action.slice(1)}ing…`; msg.style.color = ''; }
+  try {
+    const result = await api(`/api/admin/articles/${id}/${action}`, { method: 'POST', body });
+    if (msg) {
+      msg.textContent = `✓ Done. New status: ${result.status}. Reloading…`;
+      msg.style.color = '#1f7a3f';
+    }
+    toast(`Article ${action}d`, 'success');
+    setTimeout(() => location.reload(), 600);
+  } catch (err) {
+    if (msg) { msg.textContent = `Error: ${err.message}`; msg.style.color = '#c0392b'; }
+    toast(`${action} failed: ${err.message}`, 'error');
+    setBusy(btn, false);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────

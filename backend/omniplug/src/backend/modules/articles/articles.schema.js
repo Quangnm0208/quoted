@@ -25,26 +25,48 @@ const contentHtmlField = z.string()
     },
   );
 
+// v0.7.0: extended status enum + new SEO/workflow fields per master prompt §1+2
+const STATUS_VALUES = ['draft', 'scheduled', 'published', 'archived'];
+const CONTENT_TYPE_VALUES = ['article', 'doc', 'changelog', 'faq', 'landing'];
+const SCHEMA_TYPE_VALUES = ['Article', 'BlogPosting', 'Product', 'FAQPage'];
+
 export const articleInputSchema = z.object({
   title: z.string().min(1).max(300).optional(),
   slug: z.string().max(80).optional(),
   excerpt: z.string().max(500).optional(),
   content_html: contentHtmlField,
   cover_media_id: z.number().int().positive().nullable().optional(),
-  status: z.enum(['draft', 'published', 'archived']).optional(),
+  status: z.enum(STATUS_VALUES).optional(),
   published_at: z.string().datetime().nullable().optional(),
+  scheduled_at: z.string().datetime().nullable().optional(),
   meta_title: z.string().max(160).optional(),
   meta_description: z.string().max(300).optional(),
   meta_og_image: z.number().int().positive().nullable().optional(),
+  // v0.7.0 additions
+  seo_title: z.string().max(160).optional(),
+  seo_description: z.string().max(300).optional(),
+  canonical_url: z.string().url().or(z.literal('')).optional(),
+  og_title: z.string().max(160).optional(),
+  og_description: z.string().max(300).optional(),
+  og_image_id: z.number().int().positive().nullable().optional(),
+  robots_index: z.coerce.boolean().optional(),
+  robots_follow: z.coerce.boolean().optional(),
+  schema_type: z.enum(SCHEMA_TYPE_VALUES).optional(),
+  content_type: z.enum(CONTENT_TYPE_VALUES).optional(),
 });
 
 export const articleListQuerySchema = z.object({
-  status: z.enum(['draft', 'published', 'archived']).optional(),
+  status: z.enum(STATUS_VALUES).optional(),
+  content_type: z.enum(CONTENT_TYPE_VALUES).optional(),
   search: z.string().max(100).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
   offset: z.coerce.number().int().min(0).optional(),
   order: z.enum(['newest', 'oldest', 'title']).optional(),
   include_deleted: z.coerce.boolean().optional(),
+});
+
+export const articleScheduleSchema = z.object({
+  scheduled_at: z.string().datetime(),
 });
 
 export const articleIdParamSchema = z.object({

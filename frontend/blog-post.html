@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- v0.7.0 — SEO meta tags are populated dynamically from /api/public/articles/:slug -->
+<title>Blog post — Quoted</title>
+<meta name="description" content="">
+<link id="canonical-link" rel="canonical" href="">
+<meta id="og-type" property="og:type" content="article">
+<meta id="og-title" property="og:title" content="">
+<meta id="og-description" property="og:description" content="">
+<meta id="og-image" property="og:image" content="">
+<meta id="og-url" property="og:url" content="">
+<meta id="twitter-card" name="twitter:card" content="summary_large_image">
+<meta id="twitter-title" name="twitter:title" content="">
+<meta id="twitter-description" name="twitter:description" content="">
+<meta id="robots-meta" name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+  .post-wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px; }
+  .post-meta { color: var(--q-text-muted, #6b7280); font-size: 14px; margin-bottom: 32px; }
+  .post-meta time { display: inline-block; }
+  .post-title { font-size: 36px; line-height: 1.15; margin: 0 0 8px; }
+  .post-excerpt { font-size: 18px; color: var(--q-text-muted, #6b7280); margin: 0 0 32px; line-height: 1.5; }
+  .post-body { font-size: 17px; line-height: 1.7; }
+  .post-body h2 { margin-top: 40px; }
+  .post-body h3 { margin-top: 28px; }
+  .post-body img { max-width: 100%; height: auto; border-radius: 8px; }
+  .post-body pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
+  .post-body code { background: #f4f4f4; padding: 1px 6px; border-radius: 4px; font-family: var(--q-font-mono, monospace); font-size: 0.9em; }
+  .post-cover { width: 100%; max-height: 480px; object-fit: cover; border-radius: 12px; margin-bottom: 32px; }
+  .back-link { color: var(--q-primary, #3b3fbf); text-decoration: none; font-size: 14px; }
+  .back-link:hover { text-decoration: underline; }
+  .not-found { text-align: center; padding: 80px 20px; }
+  .loading { text-align: center; padding: 80px 20px; color: var(--q-text-muted, #6b7280); }
+</style>
+</head>
+<body data-screen-label="Blog post">
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-include="header"></div>
+
+<main id="main">
+  <div class="post-wrap">
+
+    <div id="loading" class="loading">Loading…</div>
+
+    <article id="post-body" style="display:none;">
+      <a class="back-link" href="/blog.html">← All articles</a>
+
+      <div class="post-meta" style="margin-top:24px;">
+        <time id="post-date" datetime=""></time>
+        <span id="post-author-sep" style="display:none;"> · </span>
+        <span id="post-author"></span>
+      </div>
+
+      <h1 id="post-title" class="post-title"></h1>
+      <p id="post-excerpt" class="post-excerpt" style="display:none;"></p>
+
+      <img id="post-cover" class="post-cover" style="display:none;" alt="">
+
+      <div id="post-content" class="post-body"></div>
+
+      <hr style="margin:48px 0;border:0;border-top:1px solid #eee;">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+        <a class="back-link" href="/blog.html">← All articles</a>
+        <a class="back-link" href="/pricing.html">Get Quoted →</a>
+      </div>
+
+      <!-- Schema.org JSON-LD; populated dynamically -->
+      <script id="post-schema" type="application/ld+json"></script>
+    </article>
+
+    <div id="not-found" class="not-found" style="display:none;">
+      <h1>Article not found</h1>
+      <p class="muted">The article you're looking for doesn't exist or has been unpublished.</p>
+      <a class="back-link" href="/blog.html">← Browse all articles</a>
+    </div>
+
+  </div>
+</main>
+
+<div data-include="footer"></div>
+
+<script src="/assets/shared.js" defer></script>
+
+<script>
+(function() {
+  'use strict';
+
+  function apiBase() {
+    var meta = document.querySelector('meta[name="quoted-cms-api"]');
+    if (meta && meta.content) return meta.content.replace(/\/+$/, '');
+    if (window.QUOTED_CMS_API_BASE) return window.QUOTED_CMS_API_BASE.replace(/\/+$/, '');
+    var devPorts = ['3000', '5173', '5500', '8080'];
+    if (window.location.protocol.startsWith('http') && devPorts.indexOf(window.location.port) !== -1) {
+      return 'http://127.0.0.1:4000';
+    }
+    return window.location.origin;
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
+    });
+  }
+  function fmt(d) {
+    if (!d) return '';
+    try {
+      return new Date(d.replace(' ', 'T') + (d.includes('Z') ? '' : 'Z'))
+        .toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch { return d; }
+  }
+
+  function setMeta(id, value, attr) {
+    var el = $(id);
+    if (el && value) el.setAttribute(attr || 'content', value);
+  }
+
+  function show(id) { var e = $(id); if (e) e.style.display = ''; }
+  function hide(id) { var e = $(id); if (e) e.style.display = 'none'; }
+
+  function renderArticle(a) {
+    var canonicalUrl = a.canonical_url || (window.location.origin + '/blog-post.html?slug=' + encodeURIComponent(a.slug));
+    var ogTitle = a.og_title || a.seo_title || a.title;
+    var ogDesc  = a.og_description || a.seo_description || a.excerpt || '';
+    var seoTitle = a.seo_title || (a.title + ' — Quoted');
+    var seoDesc  = a.seo_description || a.excerpt || '';
+    var cover = (a.cover_media && a.cover_media.url) || (a.og_image && a.og_image.url) || '';
+
+    // <head> meta
+    document.title = seoTitle;
+    var descTag = document.querySelector('meta[name="description"]');
+    if (descTag) descTag.setAttribute('content', seoDesc);
+
+    setMeta('canonical-link', canonicalUrl, 'href');
+    setMeta('og-title', ogTitle);
+    setMeta('og-description', ogDesc);
+    setMeta('og-image', cover);
+    setMeta('og-url', canonicalUrl);
+    setMeta('twitter-title', ogTitle);
+    setMeta('twitter-description', ogDesc);
+    setMeta('robots-meta', (a.robots_index ? 'index' : 'noindex') + ',' + (a.robots_follow ? 'follow' : 'nofollow'));
+
+    // Page body
+    $('post-title').textContent = a.title;
+    if (a.excerpt) {
+      $('post-excerpt').textContent = a.excerpt;
+      show('post-excerpt');
+    }
+    var dateEl = $('post-date');
+    dateEl.setAttribute('datetime', a.published_at || a.updated_at || '');
+    dateEl.textContent = fmt(a.published_at || a.updated_at);
+    if (cover) {
+      var coverEl = $('post-cover');
+      coverEl.setAttribute('src', cover);
+      coverEl.setAttribute('alt', a.title);
+      show('post-cover');
+    }
+    // Content: backend already sanitizes HTML. Trust it for innerHTML.
+    $('post-content').innerHTML = a.content_html || '';
+
+    // Schema.org JSON-LD
+    var schema = {
+      '@context': 'https://schema.org',
+      '@type': a.schema_type || 'Article',
+      headline: a.title,
+      description: seoDesc,
+      datePublished: a.published_at,
+      dateModified: a.updated_at,
+      mainEntityOfPage: canonicalUrl,
+      url: canonicalUrl,
+    };
+    if (cover) schema.image = cover;
+    $('post-schema').textContent = JSON.stringify(schema, null, 2);
+
+    hide('loading');
+    show('post-body');
+  }
+
+  function renderNotFound() {
+    document.title = 'Article not found — Quoted';
+    hide('loading');
+    show('not-found');
+  }
+
+  var slug = new URLSearchParams(window.location.search).get('slug');
+  if (!slug) {
+    renderNotFound();
+    return;
+  }
+
+  fetch(apiBase() + '/api/public/articles/' + encodeURIComponent(slug))
+    .then(function(r) {
+      if (r.status === 404) return null;
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      if (!data) return renderNotFound();
+      renderArticle(data);
+    })
+    .catch(function(err) {
+      if (window.console) console.warn('[blog-post] fetch failed:', err && err.message);
+      renderNotFound();
+    });
+})();
+</script>
+
+</body>
+</html>

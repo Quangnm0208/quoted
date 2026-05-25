@@ -26,7 +26,7 @@
 import { Router } from 'express';
 import { articlesService } from './articles.service.js';
 import { articlesPolicy } from './articles.policy.js';
-import { articleInputSchema, articleListQuerySchema, articleIdParamSchema, articleSlugParamSchema } from './articles.schema.js';
+import { articleInputSchema, articleListQuerySchema, articleIdParamSchema, articleSlugParamSchema, articleScheduleSchema } from './articles.schema.js';
 import { requireAuth } from '../../../core/middleware/auth.js';
 import { requireRole } from '../../../core/middleware/rbac.js';
 import { validate } from '../../../core/middleware/validate.js';
@@ -42,7 +42,14 @@ export const publicRouter = Router();
 publicRouter.get('/',
   validate({ query: articleListQuerySchema }),
   asyncHandler((req, res) => {
-    const query = { ...req.validated.query, status: 'published', includeDeleted: false };
+    // v0.7.0: publicMode pulls published + scheduled-but-past articles
+    // in a single query. Drafts/archived/scheduled-future never appear.
+    const query = {
+      ...req.validated.query,
+      publicMode: true,
+      status: undefined,
+      includeDeleted: false,
+    };
     const result = articlesService.list(query, req.tenantId, env.UPLOAD_PUBLIC_URL);
     res.json(result);
   })
@@ -132,6 +139,37 @@ adminRouter.post('/:id/publish',
   asyncHandler((req, res) => {
     const article = articlesService.publish(req.validated.params.id, req.tenantId, env.UPLOAD_PUBLIC_URL);
     recordAudit(req, 'article.publish', { entityType: 'article', entityId: req.validated.params.id });
+    res.json(article);
+  })
+);
+
+// v0.7.0 — schedule a draft to auto-publish at a future ISO datetime.
+adminRouter.post('/:id/schedule',
+  requireRole(...articlesPolicy.publish),
+  validate({ params: articleIdParamSchema, body: articleScheduleSchema }),
+  asyncHandler((req, res) => {
+    const article = articlesService.schedule(
+      req.validated.params.id,
+      req.validated.body.scheduled_at,
+      req.tenantId,
+      env.UPLOAD_PUBLIC_URL,
+    );
+    recordAudit(req, 'article.schedule', {
+      entityType: 'article',
+      entityId: req.validated.params.id,
+      metadata: { scheduled_at: req.validated.body.scheduled_at },
+    });
+    res.json(article);
+  })
+);
+
+// v0.7.0 — revert a published article back to draft.
+adminRouter.post('/:id/unpublish',
+  requireRole(...articlesPolicy.publish),
+  validate({ params: articleIdParamSchema }),
+  asyncHandler((req, res) => {
+    const article = articlesService.unpublish(req.validated.params.id, req.tenantId, env.UPLOAD_PUBLIC_URL);
+    recordAudit(req, 'article.unpublish', { entityType: 'article', entityId: req.validated.params.id });
     res.json(article);
   })
 );

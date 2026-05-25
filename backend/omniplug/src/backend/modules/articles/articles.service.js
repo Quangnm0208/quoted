@@ -46,7 +46,16 @@ export const articlesService = {
 
   getPublishedBySlug(slug, tenantId, uploadBaseUrl) {
     const article = articlesRepository.findBySlug(slug, tenantId);
-    if (!article || article.status !== 'published') {
+    if (!article) {
+      throw new NotFoundError('Article not found', 'ARTICLE_NOT_FOUND');
+    }
+    // v0.7.0 — accept published OR (scheduled AND scheduled_at <= now).
+    // Drafts and archived NEVER public.
+    const isPublished = article.status === 'published';
+    const isScheduledAndDue = article.status === 'scheduled'
+      && article.scheduled_at
+      && Date.parse(article.scheduled_at) <= Date.now();
+    if (!isPublished && !isScheduledAndDue) {
       throw new NotFoundError('Article not found', 'ARTICLE_NOT_FOUND');
     }
     return attachMediaUrls(article, tenantId, uploadBaseUrl);
@@ -91,6 +100,17 @@ export const articlesService = {
       meta_title: (input.meta_title || '').trim().slice(0, 160),
       meta_description: cleanMetaDesc,
       meta_og_image: input.meta_og_image || null,
+      // v0.7.0 — forward new fields to repo
+      seo_title: (input.seo_title || '').trim().slice(0, 160),
+      seo_description: (input.seo_description || '').trim().slice(0, 300),
+      canonical_url: (input.canonical_url || '').trim(),
+      og_title: (input.og_title || '').trim().slice(0, 160),
+      og_description: (input.og_description || '').trim().slice(0, 300),
+      og_image_id: input.og_image_id || null,
+      robots_index: input.robots_index !== false,
+      robots_follow: input.robots_follow !== false,
+      schema_type: input.schema_type || 'Article',
+      content_type: input.content_type || 'article',
       author_id: userId,
     });
 
@@ -138,11 +158,46 @@ export const articlesService = {
   },
 
   publish(id, tenantId, uploadBaseUrl) {
-    return this.update(id, { status: 'published' }, tenantId, uploadBaseUrl);
+    // Clear scheduled_at + archived_at when transitioning to published
+    return this.update(id, {
+      status: 'published',
+      scheduled_at: null,
+      archived_at: null,
+    }, tenantId, uploadBaseUrl);
+  },
+
+  // v0.7.0 — schedule for future publish. Public read query auto-promotes
+  // scheduled+past articles to visible (no cron needed).
+  schedule(id, scheduledAtIso, tenantId, uploadBaseUrl) {
+    const ts = Date.parse(scheduledAtIso);
+    if (!Number.isFinite(ts)) {
+      throw new ValidationError('scheduled_at must be a valid ISO datetime');
+    }
+    if (ts <= Date.now()) {
+      throw new ValidationError('scheduled_at must be in the future');
+    }
+    return this.update(id, {
+      status: 'scheduled',
+      scheduled_at: scheduledAtIso,
+      published_at: null,
+      archived_at: null,
+    }, tenantId, uploadBaseUrl);
+  },
+
+  // v0.7.0 — revert a published article back to draft
+  unpublish(id, tenantId, uploadBaseUrl) {
+    return this.update(id, {
+      status: 'draft',
+      published_at: null,
+      scheduled_at: null,
+    }, tenantId, uploadBaseUrl);
   },
 
   archive(id, tenantId, uploadBaseUrl) {
-    return this.update(id, { status: 'archived' }, tenantId, uploadBaseUrl);
+    return this.update(id, {
+      status: 'archived',
+      archived_at: new Date().toISOString(),
+    }, tenantId, uploadBaseUrl);
   },
 
   softDelete(id, tenantId) {

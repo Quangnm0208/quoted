@@ -518,25 +518,76 @@ async function renderMedia() {
 // here they are read-only for sanity check)
 // ─────────────────────────────────────────────────────────────────────
 
+// v0.7.0 — full article list with filters + per-row actions.
 async function renderArticles() {
-  const data = await api('/api/admin/articles').catch(() => ({ rows: [] }));
+  // Read query params from window.location for filter state. Keep simple —
+  // no URL routing library; URL search string ?status=draft&q=hello.
+  const params = new URLSearchParams(window.location.search);
+  const statusFilter = params.get('status') || '';
+  const typeFilter   = params.get('type') || '';
+  const search       = params.get('q') || '';
+
+  const qs = new URLSearchParams();
+  if (statusFilter) qs.set('status', statusFilter);
+  if (typeFilter)   qs.set('content_type', typeFilter);
+  if (search)       qs.set('search', search);
+  qs.set('limit', '100');
+  const data = await api('/api/admin/articles?' + qs.toString()).catch(() => ({ rows: [] }));
   const rows = data.rows || [];
+
+  const statusOpts = ['', 'draft', 'scheduled', 'published', 'archived'];
+  const typeOpts = ['', 'article', 'doc', 'changelog', 'faq', 'landing'];
+
   return `
-    ${pageHeader('Articles', `<span class="muted">${rows.length} articles</span>`)}
-    ${noticeBanner('Articles thường được sync từ WordPress plugin của khách, không phải tạo trong CMS này. Read-only view ở đây để kiểm tra DB.', 'warning')}
-    ${rows.length === 0 ? emptyState('Chưa có article nào trong tenant này.') : `
+    ${pageHeader('Blog Articles', `
+      <a class="btn-primary" href="/admin/article-edit.html?new=1">${icon.plus || '+'} New article</a>
+    `)}
+    ${noticeBanner('Quản lý blog/content cho marketing website. Drafts không public. Schedule = auto-publish khi tới giờ. SEO panel ngay trong editor.')}
+
+    <div class="panel" style="padding:12px 16px;margin-bottom:16px;">
+      <form method="get" action="/admin/articles.html" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="text" name="q" value="${escapeHtml(search)}" placeholder="Search title/excerpt..." style="flex:1;min-width:200px;padding:6px 10px;">
+        <select name="status" style="padding:6px 10px;">
+          ${statusOpts.map(s => `<option value="${s}" ${s === statusFilter ? 'selected' : ''}>${s ? s : 'All status'}</option>`).join('')}
+        </select>
+        <select name="type" style="padding:6px 10px;">
+          ${typeOpts.map(t => `<option value="${t}" ${t === typeFilter ? 'selected' : ''}>${t ? t : 'All types'}</option>`).join('')}
+        </select>
+        <button class="btn-secondary" type="submit">Filter</button>
+        ${(statusFilter || typeFilter || search) ? '<a class="btn-link" href="/admin/articles.html">Clear</a>' : ''}
+      </form>
+    </div>
+
+    ${rows.length === 0 ? emptyState('Chưa có article nào. Click "New article" để bắt đầu.') : `
       <div class="panel">
         <table class="table">
-          <thead><tr><th>Title</th><th>Slug</th><th>Status</th><th>Published</th></tr></thead>
+          <thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Published / Scheduled</th><th>Updated</th><th></th></tr></thead>
           <tbody>
-            ${rows.map(a => `
-              <tr>
-                <td><strong>${escapeHtml(a.title || '—')}</strong></td>
-                <td><code>${escapeHtml(a.slug || '')}</code></td>
-                <td>${badge(a.status || '—', a.status === 'published' ? 'active' : 'warning')}</td>
-                <td class="muted" style="font-size:12px;">${fmtDate(a.published_at)}</td>
-              </tr>
-            `).join('')}
+            ${rows.map(a => {
+              const statusBadge = a.status === 'published' ? badge(a.status, 'active')
+                : a.status === 'scheduled' ? badge(a.status, 'warning')
+                : a.status === 'archived' ? badge(a.status, 'danger')
+                : badge(a.status || 'draft', '');
+              const dateCol = a.status === 'scheduled' ? fmtDate(a.scheduled_at)
+                : a.status === 'published' ? fmtDate(a.published_at)
+                : a.status === 'archived' ? fmtDate(a.archived_at)
+                : '—';
+              return `
+                <tr>
+                  <td>
+                    <strong>${escapeHtml(a.title || '—')}</strong>
+                    <br><code style="font-size:12px;color:var(--muted,#666);">${escapeHtml(a.slug || '')}</code>
+                  </td>
+                  <td><code style="font-size:12px;">${escapeHtml(a.content_type || 'article')}</code></td>
+                  <td>${statusBadge}</td>
+                  <td class="muted" style="font-size:12px;">${dateCol}</td>
+                  <td class="muted" style="font-size:12px;">${fmtDate(a.updated_at)}</td>
+                  <td class="actions">
+                    <a class="btn-link" href="/admin/article-edit.html?id=${a.id}">Edit</a>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
       </div>
@@ -556,11 +607,165 @@ async function renderProjects() {
   `;
 }
 
-function renderArticleEditStub() {
+// v0.7.0 — full article editor. Loads by ?id=, or shows blank form if ?new=1.
+async function renderArticleEditStub() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  const isNew = params.get('new') === '1' || !id;
+
+  let article = null;
+  if (!isNew) {
+    try {
+      article = await api(`/api/admin/articles/${id}`);
+    } catch (err) {
+      return `${pageHeader('Edit Article')}${errorPanel(`Article not found: ${err.message}`)}<a class="btn-secondary" href="/admin/articles.html">← Back</a>`;
+    }
+  }
+
+  const a = article || {
+    id: null,
+    title: '',
+    slug: '',
+    excerpt: '',
+    content_html: '',
+    status: 'draft',
+    scheduled_at: null,
+    published_at: null,
+    archived_at: null,
+    seo_title: '',
+    seo_description: '',
+    canonical_url: '',
+    og_title: '',
+    og_description: '',
+    schema_type: 'Article',
+    content_type: 'article',
+    robots_index: 1,
+    robots_follow: 1,
+    cover_media_id: null,
+  };
+
+  const statusBadge = a.status === 'published' ? badge('published', 'active')
+    : a.status === 'scheduled' ? badge('scheduled', 'warning')
+    : a.status === 'archived' ? badge('archived', 'danger')
+    : badge('draft', '');
+
   return `
-    ${pageHeader('Edit Article')}
-    ${noticeBanner('Article editor chưa được wire vào backend trong Quoted overlay. Articles thường sync qua WordPress plugin chứ không tạo từ CMS. Đặt task này vào M3 nếu cần.', 'warning')}
-    <a class="btn-secondary" href="/admin/articles.html">← Back to Articles</a>
+    ${pageHeader(isNew ? 'New Article' : 'Edit Article', `
+      <a class="btn-secondary" href="/admin/articles.html">← Back to list</a>
+      ${a.status === 'published' ? `<a class="btn-secondary" href="/blog.html?slug=${encodeURIComponent(a.slug)}" target="_blank">Preview ↗</a>` : ''}
+    `)}
+
+    <form id="article-form" data-article-id="${a.id || ''}" data-mode="${isNew ? 'create' : 'edit'}">
+      <div class="grid grid-2" style="grid-template-columns:2fr 1fr;gap:24px;">
+
+        <!-- Main column: title / slug / excerpt / content -->
+        <div>
+          <div class="field" style="margin-bottom:12px;">
+            <label><strong>Title</strong> <span class="muted">(required)</span></label>
+            <input id="f-title" type="text" maxlength="300" value="${escapeHtml(a.title || '')}" required style="width:100%;font-size:18px;padding:10px;">
+          </div>
+
+          <div class="field" style="margin-bottom:12px;">
+            <label><strong>Slug</strong> <span class="muted">(URL path; auto-generated from title if empty)</span></label>
+            <input id="f-slug" type="text" maxlength="80" value="${escapeHtml(a.slug || '')}" pattern="[a-z0-9-]+" style="width:100%;padding:8px;font-family:var(--mono,monospace);">
+          </div>
+
+          <div class="field" style="margin-bottom:12px;">
+            <label><strong>Excerpt</strong> <span class="muted">(short summary; ≤500 chars)</span></label>
+            <textarea id="f-excerpt" maxlength="500" rows="2" style="width:100%;padding:8px;">${escapeHtml(a.excerpt || '')}</textarea>
+          </div>
+
+          <div class="field" style="margin-bottom:12px;">
+            <label><strong>Content</strong> <span class="muted">(HTML; paste markdown-converted output OR plain HTML)</span></label>
+            <textarea id="f-content" rows="20" style="width:100%;padding:10px;font-family:var(--mono,monospace);font-size:13px;">${escapeHtml(a.content_html || '')}</textarea>
+            <div class="muted" style="font-size:12px;margin-top:4px;">Max 200 KB. HTML is sanitized server-side (script tags + event handlers stripped).</div>
+          </div>
+        </div>
+
+        <!-- Right column: status, SEO panel, action bar -->
+        <div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h2 class="panel-title" style="margin-top:0;">Status</h2>
+            <div style="margin-bottom:8px;">Current: ${statusBadge}</div>
+            ${a.published_at ? `<div class="muted" style="font-size:12px;">Published: ${fmtDate(a.published_at)}</div>` : ''}
+            ${a.scheduled_at ? `<div class="muted" style="font-size:12px;">Scheduled: ${fmtDate(a.scheduled_at)}</div>` : ''}
+            ${a.archived_at ? `<div class="muted" style="font-size:12px;">Archived: ${fmtDate(a.archived_at)}</div>` : ''}
+
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:16px;">
+              <button type="button" class="btn-primary js-article-save" data-mode="draft">💾 Save draft</button>
+              ${a.id ? `
+                ${a.status !== 'published' ? `<button type="button" class="btn-primary js-article-save" data-mode="publish" style="background:#16a34a;">🚀 Publish now</button>` : ''}
+                ${a.status === 'published' ? `<button type="button" class="btn-secondary js-article-action" data-action="unpublish">↩ Unpublish (back to draft)</button>` : ''}
+                <details style="margin-top:8px;">
+                  <summary class="muted" style="cursor:pointer;font-size:13px;">Schedule for later…</summary>
+                  <input id="f-scheduled-at" type="datetime-local" style="width:100%;margin-top:6px;padding:6px;">
+                  <button type="button" class="btn-secondary js-article-action" data-action="schedule" style="margin-top:6px;width:100%;">📅 Schedule</button>
+                </details>
+                ${a.status !== 'archived' ? `<button type="button" class="btn-secondary js-article-action" data-action="archive" style="margin-top:8px;color:#c0392b;">🗄 Archive</button>` : ''}
+              ` : '<div class="muted" style="font-size:12px;margin-top:4px;">Save draft first to unlock publish/schedule.</div>'}
+            </div>
+            <div class="save-msg muted" data-save-msg style="margin-top:8px;font-size:12px;"></div>
+          </div>
+
+          <div class="panel" style="margin-bottom:16px;">
+            <h2 class="panel-title" style="margin-top:0;">Metadata</h2>
+            <div class="field" style="margin-bottom:8px;">
+              <label class="muted" style="font-size:13px;">Content type</label>
+              <select id="f-content-type" style="width:100%;padding:6px;">
+                ${['article','doc','changelog','faq','landing'].map(t =>
+                  `<option value="${t}" ${a.content_type === t ? 'selected' : ''}>${t}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label class="muted" style="font-size:13px;">Featured image (media ID)</label>
+              <input id="f-cover-media-id" type="number" value="${a.cover_media_id || ''}" placeholder="optional — leave blank" style="width:100%;padding:6px;font-family:var(--mono,monospace);">
+              <div class="muted" style="font-size:11px;margin-top:4px;">Upload via /admin/media first, then paste the ID here. Media picker UI lands in v0.7.1.</div>
+            </div>
+          </div>
+
+          <details class="panel" style="margin-bottom:16px;" ${(a.seo_title || a.seo_description || a.canonical_url) ? 'open' : ''}>
+            <summary class="panel-title" style="margin:0;cursor:pointer;">SEO &amp; Open Graph</summary>
+            <div style="margin-top:12px;">
+              <div class="field" style="margin-bottom:8px;">
+                <label class="muted" style="font-size:13px;">SEO title <span style="font-size:11px;">(defaults to Title)</span></label>
+                <input id="f-seo-title" type="text" maxlength="160" value="${escapeHtml(a.seo_title || '')}" style="width:100%;padding:6px;">
+              </div>
+              <div class="field" style="margin-bottom:8px;">
+                <label class="muted" style="font-size:13px;">Meta description <span style="font-size:11px;">(defaults to Excerpt)</span></label>
+                <textarea id="f-seo-description" maxlength="300" rows="2" style="width:100%;padding:6px;">${escapeHtml(a.seo_description || '')}</textarea>
+              </div>
+              <div class="field" style="margin-bottom:8px;">
+                <label class="muted" style="font-size:13px;">Canonical URL</label>
+                <input id="f-canonical-url" type="url" value="${escapeHtml(a.canonical_url || '')}" placeholder="https://quotedeasy.com/blog/your-slug" style="width:100%;padding:6px;font-family:var(--mono,monospace);font-size:12px;">
+              </div>
+              <div class="field" style="margin-bottom:8px;">
+                <label class="muted" style="font-size:13px;">OG title</label>
+                <input id="f-og-title" type="text" maxlength="160" value="${escapeHtml(a.og_title || '')}" style="width:100%;padding:6px;">
+              </div>
+              <div class="field" style="margin-bottom:8px;">
+                <label class="muted" style="font-size:13px;">OG description</label>
+                <textarea id="f-og-description" maxlength="300" rows="2" style="width:100%;padding:6px;">${escapeHtml(a.og_description || '')}</textarea>
+              </div>
+              <div class="field" style="margin-bottom:8px;">
+                <label class="muted" style="font-size:13px;">Schema type</label>
+                <select id="f-schema-type" style="width:100%;padding:6px;">
+                  ${['Article','BlogPosting','Product','FAQPage'].map(t =>
+                    `<option value="${t}" ${a.schema_type === t ? 'selected' : ''}>${t}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field" style="display:flex;gap:16px;margin-bottom:0;">
+                <label style="display:flex;gap:6px;align-items:center;font-size:13px;">
+                  <input id="f-robots-index" type="checkbox" ${a.robots_index ? 'checked' : ''}> Allow Google indexing
+                </label>
+                <label style="display:flex;gap:6px;align-items:center;font-size:13px;">
+                  <input id="f-robots-follow" type="checkbox" ${a.robots_follow ? 'checked' : ''}> Follow outbound links
+                </label>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </form>
   `;
 }
 

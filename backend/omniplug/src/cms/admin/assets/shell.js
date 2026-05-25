@@ -155,6 +155,7 @@ export async function renderShell(activeTab, pageTitle) {
     { label: 'Marketing CMS', items: [
       { id: 'pages', label: 'Pages (hero, promos)', href: '/admin/pages.html', icon: icon.sections },
       { id: 'sections', label: 'Sections (flat)', href: '/admin/sections.html', icon: icon.sections },
+      { id: 'articles', label: 'Blog Articles', href: '/admin/articles.html', icon: icon.articles },
       { id: 'site', label: 'Site Settings', href: '/admin/site.html', icon: icon.site },
       { id: 'media', label: 'Media Library', href: '/admin/media.html', icon: icon.media },
       { id: 'leads', label: 'Leads', href: '/admin/leads.html', icon: icon.leads },
@@ -164,7 +165,6 @@ export async function renderShell(activeTab, pageTitle) {
       { id: 'users', label: 'Admin Users', href: '/admin/users.html', icon: icon.users },
       { id: 'tenants', label: 'Tenants', href: '/admin/tenants.html', icon: icon.tenants },
       { id: 'audit', label: 'Audit Log', href: '/admin/audit.html', icon: icon.audit },
-      { id: 'articles', label: 'Articles (OmniPlug)', href: '/admin/articles.html', icon: icon.articles },
       { id: 'projects', label: 'Projects (OmniPlug)', href: '/admin/projects.html', icon: icon.projects },
     ] },
   ];
@@ -231,7 +231,7 @@ export async function renderShell(activeTab, pageTitle) {
 
 // Bump on every functional admin UI change so the user sees a new
 // stamp in the sidebar footer and knows the file isn't a stale cache.
-export const ADMIN_BUILD = 'M3.1';
+export const ADMIN_BUILD = 'v0.7.0 / M4';
 
 export function themeSwitcher() {
   const current = getTheme();

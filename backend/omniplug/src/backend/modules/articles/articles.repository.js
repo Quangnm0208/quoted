@@ -33,11 +33,19 @@ function preparedSelect(sql) {
 const stmt = lazyPrepare(() => ({
   insert: db.prepare(`
     INSERT INTO articles (tenant_id, slug, title, excerpt, content_html, cover_media_id,
-                         status, published_at, meta_title, meta_description,
-                         meta_og_image, author_id)
+                         status, published_at, scheduled_at, archived_at,
+                         meta_title, meta_description, meta_og_image,
+                         seo_title, seo_description, canonical_url,
+                         og_title, og_description, og_image_id,
+                         robots_index, robots_follow, schema_type, content_type,
+                         author_id)
     VALUES (@tenant_id, @slug, @title, @excerpt, @content_html, @cover_media_id,
-            @status, @published_at, @meta_title, @meta_description,
-            @meta_og_image, @author_id)
+            @status, @published_at, @scheduled_at, @archived_at,
+            @meta_title, @meta_description, @meta_og_image,
+            @seo_title, @seo_description, @canonical_url,
+            @og_title, @og_description, @og_image_id,
+            @robots_index, @robots_follow, @schema_type, @content_type,
+            @author_id)
   `),
 
   findById:    db.prepare(`SELECT * FROM articles WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL`),
@@ -47,16 +55,14 @@ const stmt = lazyPrepare(() => ({
 
   update: db.prepare(`
     UPDATE articles SET
-      slug = @slug,
-      title = @title,
-      excerpt = @excerpt,
-      content_html = @content_html,
-      cover_media_id = @cover_media_id,
-      status = @status,
-      published_at = @published_at,
-      meta_title = @meta_title,
-      meta_description = @meta_description,
-      meta_og_image = @meta_og_image,
+      slug = @slug, title = @title, excerpt = @excerpt, content_html = @content_html,
+      cover_media_id = @cover_media_id, status = @status,
+      published_at = @published_at, scheduled_at = @scheduled_at, archived_at = @archived_at,
+      meta_title = @meta_title, meta_description = @meta_description, meta_og_image = @meta_og_image,
+      seo_title = @seo_title, seo_description = @seo_description, canonical_url = @canonical_url,
+      og_title = @og_title, og_description = @og_description, og_image_id = @og_image_id,
+      robots_index = @robots_index, robots_follow = @robots_follow,
+      schema_type = @schema_type, content_type = @content_type,
       updated_at = datetime('now')
     WHERE id = @id AND tenant_id = @tenant_id AND deleted_at IS NULL
   `),
@@ -106,9 +112,17 @@ export const articlesRepository = {
     const params = [tenantId];
 
     if (!opts.includeDeleted) where.push('deleted_at IS NULL');
-    if (opts.status) {
+    // v0.7.0: when publicMode is on, treat "scheduled AND scheduled_at <= now"
+    // as effectively published. Frontend doesn't need to call any cron job.
+    if (opts.publicMode) {
+      where.push("(status = 'published' OR (status = 'scheduled' AND scheduled_at IS NOT NULL AND scheduled_at <= datetime('now')))");
+    } else if (opts.status) {
       where.push('status = ?');
       params.push(opts.status);
+    }
+    if (opts.content_type) {
+      where.push('content_type = ?');
+      params.push(opts.content_type);
     }
     if (opts.search) {
       where.push('(title LIKE ? OR excerpt LIKE ?)');
@@ -173,9 +187,22 @@ export const articlesRepository = {
       cover_media_id: data.cover_media_id || null,
       status: data.status || 'draft',
       published_at: data.published_at || null,
+      scheduled_at: data.scheduled_at || null,
+      archived_at: data.archived_at || null,
       meta_title: data.meta_title || '',
       meta_description: data.meta_description || '',
       meta_og_image: data.meta_og_image || null,
+      // These columns are NOT NULL DEFAULT '' in schema → use '' not null
+      seo_title: data.seo_title || '',
+      seo_description: data.seo_description || '',
+      canonical_url: data.canonical_url || '',
+      og_title: data.og_title || '',
+      og_description: data.og_description || '',
+      og_image_id: data.og_image_id || null,
+      robots_index: data.robots_index === false || data.robots_index === 0 ? 0 : 1,
+      robots_follow: data.robots_follow === false || data.robots_follow === 0 ? 0 : 1,
+      schema_type: data.schema_type || 'Article',
+      content_type: data.content_type || 'article',
       author_id: data.author_id || null,
     });
     return this.findById(info.lastInsertRowid, tenantId);
@@ -194,9 +221,22 @@ export const articlesRepository = {
       cover_media_id: data.cover_media_id !== undefined ? data.cover_media_id : existing.cover_media_id,
       status: data.status ?? existing.status,
       published_at: data.published_at !== undefined ? data.published_at : existing.published_at,
+      scheduled_at: data.scheduled_at !== undefined ? data.scheduled_at : existing.scheduled_at,
+      archived_at: data.archived_at !== undefined ? data.archived_at : existing.archived_at,
       meta_title: data.meta_title ?? existing.meta_title,
       meta_description: data.meta_description ?? existing.meta_description,
       meta_og_image: data.meta_og_image !== undefined ? data.meta_og_image : existing.meta_og_image,
+      // NOT NULL DEFAULT '' — fall back to existing value (which itself is '' if never set)
+      seo_title: data.seo_title ?? existing.seo_title ?? '',
+      seo_description: data.seo_description ?? existing.seo_description ?? '',
+      canonical_url: data.canonical_url ?? existing.canonical_url ?? '',
+      og_title: data.og_title ?? existing.og_title ?? '',
+      og_description: data.og_description ?? existing.og_description ?? '',
+      og_image_id: data.og_image_id !== undefined ? data.og_image_id : existing.og_image_id,
+      robots_index: data.robots_index !== undefined ? (data.robots_index ? 1 : 0) : existing.robots_index,
+      robots_follow: data.robots_follow !== undefined ? (data.robots_follow ? 1 : 0) : existing.robots_follow,
+      schema_type: data.schema_type ?? existing.schema_type,
+      content_type: data.content_type ?? existing.content_type,
     });
     return this.findById(id, tenantId);
   },

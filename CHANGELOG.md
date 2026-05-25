@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-05-25 — Blog/article content management
+
+Adds full content management to Quoted CMS — CEO can publish blog
+articles + docs + changelog with SEO panel without developer help.
+Extends existing `articles` table (24 → 33 columns) rather than creating
+a duplicate `content_posts` module per master-prompt directive.
+
+See `docs/RELEASE_NOTES_v0.7.0.md` for full detail. TL;DR:
+
+- Article status workflow: `draft → scheduled → published / archived`
+- 2 new admin endpoints: `/schedule`, `/unpublish`
+- Full article editor in admin UI with collapsible SEO panel
+- `frontend/blog.html` now hydrates from CMS; `frontend/blog-post.html`
+  NEW single-article view with SEO meta + schema.org JSON-LD
+- Sidebar: "Articles" moved from System → Marketing CMS, renamed
+  "Blog Articles"
+- 12 new tests (T-ART-1..12); npm test 20/20 pass
+
 ## [0.6.4] — 2026-05-25 — Customer portal + WP-site revoke + webhook-events admin view
 
 ### Added
