@@ -117,13 +117,28 @@ export function toast(message, type = 'info') {
   setTimeout(() => node.remove(), 2900);
 }
 
+// Resolve the tenant domain to show under the brand. Falls back to the
+// configured TENANT_DEFAULT_DOMAIN exposed via /api/health, then to
+// window.location.hostname so the sidebar never shows a stale string.
+async function resolveBrandSub(user) {
+  try {
+    const t = await api('/api/admin/tenants').catch(() => null);
+    const tenantId = user && user.tenant_id;
+    const row = t && Array.isArray(t.rows) ? t.rows.find((x) => x.id === tenantId) : null;
+    if (row && row.domain) return row.domain;
+    if (row && row.name) return row.name;
+  } catch { /* ignore */ }
+  return window.location.hostname || 'admin';
+}
+
 export async function renderShell(activeTab, pageTitle) {
   const user = await guard();
   if (!user) return null;
   const shell = document.getElementById('headerMount');
-  const email = user.email || 'admin@vinhomes.vn';
+  const email = user.email || 'admin';
   const initial = email[0]?.toUpperCase() || 'A';
-  const roleLabel = user.role === 'admin' ? 'Pro' : user.role;
+  const roleLabel = user.role === 'admin' ? 'Admin' : user.role;
+  const brandSub = await resolveBrandSub(user);
   const navGroups = [
     { label: '', items: [{ id: 'dashboard', label: 'Dashboard', href: '/admin/dashboard.html', icon: icon.dashboard }] },
     { label: 'Content', items: [
@@ -149,8 +164,8 @@ export async function renderShell(activeTab, pageTitle) {
       <div class="brand">
         <div class="brand-mark">${icon.logo}</div>
         <div>
-          <div class="brand-name">OmniPlug CMS</div>
-          <div class="brand-sub">vinhomes.vn</div>
+          <div class="brand-name">Quoted CMS</div>
+          <div class="brand-sub">${escapeHtml(brandSub)}</div>
         </div>
       </div>
       <div class="theme-area">
@@ -179,6 +194,9 @@ export async function renderShell(activeTab, pageTitle) {
         </div>
         <button class="icon-btn btn-icon" id="logoutBtn" type="button" title="Đăng xuất">${icon.logout}</button>
       </div>
+      <div class="build-stamp" data-build-stamp style="padding:8px 12px;font-size:11px;color:var(--muted,#888);text-align:center;border-top:1px solid var(--border,#eee);">
+        loading version…
+      </div>
     </aside>
     <header class="topbar">
       <div class="breadcrumb">${escapeHtml(pageTitle)}</div>
@@ -190,8 +208,21 @@ export async function renderShell(activeTab, pageTitle) {
     </header>
   `;
   setTheme(getTheme());
+  // Fill the build stamp with the actual server version so the operator
+  // can visually confirm they are looking at a fresh deploy and not a
+  // stale cached admin bundle.
+  fetch('/api/health').then((r) => r.ok ? r.json() : null).then((h) => {
+    const el = document.querySelector('[data-build-stamp]');
+    if (!el) return;
+    const v = (h && h.version) ? `v${h.version}` : 'v?';
+    el.textContent = `${v} · admin build ${ADMIN_BUILD}`;
+  }).catch(() => {});
   return user;
 }
+
+// Bump on every functional admin UI change so the user sees a new
+// stamp in the sidebar footer and knows the file isn't a stale cache.
+export const ADMIN_BUILD = 'M2.1';
 
 export function themeSwitcher() {
   const current = getTheme();

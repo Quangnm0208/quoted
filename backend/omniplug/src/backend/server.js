@@ -213,9 +213,17 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // ===== 3. Static =====
+// Admin static assets — set Cache-Control: no-cache so the browser
+// re-validates each request. Without this, ES module scripts get
+// pinned in memory cache and the operator sees old admin UI even
+// after a deploy. ETag still saves bandwidth via 304s when content
+// hasn't changed.
 app.use('/admin', express.static(path.join(__dirname, '..', 'cms', 'admin'), {
   index: 'index.html',
-  setHeaders: (res) => res.set('X-Robots-Tag', 'noindex, nofollow'),
+  setHeaders: (res) => {
+    res.set('X-Robots-Tag', 'noindex, nofollow');
+    res.set('Cache-Control', 'no-cache, must-revalidate');
+  },
 }));
 
 app.use(env.UPLOAD_PUBLIC_URL, express.static(path.resolve(env.UPLOAD_DIR), {
