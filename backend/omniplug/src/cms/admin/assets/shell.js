@@ -140,23 +140,31 @@ export async function renderShell(activeTab, pageTitle) {
   const roleLabel = user.role === 'admin' ? 'Admin' : user.role;
   const brandSub = await resolveBrandSub(user);
   const navGroups = [
-    { label: '', items: [{ id: 'dashboard', label: 'Dashboard', href: '/admin/dashboard.html', icon: icon.dashboard }] },
-    { label: 'Content', items: [
-      { id: 'articles', label: 'Bài viết', href: '/admin/articles.html', icon: icon.articles },
-      { id: 'pages', label: 'Pages', href: '/admin/pages.html', icon: icon.sections },
-      { id: 'sections', label: 'Sections', href: '/admin/sections.html', icon: icon.sections },
-      { id: 'media', label: 'Media', href: '/admin/media.html', icon: icon.media },
+    { label: '', items: [
+      { id: 'quoteddashboard', label: 'Quoted Dashboard', href: '/admin/quoted-dashboard.html', icon: icon.dashboard },
     ] },
-    { label: 'Campaigns', items: [
-      { id: 'leads', label: 'Leads', href: '/admin/leads.html', icon: icon.leads, badge: '4' },
-      { id: 'projects', label: 'Tiến độ', href: '/admin/projects.html', icon: icon.projects },
+    { label: 'Quoted SaaS', items: [
+      { id: 'customers', label: 'Customers', href: '/admin/customers.html', icon: icon.users },
+      { id: 'subscriptions', label: 'Subscriptions', href: '/admin/subscriptions.html', icon: icon.license },
+      { id: 'license', label: 'Licenses', href: '/admin/license.html', icon: icon.license },
+      { id: 'wpsites', label: 'WP Sites', href: '/admin/wp-sites.html', icon: icon.tenants },
+      { id: 'botcrawls', label: 'Bot Crawls', href: '/admin/bot-crawls.html', icon: icon.search },
+      { id: 'posts', label: 'Synced Posts', href: '/admin/posts.html', icon: icon.articles },
+    ] },
+    { label: 'Marketing CMS', items: [
+      { id: 'pages', label: 'Pages (hero, promos)', href: '/admin/pages.html', icon: icon.sections },
+      { id: 'sections', label: 'Sections (flat)', href: '/admin/sections.html', icon: icon.sections },
+      { id: 'site', label: 'Site Settings', href: '/admin/site.html', icon: icon.site },
+      { id: 'media', label: 'Media Library', href: '/admin/media.html', icon: icon.media },
+      { id: 'leads', label: 'Leads', href: '/admin/leads.html', icon: icon.leads },
     ] },
     { label: 'System', items: [
-      { id: 'site', label: 'Site Settings', href: '/admin/site.html', icon: icon.site },
-      { id: 'users', label: 'Users', href: '/admin/users.html', icon: icon.users },
+      { id: 'dashboard', label: 'OmniPlug Dashboard', href: '/admin/dashboard.html', icon: icon.dashboard },
+      { id: 'users', label: 'Admin Users', href: '/admin/users.html', icon: icon.users },
       { id: 'tenants', label: 'Tenants', href: '/admin/tenants.html', icon: icon.tenants },
       { id: 'audit', label: 'Audit Log', href: '/admin/audit.html', icon: icon.audit },
-      { id: 'license', label: 'License', href: '/admin/license.html', icon: icon.license },
+      { id: 'articles', label: 'Articles (OmniPlug)', href: '/admin/articles.html', icon: icon.articles },
+      { id: 'projects', label: 'Projects (OmniPlug)', href: '/admin/projects.html', icon: icon.projects },
     ] },
   ];
   shell.innerHTML = `
@@ -222,7 +230,7 @@ export async function renderShell(activeTab, pageTitle) {
 
 // Bump on every functional admin UI change so the user sees a new
 // stamp in the sidebar footer and knows the file isn't a stale cache.
-export const ADMIN_BUILD = 'M2.1';
+export const ADMIN_BUILD = 'M3';
 
 export function themeSwitcher() {
   const current = getTheme();

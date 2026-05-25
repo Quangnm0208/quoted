@@ -117,6 +117,10 @@ import citationsRouter from './modules/plugin-runtime/citations/citations.contro
 import liveAiTestRouter from './modules/plugin-runtime/live-ai-test/live-ai-test.controller.js';
 import llmsContentRouter from './modules/plugin-runtime/llms-content/llms-content.controller.js';
 
+// Quoted SaaS admin (v0.6.0) — operator-facing read-only views of
+// customers/subscriptions/licenses/wp-sites/bot-crawls/posts/citations
+import quotedSaasAdmin from './modules/plugin-runtime/quoted-admin/quoted-admin.controller.js';
+
 // Quoted commercial layer (v0.4.0) — payments + licenses.
 import {
   paymentsRouter as quotedPaymentsRouter,
@@ -378,6 +382,9 @@ app.use('/api/admin/indexing', indexingAdmin);
 app.use('/api/admin/redirections', redirectionsAdmin);
 app.use('/api/admin/error-404', error404Admin);
 app.use('/api/admin/seo',       seoValidatorAdmin);
+
+// Quoted SaaS admin (v0.6.0) — JWT-gated read-only operator views
+app.use('/api/admin/quoted',    quotedSaasAdmin);
 
 // v1.4.4: license admin endpoints (activate / sync-crl / status)
 app.use('/api/admin/license',   licenseAdmin);

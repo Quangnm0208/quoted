@@ -29,6 +29,7 @@ import { api, escapeHtml, toast, icon } from './shell.js';
 export async function renderPage(page) {
   const renderers = {
     dashboard: renderDashboard,
+    quoteddashboard: renderQuotedDashboard,
     pages: renderPagesAdmin,
     sections: renderSectionsAdmin,
     media: renderMedia,
@@ -41,6 +42,11 @@ export async function renderPage(page) {
     tenants: renderTenants,
     audit: renderAudit,
     license: renderLicense,
+    customers: renderCustomers,
+    subscriptions: renderSubscriptions,
+    wpsites: renderWpSites,
+    botcrawls: renderBotCrawls,
+    posts: renderQuotedPosts,
   };
   const fn = renderers[page] || renderDashboard;
   try {
@@ -54,6 +60,7 @@ export async function renderPage(page) {
 export function pageTitle(page) {
   return {
     dashboard: 'Dashboard',
+    quoteddashboard: 'Quoted Dashboard',
     pages: 'Pages',
     sections: 'Sections',
     media: 'Media',
@@ -66,7 +73,17 @@ export function pageTitle(page) {
     tenants: 'Tenants',
     audit: 'Audit Log',
     license: 'License',
+    customers: 'Customers',
+    subscriptions: 'Subscriptions',
+    wpsites: 'WP Sites',
+    botcrawls: 'Bot Crawls',
+    posts: 'Synced Posts',
   }[page] || 'Dashboard';
+}
+
+function money(cents, currency = 'USD') {
+  const v = (cents || 0) / 100;
+  return `${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -542,5 +559,248 @@ function renderArticleEditStub() {
     ${pageHeader('Edit Article')}
     ${noticeBanner('Article editor chưa được wire vào backend trong Quoted overlay. Articles thường sync qua WordPress plugin chứ không tạo từ CMS. Đặt task này vào M3 nếu cần.', 'warning')}
     <a class="btn-secondary" href="/admin/articles.html">← Back to Articles</a>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Quoted SaaS renderers (M3 — real product surfaces, not generic CMS)
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Quoted SaaS dashboard — KPIs the operator actually cares about
+async function renderQuotedDashboard() {
+  const d = await api('/api/admin/quoted/dashboard').catch(() => null);
+  if (!d) return `${pageHeader('Quoted Dashboard')}${errorPanel('Không load được /api/admin/quoted/dashboard')}`;
+
+  return `
+    ${pageHeader('Quoted SaaS Dashboard', `<button class="btn-secondary" type="button" onclick="location.reload()">Refresh</button>`)}
+    ${noticeBanner(`Số liệu trực tiếp từ DB. MRR/ARR tính từ subscription đang active × giá variant (Pro $19 / Agency $29 hàng tháng; yearly chia 12). Cập nhật mỗi khi LS webhook về.`)}
+
+    <div class="grid grid-4">
+      ${stat('MRR', '$' + money(d.mrr_cents, '').trim(), 'Monthly Recurring Revenue')}
+      ${stat('ARR', '$' + money(d.arr_cents, '').trim(), 'Annual Recurring Revenue')}
+      ${stat('Total Revenue', '$' + money(d.total_revenue_cents, '').trim(), `${d.customers} customers all-time`)}
+      ${stat('Active Subscriptions', String(d.active_subscriptions), `${d.active_licenses} licenses`)}
+    </div>
+
+    <div class="grid grid-4" style="margin-top:16px;">
+      ${stat('Active WP Sites', String(d.wp_sites_active), `${d.wp_sites_total} total registered`)}
+      ${stat('Posts Synced', String(d.posts_synced), 'across all WP sites')}
+      ${stat('Bot Crawls (7d)', String(d.bot_crawls_7d), 'GPTBot/ClaudeBot/PerplexityBot/...')}
+      ${stat('Citations (7d)', String(d.citations_7d), 'Phase 2 — citation polling')}
+    </div>
+
+    <div class="grid grid-2" style="margin-top:24px;">
+      ${panel('Subscriptions by plan', `
+        ${d.active_subscriptions_by_plan.length === 0
+          ? `<p class="muted" style="margin:8px 0;">Chưa có subscription active nào. Sau khi khách đầu tiên mua, số sẽ hiện ở đây.</p>`
+          : `<table class="table"><thead><tr><th>Plan</th><th>Active subs</th></tr></thead><tbody>
+              ${d.active_subscriptions_by_plan.map(s => `<tr><td><code>${escapeHtml(s.plan_id || '—')}</code></td><td><strong>${s.c}</strong></td></tr>`).join('')}
+            </tbody></table>`}
+      `)}
+      ${panel('System health', `
+        <table class="table">
+          <tr><td><strong>Webhook failures</strong></td><td>${d.webhook_failures > 0 ? badge(String(d.webhook_failures), 'danger') : badge('0', 'active')}</td></tr>
+          <tr><td><strong>Backend</strong></td><td>${badge('ok', 'active')} v1.4.4</td></tr>
+          <tr><td colspan="2" class="muted" style="font-size:12px;">Webhook failures > 0 cần check LS dashboard + retry. Xem chi tiết ở /admin/webhook-events.html (M4 — chưa wire UI).</td></tr>
+        </table>
+      `)}
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px;">
+      ${panel('Truy cập nhanh', `
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a class="btn-secondary btn-block" href="/admin/customers.html">→ Customers (${d.customers})</a>
+          <a class="btn-secondary btn-block" href="/admin/subscriptions.html">→ Subscriptions (${d.active_subscriptions} active)</a>
+          <a class="btn-secondary btn-block" href="/admin/wp-sites.html">→ WP Sites (${d.wp_sites_active} active)</a>
+          <a class="btn-secondary btn-block" href="/admin/bot-crawls.html">→ Bot Crawls (${d.bot_crawls_7d} last 7d)</a>
+        </div>
+      `)}
+      ${panel('Marketing CMS', `
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a class="btn-secondary btn-block" href="/admin/pages.html">→ Edit homepage hero / promo cards</a>
+          <a class="btn-secondary btn-block" href="/admin/site.html">→ Edit site-wide settings</a>
+          <a class="btn-secondary btn-block" href="/admin/audit.html">→ Audit log (who edited what)</a>
+        </div>
+      `)}
+    </div>
+  `;
+}
+
+// ── Customers ───────────────────────────────────────────────────────
+async function renderCustomers() {
+  const d = await api('/api/admin/quoted/customers').catch(() => ({ rows: [] }));
+  const rows = d.rows || [];
+  return `
+    ${pageHeader('Customers', `<span class="muted">${d.total || 0} total</span>`)}
+    ${noticeBanner('Mỗi row = 1 khách mua qua Lemon Squeezy. Tạo tự động từ webhook order_created. Read-only ở đây — refund/cancel làm bên LS dashboard.')}
+    ${rows.length === 0 ? emptyState('Chưa có customer nào. Sau khi khách đầu tiên hoàn tất checkout, row sẽ hiện ở đây.') : `
+      <div class="panel">
+        <table class="table">
+          <thead><tr><th>Email</th><th>Name</th><th>Latest plan</th><th>Active subs</th><th>Active licenses</th><th>LS customer ID</th><th>Created</th></tr></thead>
+          <tbody>
+            ${rows.map(c => `
+              <tr>
+                <td><strong>${escapeHtml(c.email)}</strong></td>
+                <td>${escapeHtml(c.name || '—')}</td>
+                <td>${c.latest_plan ? `<code>${escapeHtml(c.latest_plan)}</code>` : '<span class="muted">—</span>'}</td>
+                <td>${c.active_subs > 0 ? badge(String(c.active_subs), 'active') : '<span class="muted">0</span>'}</td>
+                <td>${c.active_licenses > 0 ? badge(String(c.active_licenses), 'active') : '<span class="muted">0</span>'}</td>
+                <td class="muted mono" style="font-size:12px;">${escapeHtml(c.lemon_customer_id || '—')}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(c.created_at)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
+  `;
+}
+
+// ── Subscriptions ───────────────────────────────────────────────────
+async function renderSubscriptions() {
+  const d = await api('/api/admin/quoted/subscriptions').catch(() => ({ rows: [], by_status: [] }));
+  const rows = d.rows || [];
+  return `
+    ${pageHeader('Subscriptions', `<span class="muted">${d.total || 0} total</span>`)}
+    ${noticeBanner('Subscription = recurring plan (monthly/yearly Pro/Agency). Tạo từ LS subscription_created webhook. Status flip qua webhook subscription_cancelled/resumed/expired.')}
+
+    ${d.by_status && d.by_status.length > 0 ? `
+      <div class="grid grid-4">
+        ${d.by_status.map(s => stat(s.status, String(s.c), '', s.status === 'active' ? '' : 'warning')).join('')}
+      </div>
+    ` : ''}
+
+    ${rows.length === 0 ? emptyState('Chưa có subscription nào. Tạo bằng cách: khách mua qua /pricing → LS gửi webhook subscription_created.') : `
+      <div class="panel" style="margin-top:16px;">
+        <table class="table">
+          <thead><tr><th>Customer</th><th>Plan</th><th>Status</th><th>Renews</th><th>Ends</th><th>LS sub ID</th><th>Created</th></tr></thead>
+          <tbody>
+            ${rows.map(s => `
+              <tr>
+                <td>
+                  ${escapeHtml(s.customer_email || '—')}
+                  ${s.customer_name ? `<br><span class="muted" style="font-size:12px;">${escapeHtml(s.customer_name)}</span>` : ''}
+                </td>
+                <td><code>${escapeHtml(s.plan_id || '—')}</code></td>
+                <td>${badge(s.status, s.status === 'active' ? 'active' : (s.status === 'cancelled' ? 'danger' : 'warning'))}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(s.renews_at)}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(s.ends_at)}</td>
+                <td class="muted mono" style="font-size:12px;">${escapeHtml(s.lemon_subscription_id || '—')}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(s.created_at)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
+  `;
+}
+
+// ── WP Sites ────────────────────────────────────────────────────────
+async function renderWpSites() {
+  const d = await api('/api/admin/quoted/wp-sites').catch(() => ({ rows: [] }));
+  const rows = d.rows || [];
+  return `
+    ${pageHeader('WP Sites', `<span class="muted">${d.active || 0} active / ${d.total || 0} total</span>`)}
+    ${noticeBanner('Mỗi row = 1 cài đặt WordPress plugin Quoted của khách. Tạo qua POST /api/v1/wp-sites/register khi khách activate license. Đây là số liệu quan trọng nhất cho product manager — bao nhiêu site đang LIVE dùng Quoted.')}
+    ${rows.length === 0 ? emptyState('Chưa có WP site nào đăng ký. Khách mua → email license → cài plugin → Activate → site xuất hiện ở đây.') : `
+      <div class="panel">
+        <table class="table">
+          <thead><tr><th>Domain</th><th>Plan</th><th>Customer</th><th>Posts</th><th>Crawls 7d</th><th>WP / Plugin ver</th><th>Last seen</th></tr></thead>
+          <tbody>
+            ${rows.map(s => `
+              <tr>
+                <td>
+                  <strong>${escapeHtml(s.domain)}</strong>
+                  ${s.site_name ? `<br><span class="muted" style="font-size:12px;">${escapeHtml(s.site_name)}</span>` : ''}
+                  ${s.is_active ? '' : '&nbsp;' + badge('inactive', 'danger')}
+                </td>
+                <td>${badge(s.plan || 'free', s.plan === 'free' ? 'warning' : 'active')}</td>
+                <td class="muted" style="font-size:12px;">${escapeHtml(s.customer_email || s.admin_email || '—')}</td>
+                <td><strong>${s.post_count || 0}</strong></td>
+                <td>${s.crawls_7d > 0 ? `<strong>${s.crawls_7d}</strong>` : '<span class="muted">0</span>'}</td>
+                <td class="muted mono" style="font-size:12px;">${escapeHtml(s.wp_version || '?')} / ${escapeHtml(s.plugin_version || '?')}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(s.last_seen_at)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
+  `;
+}
+
+// ── Bot crawls (the product's whole reason for existing) ────────────
+async function renderBotCrawls() {
+  const d = await api('/api/admin/quoted/bot-crawls?days=7').catch(() => null);
+  if (!d) return `${pageHeader('Bot Crawls')}${errorPanel('Không load được /api/admin/quoted/bot-crawls')}`;
+
+  return `
+    ${pageHeader('Bot Crawls', `<span class="muted">${d.total} hits last ${d.days} days</span>`)}
+    ${noticeBanner(`Bot crawls = AI crawler (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, etc.) visit khách's WP site. Plugin của khách log lại + sync mỗi giờ. Đây là VALUE-PROP THẬT của Quoted: chứng minh AI thực sự đang crawl site khách.`)}
+
+    ${d.total === 0 ? emptyState('Chưa có bot crawl nào. Sau khi khách cài plugin + site được crawl bởi AI bot, dữ liệu sẽ tự sync lên.') : `
+      <div class="grid grid-2">
+        ${panel('Top bots (last ' + d.days + ' days)', `
+          <table class="table">
+            <thead><tr><th>Bot</th><th>Hits</th></tr></thead>
+            <tbody>
+              ${d.by_bot.map(b => `<tr><td><strong>${escapeHtml(b.bot_name)}</strong></td><td><strong>${b.hits}</strong></td></tr>`).join('')}
+            </tbody>
+          </table>
+        `)}
+        ${panel('Top sites being crawled', `
+          ${d.top_sites.length === 0 ? '<p class="muted">No site data yet</p>' : `
+            <table class="table">
+              <thead><tr><th>Domain</th><th>Hits</th></tr></thead>
+              <tbody>
+                ${d.top_sites.map(s => `<tr><td><code>${escapeHtml(s.domain || '—')}</code></td><td><strong>${s.hits}</strong></td></tr>`).join('')}
+              </tbody>
+            </table>
+          `}
+        `)}
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <h2 class="panel-title">Crawls by day</h2>
+        <table class="table">
+          <thead><tr><th>Day</th><th>Hits</th></tr></thead>
+          <tbody>
+            ${d.by_day.map(day => `<tr><td>${escapeHtml(day.day)}</td><td><strong>${day.hits}</strong></td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
+  `;
+}
+
+// ── Synced posts (content WP plugin sent to backend) ────────────────
+async function renderQuotedPosts() {
+  const d = await api('/api/admin/quoted/posts').catch(() => ({ rows: [] }));
+  const rows = d.rows || [];
+  return `
+    ${pageHeader('Synced Posts', `<span class="muted">${d.total || 0} total</span>`)}
+    ${noticeBanner('Mỗi row = 1 post / page WordPress khách đã sync lên backend Quoted (qua POST /api/v1/wp-sites/posts/sync mỗi giờ). Dùng để serve /api/public/llm/sitemap.txt + Markdown.')}
+    ${rows.length === 0 ? emptyState('Chưa có post nào. Sau khi khách activate plugin, hourly cron sẽ sync posts.') : `
+      <div class="panel">
+        <table class="table">
+          <thead><tr><th>Title</th><th>Site</th><th>Slug</th><th>Published</th><th>Modified</th></tr></thead>
+          <tbody>
+            ${rows.map(p => `
+              <tr>
+                <td>
+                  <strong>${escapeHtml(p.title || '—')}</strong>
+                  ${p.author ? `<br><span class="muted" style="font-size:12px;">by ${escapeHtml(p.author)}</span>` : ''}
+                </td>
+                <td><code style="font-size:12px;">${escapeHtml(p.site_domain || '—')}</code></td>
+                <td class="muted" style="font-size:12px;">/${escapeHtml(p.slug || '')}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(p.published_at)}</td>
+                <td class="muted" style="font-size:12px;">${fmtDate(p.modified_at)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
   `;
 }

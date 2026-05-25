@@ -3,9 +3,23 @@
 > **Canonical operator guide:** [`CMS-CEO-GUIDE.md`](./CMS-CEO-GUIDE.md).
 > This file is the admin-functionality status matrix only.
 
-## Per-page admin status (v0.5.0)
+## Per-page admin status (v0.6.0 — M3 SaaS surfaces landed)
 
-All entries verified by `/tmp/admin-render-test.mjs` simulator (13/13 pass) + manual edit-and-verify loops.
+All entries verified by renderer simulator (19/19 pass against the real backend) + manual edit-and-verify loops on the editable surfaces.
+
+## SaaS operator pages (NEW in M3)
+
+| Admin Area | URL | Backend endpoint | Status |
+|---|---|---|---|
+| **Quoted Dashboard** | `/admin/quoted-dashboard.html` | `GET /api/admin/quoted/dashboard` | ✅ — MRR / ARR / customers / subs / WP sites / bot crawls / citations / webhook health |
+| **Customers** | `/admin/customers.html` | `GET /api/admin/quoted/customers` | ✅ read-only — list with latest plan, active subs, active licenses, LS customer ID |
+| **Subscriptions** | `/admin/subscriptions.html` | `GET /api/admin/quoted/subscriptions` | ✅ read-only — by-status counts + per-row plan/renews/ends |
+| **Licenses** | `/admin/license.html` | `GET /api/admin/quoted/licenses` (deferred — currently shows OmniPlug license status) | ⏳ swap to customer_licenses list in M3.1 |
+| **WP Sites** | `/admin/wp-sites.html` | `GET /api/admin/quoted/wp-sites` | ✅ read-only — domain, plan, posts count, crawls 7d, WP/plugin version, last seen |
+| **Bot Crawls** | `/admin/bot-crawls.html` | `GET /api/admin/quoted/bot-crawls` | ✅ read-only — top bots, top sites, daily breakdown (the product's value-prop data) |
+| **Synced Posts** | `/admin/posts.html` | `GET /api/admin/quoted/posts` | ✅ read-only — content WP plugin sent (used to serve llms.txt) |
+
+## Marketing CMS pages
 
 | Admin Area | URL | Real Save? | Front-end Updates? | Status | Notes |
 |---|---|---|---|---|---|
