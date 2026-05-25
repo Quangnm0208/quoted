@@ -29,8 +29,8 @@ import db from '../../../core/db/connection.js';
 import { transaction } from '../../../core/db/connection.js';
 import { verifyWebhookSignature } from './lemon-squeezy.client.js';
 import * as eventStore from './webhook-events.repository.js';
-import { entitlementRepo, hashLicenseKey, shortLicenseKey } from './entitlement.repository.js';
-import { planIdFromVariantId, getPlan } from './plans.config.js';
+import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../entitlements/entitlement.repository.js';
+import { planIdFromVariantId, getPlan } from '../plans/plans.config.js';
 
 const SUPPORTED = new Set([
   'order_created',

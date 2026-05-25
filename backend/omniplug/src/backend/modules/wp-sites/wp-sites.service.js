@@ -19,7 +19,7 @@ import * as repo from './wp-sites.repository.js';
 import { quotedPostsRepository } from '../_shared/quoted-posts.repository.js';
 import * as crawlsRepo from '../bot-crawls/bot-crawls.repository.js';
 import { decodeActivationToken } from '../licenses/licenses.service.js';
-import { entitlementRepo } from '../payments/entitlement.repository.js';
+import { entitlementRepo } from '../entitlements/entitlement.repository.js';
 import db from '../../../core/db/connection.js';
 
 const JWT_TTL_HOURS = Number(process.env.QUOTED_JWT_TTL_HOURS || 24);

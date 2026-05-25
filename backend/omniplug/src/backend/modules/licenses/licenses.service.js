@@ -22,8 +22,8 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../../../core/config/env.js';
 import { callLicenseApi } from '../payments/lemon-squeezy.client.js';
-import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../payments/entitlement.repository.js';
-import { planIdFromVariantId, getPlan } from '../payments/plans.config.js';
+import { entitlementRepo, hashLicenseKey, shortLicenseKey } from '../entitlements/entitlement.repository.js';
+import { planIdFromVariantId, getPlan } from '../plans/plans.config.js';
 
 const ACTIVATION_TOKEN_TTL = 24 * 3600;  // 24h — plugin re-validates daily
 

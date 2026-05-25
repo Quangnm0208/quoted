@@ -8,7 +8,7 @@
  *   variant_env (Mode B-ready) but no checkout_env set.
  */
 
-import { getPlan, publicPlanView, PLANS } from './plans.config.js';
+import { getPlan, publicPlanView, PLANS } from '../plans/plans.config.js';
 
 function err(code, message, httpStatus = 400) {
   const e = new Error(message);
