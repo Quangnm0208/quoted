@@ -5,7 +5,7 @@ Tags: ai, llms.txt, chatgpt, claude, perplexity
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.3.0
+Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,20 +31,22 @@ It runs **alongside** your existing SEO plugin (Yoast, Rank Math, AIOSEO, SEOPre
 * **< 2 ms overhead** per pageview — one substring scan on the User-Agent header.
 * **Multi-language** — UTF-8 safe; tested with French accents, Vietnamese diacritics, Japanese kanji, CJK characters.
 
-= ⭐ Pro features (coming soon) =
+= ⭐ Pro features (available now) =
 
-The Free tier above is fully functional and will stay free forever. A paid Pro tier is in active development at [quotedeasy.com](https://quotedeasy.com), planned features:
+The Free tier above is fully functional and will stay free forever. **Pro and Agency plans are now live at [quotedeasy.com/pricing](https://quotedeasy.com/pricing)** with monthly and yearly billing:
 
 * **Unlimited posts** in llms.txt (free tier caps at 50)
 * **12 months** of bot history (free is 7 days)
 * **Citation tracking** with your own Perplexity/Tavily API key — we never proxy your queries or use our credits
 * **Live AI Test** — ask AI a question and see if your site is cited
 * **Niche benchmark** — compare your AI distribution vs competitors
-* **Multi-site license** (up to 30 sites)
+* **Multi-site license** (Agency plan, up to 5 sites; talk to us if you need more)
 * **Remove the "Powered by Quoted" badge** in footer
 * **Priority support**
 
-Pricing and exact launch date will be announced at [quotedeasy.com](https://quotedeasy.com). Subscribe there to be notified.
+**Pricing:** Pro Monthly $19 · Pro Yearly $190 (2 months free) · Agency Monthly $29 · Agency Yearly $290. 30-day money-back guarantee. Billed by Lemon Squeezy (merchant-of-record, handles VAT/sales tax globally).
+
+To activate Pro: buy at [quotedeasy.com/pricing](https://quotedeasy.com/pricing) → check email for license key → paste into the plugin Settings → click Activate. Setup takes 1–2 minutes.
 
 = 🤖 AI engines supported =
 
@@ -106,26 +108,33 @@ Yes. Quoted is UTF-8 throughout. Post titles, body content, and category names s
 
 == External services ==
 
-**This Free release of Quoted does not connect to any external service.** Everything happens on your own server: llms.txt is generated from your local posts, Markdown is rendered from your local content, bot crawls are logged to your local database, schema is emitted into your own pages, and the dashboard reads only from your `wp_quoted_bot_log` table.
+**Free tier connects to nothing external.** Everything happens on your own server: llms.txt is generated from your local posts, Markdown is rendered from your local content, bot crawls are logged to your local database, schema is emitted into your own pages, and the dashboard reads only from your `wp_quoted_bot_log` table.
 
-The integrations below are described for transparency — they will activate **only after the Pro tier launches** and only if you choose to activate a paid license. Until then, none of these URLs are hit by the plugin.
+The integrations below activate **only when you paste a Pro license key**. They are off by default.
 
-= Lemon Squeezy License API (Pro only — not active in this release) =
+= Quoted backend (Pro license activation — only when license is entered) =
 
-When you activate a Pro license, the plugin sends a POST request to `https://api.lemonsqueezy.com/v1/licenses/activate` with your license key and the site's hostname. Once daily, it revalidates by POSTing to `https://api.lemonsqueezy.com/v1/licenses/validate`. The plugin stores the instance ID returned by Lemon Squeezy locally so you can deactivate the seat later.
+When you activate a Pro license, the plugin sends a POST request to `https://api.quotedeasy.com/api/v1/licenses/activate` with your license key and the site's hostname. Once daily, it revalidates by POSTing to `https://api.quotedeasy.com/api/v1/licenses/validate`. The backend URL is operator-changeable via the `quoted_backend_url` option for self-hosted setups.
 
-* **What we send:** license key, site hostname.
+* **What we send:** license key, site hostname, plugin version, WP version.
 * **What we don't send:** post content, user data, page views, any analytics.
+* **Terms of service:** https://quotedeasy.com/terms
+* **Privacy policy:** https://quotedeasy.com/privacy
+
+= Lemon Squeezy License API (Pro only — only when license is activated) =
+
+After activation, the Quoted backend re-validates your license against `https://api.lemonsqueezy.com/v1/licenses/validate` on a daily schedule (or sooner if you trigger a re-sync from the plugin). This call is server-to-server (Lemon Squeezy ↔ Quoted backend), not from your WordPress site.
+
 * **Terms of service:** https://www.lemonsqueezy.com/legal/terms-of-service
 * **Privacy policy:** https://www.lemonsqueezy.com/legal/privacy
 
-= Lemon Squeezy hosted checkout (Pro only — not active in this release) =
+= Lemon Squeezy hosted checkout (linked from plugin, no data sent until you click) =
 
-When Pro launches, the Upgrade page will contain anchor links to `https://STORE.lemonsqueezy.com/buy/...`. Clicking opens Lemon Squeezy's hosted checkout in a new tab. No data is sent from the plugin to Lemon Squeezy until you click. Subject to Lemon Squeezy's own terms/privacy linked above.
+The Upgrade button in the plugin admin opens `https://STORE.lemonsqueezy.com/buy/...` in a new tab. No data is sent from the plugin to Lemon Squeezy until you complete checkout. Subject to Lemon Squeezy's own terms/privacy linked above.
 
-= Perplexity AI / Tavily (Pro only, BYO key, not active in this release) =
+= Perplexity AI / Tavily (Pro only, BYO key, only when you opt in) =
 
-After Pro launches: when you paste a Perplexity or Tavily API key into Settings and trigger a Live AI Test or Citation Check, the plugin will post your query directly from your WordPress server to `https://api.perplexity.ai` or `https://api.tavily.com` using **your** API key. Quoted never sees the query.
+When you paste a Perplexity or Tavily API key into Settings and trigger a Live AI Test or Citation Check, the plugin posts your query **directly from your WordPress server** to `https://api.perplexity.ai` or `https://api.tavily.com` using **your** API key. Quoted never sees the query.
 
 * Perplexity terms: https://www.perplexity.ai/hub/legal/perplexity-api-terms-of-service
 * Perplexity privacy: https://www.perplexity.ai/hub/legal/privacy-policy
@@ -142,6 +151,14 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 7. Welcome screen on first activation — Free tier ready in one click.
 
 == Changelog ==
+
+= 1.0.0 =
+* **Commercial launch.** Pro and Agency subscription plans live at quotedeasy.com — paste your license key in Settings → Activate to unlock unlimited llms.txt posts, 12-month bot history, citation tracking, Live AI Test, niche benchmarks, and (Agency) multi-site licensing.
+* New: license activation/deactivation flow connects to api.quotedeasy.com. Backend URL is operator-overridable via the `quoted_backend_url` WordPress option for self-hosted setups.
+* New: setup wizard auto-runs on first activation with optional 1-screen license paste. Skip to use Free forever.
+* New: customer dashboard at quotedeasy.com/customer.html — paste your license key to see all your sites, posts synced, bot crawls, and billing in one place.
+* Security: defense-in-depth license-domain binding. A license issued for one site cannot be replayed on another. 30-day money-back guarantee handled by Lemon Squeezy.
+* Internal: refreshed test harness; PHP 8.0–8.3 verified; 25/25 PHP unit tests green; 19/19 integration tests on the SaaS backend.
 
 = 0.3.0 =
 * **Bot catalog expanded from 14 → 60+ signatures.** Now covers Anthropic Claude-User + Claude-SearchBot, OpenAI Operator, Google GoogleOther + GoogleOther-Image, Microsoft Bingbot/MSNBot, Mistral, xAI Grok, DeepSeek, Amazon, Alibaba, Baidu (Baiduspider + Baidu-AI), Naver Yeti + NaverGPT, Yandex, Sogou, Huawei PetalBot, AI2Bot (Allen Institute), Hive ImagesiftBot, LAION FriendlyCrawler, Semantic Scholar, omgilibot, TimpiBot, PleiasBot, img2dataset, and the SEO crawlers (Ahrefs, Semrush, DataForSEO, MJ12) that resell data to LLM training pipelines. Also Internet Archive's ia_archiver — historically the largest single training-data source.
@@ -174,6 +191,9 @@ After Pro launches: when you paste a Perplexity or Tavily API key into Settings 
 * Free tier with 50-post limit
 
 == Upgrade Notice ==
+
+= 1.0.0 =
+Commercial launch. Free tier unchanged and fully backward-compatible — your bot log, llms.txt, schema, and allowlist settings carry over. New: optional Pro license activation in Settings (skip to stay on Free forever). Safe drop-in upgrade.
 
 = 0.3.0 =
 Major bot-catalog expansion (14 → 60+ signatures). Performance improvements on the bot log and FAQ schema extraction. Removed the unused "niche" onboarding step. Safe drop-in upgrade.
