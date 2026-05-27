@@ -2,7 +2,7 @@
 /**
  * Schema Engine — outputs JSON-LD on the frontend.
  *
- * Quoted ships two schema types:
+ * QuotedEasy AI Readiness ships two schema types:
  *   - Article (on every single post/page)
  *   - FAQPage (auto-detected from [faq] shortcodes or H2/H3 question patterns)
  *
@@ -12,14 +12,14 @@
  * generate from shortcodes, because most SEO plugins don't pick those up
  * unless their FAQ block is used.
  *
- * @package Quoted
+ * @package QuotedEasy_AI_Readiness
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Quoted_Schema {
+class QuotedEasy_AI_Readiness_Schema {
 
 	/**
 	 * SEO plugins that already emit Article/Person/Organization schema. When
@@ -71,7 +71,7 @@ class Quoted_Schema {
 	 * makes sense on a real content URL.
 	 */
 	public function maybe_output() {
-		if ( ! get_option( 'quoted_schema_enabled', true ) ) {
+		if ( ! get_option( 'quotedeasy_ai_readiness_schema_enabled', true ) ) {
 			return;
 		}
 		if ( is_feed() || is_404() || is_search() || ! is_singular() ) {
@@ -83,7 +83,7 @@ class Quoted_Schema {
 			return;
 		}
 
-		$mode = get_option( 'quoted_schema_mode', 'auto' );
+		$mode = get_option( 'quotedeasy_ai_readiness_schema_mode', 'auto' );
 
 		// Article — skip in auto mode if an SEO plugin already provides it.
 		$emit_article = true;
@@ -115,14 +115,14 @@ class Quoted_Schema {
 		if ( empty( $data ) ) {
 			return;
 		}
-		$data = apply_filters( 'quoted_schema_' . $tag, $data );
+		$data = apply_filters( 'quotedeasy_ai_readiness_schema_' . $tag, $data );
 		// JSON_HEX_* flags hex-encode <, >, &, ', " inside the script body. Without them
 		// a literal "</script>" in any field (title, FAQ Q/A) would close the JSON-LD
 		// script tag and let following content execute. These four flags are the
 		// WordPress hardening standard for inline JSON in <script> contexts.
 		$flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
 			| JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
-		echo "\n<script type=\"application/ld+json\" data-emitter=\"quoted-" . esc_attr( $tag ) . "\">";
+		echo "\n<script type=\"application/ld+json\" data-emitter=\"quotedeasy-ai-readiness-" . esc_attr( $tag ) . "\">";
 		echo wp_json_encode( $data, $flags );
 		echo "</script>\n";
 	}
@@ -217,14 +217,14 @@ class Quoted_Schema {
 		// Per-post cache. do_blocks() and the regex pass below are not free
 		// on long-form articles; without this, every page view of a post
 		// re-runs the whole thing. Invalidated by save_post via the existing
-		// Quoted_Rest::invalidate_post_cache() hook (it also drops the
+		// QuotedEasy_AI_Readiness_Rest::invalidate_post_cache() hook (it also drops the
 		// per-post markdown transient, so the cycle is one delete_post_meta).
 		static $request_cache = array();
 		if ( isset( $request_cache[ $post->ID ] ) ) {
 			return $request_cache[ $post->ID ];
 		}
 
-		$cache_key = 'quoted_faqs_' . md5( $post->ID . '|' . $post->post_modified_gmt );
+		$cache_key = 'quotedeasy_ai_readiness_faqs_' . md5( $post->ID . '|' . $post->post_modified_gmt );
 		$cached    = get_transient( $cache_key );
 		if ( is_array( $cached ) ) {
 			$request_cache[ $post->ID ] = $cached;

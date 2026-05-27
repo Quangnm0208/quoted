@@ -1,8 +1,19 @@
 # Changelog
 
-All notable changes to Quoted are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/), and the project adheres to
-[Semantic Versioning](https://semver.org/).
+All notable changes to QuotedEasy AI Readiness are documented here. The format
+follows [Keep a Changelog](https://keepachangelog.com/), and the project
+adheres to [Semantic Versioning](https://semver.org/).
+
+## [0.5.1] — 2026-05-27
+
+### Renamed for WP.org compliance
+
+- Renamed from `Quoted` to `QuotedEasy AI Readiness`. Slug changed to
+  `quotedeasy-ai-readiness`. Text domain updated to match.
+- All internal class names, constants, option names, REST namespace, AJAX
+  actions, CSS/JS handles, and the bot log database table have been renamed to
+  the new prefix.
+- No behavior changes. Functionality equivalent to 0.5.0.
 
 ## [0.5.0] — 2026-05-25
 
@@ -12,7 +23,7 @@ All notable changes to Quoted are documented here. The format follows
   Every feature is available to every install.
 - **No external services.** All previously planned commercial integrations
   have been removed from this directory release. Nothing leaves your server.
-- **Credit in footer is opt-in.** The "AI-readable via Quoted" footer link is
+- **Credit in footer is opt-in.** The "AI-ready via QuotedEasy" footer link is
   off by default; enable it under **Settings → Display**.
 
 ### Hardened
@@ -29,7 +40,7 @@ All notable changes to Quoted are documented here. The format follows
 ### Improved
 
 - `llms.txt` default cap raised to **1,000** most-recently-modified posts and
-  pages. Filterable via `quoted_llms_txt_post_limit` (pass `-1` for unlimited).
+  pages. Filterable via `quotedeasy_ai_readiness_llms_txt_post_limit` (pass `-1` for unlimited).
 - Per-post Markdown URLs now use `rest_url()` instead of a hard-coded
   `/wp-json/` path, so they survive `rest_url_prefix` filters.
 - `/llms.txt` served at `template_redirect` priority 1 to beat

@@ -8,14 +8,14 @@
  * Strips: script, style, iframe, nav, footer, aside, form.
  * Preserves: headings, paragraphs, lists, links, images, code, blockquote.
  *
- * @package Quoted
+ * @package QuotedEasy_AI_Readiness
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Quoted_Markdown {
+class QuotedEasy_AI_Readiness_Markdown {
 
 	/**
 	 * Convert a post object to markdown.

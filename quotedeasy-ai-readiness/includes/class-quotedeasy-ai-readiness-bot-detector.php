@@ -8,18 +8,18 @@
  * Each entry in the catalog can match multiple UA fragments (Anthropic, for
  * example, ships both `ClaudeBot` and `anthropic-ai`).
  *
- * Allowlist is stored in the `quoted_bot_allowlist` option; missing keys
+ * Allowlist is stored in the `quotedeasy_ai_readiness_bot_allowlist` option; missing keys
  * default to 'allow' so a new bot the operator hasn't seen doesn't get
  * silently blocked.
  *
- * @package Quoted
+ * @package QuotedEasy_AI_Readiness
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Quoted_Bot_Detector {
+class QuotedEasy_AI_Readiness_Bot_Detector {
 
 	/**
 	 * Canonical AI / LLM crawler catalog.
@@ -429,13 +429,13 @@ class Quoted_Bot_Detector {
 	 */
 	public function log_crawl( $bot_name, $url_path, $user_agent, $ip_raw ) {
 		global $wpdb;
-		$table = $wpdb->prefix . 'quoted_bot_log';
+		$table = $wpdb->prefix . 'quotedeasy_ai_readiness_bot_log';
 
-		$cached_count = get_transient( 'quoted_unsynced_count' );
+		$cached_count = get_transient( 'quotedeasy_ai_readiness_unsynced_count' );
 		if ( $cached_count === false ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- $table from $wpdb->prefix.
 			$cached_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE synced = 0" );
-			set_transient( 'quoted_unsynced_count', $cached_count, 60 );
+			set_transient( 'quotedeasy_ai_readiness_unsynced_count', $cached_count, 60 );
 		}
 
 		// B8: at the cap, prune the oldest 100 rows so the log keeps moving
@@ -447,7 +447,7 @@ class Quoted_Bot_Detector {
 			$deleted = (int) $wpdb->query( "DELETE FROM {$table} ORDER BY id ASC LIMIT 100" );
 			if ( $deleted > 0 ) {
 				$cached_count = max( 0, $cached_count - $deleted );
-				set_transient( 'quoted_unsynced_count', $cached_count, 60 );
+				set_transient( 'quotedeasy_ai_readiness_unsynced_count', $cached_count, 60 );
 			} else {
 				// Couldn't prune (table empty or storage engine quirk) — fail safe.
 				return false;
@@ -472,7 +472,7 @@ class Quoted_Bot_Detector {
 		if ( $inserted ) {
 			// Increment the cached count instead of busting it — keeps the
 			// transient warm for the next request.
-			set_transient( 'quoted_unsynced_count', (int) $cached_count + 1, 60 );
+			set_transient( 'quotedeasy_ai_readiness_unsynced_count', (int) $cached_count + 1, 60 );
 		}
 
 		return $inserted !== false;
@@ -483,7 +483,7 @@ class Quoted_Bot_Detector {
 	 * disabled (the toggle in Settings → Privacy).
 	 */
 	private function hash_ip( $ip_raw ) {
-		if ( ! get_option( 'quoted_hash_ips', true ) ) {
+		if ( ! get_option( 'quotedeasy_ai_readiness_hash_ips', true ) ) {
 			return 'raw:' . $ip_raw;
 		}
 		return 'sha256:' . hash( 'sha256', $ip_raw . wp_salt( 'auth' ) );
@@ -493,7 +493,7 @@ class Quoted_Bot_Detector {
 	 * Allowlist helpers — operator decides which bots can use the site.
 	 */
 	public static function is_allowed( $bot_name ) {
-		$allowlist = get_option( 'quoted_bot_allowlist', array() );
+		$allowlist = get_option( 'quotedeasy_ai_readiness_bot_allowlist', array() );
 		if ( ! is_array( $allowlist ) ) {
 			return true;
 		}
@@ -504,7 +504,7 @@ class Quoted_Bot_Detector {
 	}
 
 	public static function blocked_bots() {
-		$allowlist = get_option( 'quoted_bot_allowlist', array() );
+		$allowlist = get_option( 'quotedeasy_ai_readiness_bot_allowlist', array() );
 		if ( ! is_array( $allowlist ) ) {
 			return array();
 		}
@@ -528,7 +528,7 @@ class Quoted_Bot_Detector {
 			return '';
 		}
 
-		$out = "\n# Quoted — AI crawler allowlist\n";
+		$out = "\n# QuotedEasy AI Readiness — AI crawler allowlist\n";
 		foreach ( $blocked as $bot ) {
 			if ( ! isset( $catalog[ $bot ] ) ) {
 				continue;
@@ -542,7 +542,7 @@ class Quoted_Bot_Detector {
 	}
 
 	/**
-	 * Used by Quoted_Activator on uninstall + by the dashboard summary.
+	 * Used by QuotedEasy_AI_Readiness_Activator on uninstall + by the dashboard summary.
 	 * Returns the count of bot identifiers in the catalog (for "X bots tracked" UI copy).
 	 */
 	public static function catalog_size() {

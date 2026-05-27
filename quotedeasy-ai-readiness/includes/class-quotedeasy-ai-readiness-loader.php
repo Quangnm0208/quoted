@@ -2,14 +2,14 @@
 /**
  * Hook loader — batches add_action / add_filter for cleanliness.
  *
- * @package Quoted
+ * @package QuotedEasy_AI_Readiness
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Quoted_Loader {
+class QuotedEasy_AI_Readiness_Loader {
 
 	protected $actions = array();
 	protected $filters = array();

@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       Quoted — Make your site AI-readable
- * Plugin URI:        https://github.com/muahangngayvn/quoted
- * Description:       AI-readability layer for WordPress: auto-generates llms.txt, serves clean Markdown per post, detects 60+ AI bots (ChatGPT, Claude, Perplexity, Gemini), and lets you allow or block each one. Adds Article + FAQPage JSON-LD that defers to Yoast / Rank Math / AIOSEO when they are active.
- * Version:           0.5.0
+ * Plugin Name:       QuotedEasy AI Readiness
+ * Plugin URI:        https://github.com/muahangngayvn/quotedeasy-ai-readiness
+ * Description:       AI readiness layer for WordPress sites: generates llms.txt, serves clean Markdown content signals, detects AI crawlers, provides crawler allow/block controls, and outputs schema signals while respecting existing SEO plugins.
+ * Version:           0.5.1
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      7.4
@@ -11,20 +11,20 @@
  * Author URI:        https://github.com/muahangngayvn
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       quoted
+ * Text Domain:       quotedeasy-ai-readiness
  * Domain Path:       /languages
  * Network:           false
  * Update URI:        false
  *
- * @package Quoted
+ * @package QuotedEasy_AI_Readiness
  * @copyright 2026 Quang Nguyen
  *
- * Quoted is free software: you can redistribute it and/or modify
+ * QuotedEasy AI Readiness is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
- * Quoted is distributed in the hope that it will be useful,
+ * QuotedEasy AI Readiness is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -36,17 +36,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'QUOTED_VERSION', '0.5.0' );
-define( 'QUOTED_PLUGIN_FILE', __FILE__ );
-define( 'QUOTED_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'QUOTED_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'QUOTED_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+define( 'QUOTEDEASY_AI_READINESS_VERSION', '0.5.1' );
+define( 'QUOTEDEASY_AI_READINESS_PLUGIN_FILE', __FILE__ );
+define( 'QUOTEDEASY_AI_READINESS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'QUOTEDEASY_AI_READINESS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'QUOTEDEASY_AI_READINESS_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 // Minimum requirements check (graceful, no white screen).
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	add_action( 'admin_notices', function () {
 		echo '<div class="notice notice-error"><p>';
-		echo esc_html__( 'Quoted requires PHP 7.4 or higher. Please upgrade your PHP version.', 'quoted' );
+		echo esc_html__( 'QuotedEasy AI Readiness requires PHP 7.4 or higher. Please upgrade your PHP version.', 'quotedeasy-ai-readiness' );
 		echo '</p></div>';
 	} );
 	return;
@@ -55,29 +55,29 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 if ( version_compare( get_bloginfo( 'version' ), '6.0', '<' ) ) {
 	add_action( 'admin_notices', function () {
 		echo '<div class="notice notice-error"><p>';
-		echo esc_html__( 'Quoted requires WordPress 6.0 or higher. Please update WordPress.', 'quoted' );
+		echo esc_html__( 'QuotedEasy AI Readiness requires WordPress 6.0 or higher. Please update WordPress.', 'quotedeasy-ai-readiness' );
 		echo '</p></div>';
 	} );
 	return;
 }
 
 /**
- * Autoload Quoted classes.
+ * Autoload QuotedEasy AI Readiness classes.
  *
  * Follows WordPress convention: class-name.php for class Class_Name.
  * Files live in includes/, admin/, and public/.
  */
 spl_autoload_register( function ( $class ) {
-	if ( strpos( $class, 'Quoted_' ) !== 0 ) {
+	if ( strpos( $class, 'QuotedEasy_AI_Readiness_' ) !== 0 ) {
 		return;
 	}
 
 	$class_file = 'class-' . strtolower( str_replace( '_', '-', $class ) ) . '.php';
 
 	$paths = array(
-		QUOTED_PLUGIN_DIR . 'includes/',
-		QUOTED_PLUGIN_DIR . 'admin/',
-		QUOTED_PLUGIN_DIR . 'public/',
+		QUOTEDEASY_AI_READINESS_PLUGIN_DIR . 'includes/',
+		QUOTEDEASY_AI_READINESS_PLUGIN_DIR . 'admin/',
+		QUOTEDEASY_AI_READINESS_PLUGIN_DIR . 'public/',
 	);
 
 	foreach ( $paths as $path ) {
@@ -93,30 +93,30 @@ spl_autoload_register( function ( $class ) {
  * Activation hook.
  * Creates DB tables, sets default options, flushes rewrite rules.
  */
-register_activation_hook( __FILE__, array( 'Quoted_Activator', 'activate' ) );
+register_activation_hook( __FILE__, array( 'QuotedEasy_AI_Readiness_Activator', 'activate' ) );
 
 /**
  * Deactivation hook.
  * Clears scheduled cron events. Does NOT delete data
  * (use uninstall.php for clean uninstall).
  */
-register_deactivation_hook( __FILE__, array( 'Quoted_Deactivator', 'deactivate' ) );
+register_deactivation_hook( __FILE__, array( 'QuotedEasy_AI_Readiness_Deactivator', 'deactivate' ) );
 
 /**
  * Bootstrap plugin.
  * Lazy-loaded on `plugins_loaded` so other plugins can hook into our actions.
  */
-function quoted_run() {
-	$plugin = new Quoted_Core();
+function quotedeasy_ai_readiness_run() {
+	$plugin = new QuotedEasy_AI_Readiness_Core();
 	$plugin->run();
 }
-add_action( 'plugins_loaded', 'quoted_run', 10 );
+add_action( 'plugins_loaded', 'quotedeasy_ai_readiness_run', 10 );
 
 /**
  * Admin notice when the site is using "Plain" permalinks.
  *
  * Pretty URLs are required for the /llms.txt rewrite rule to resolve. The
- * REST endpoint /index.php?rest_route=/quoted/v1/llms.txt always works as a
+ * REST endpoint /index.php?rest_route=/quotedeasy-ai-readiness/v1/llms.txt always works as a
  * fallback, but most operators expect /llms.txt to be a clean URL — that's
  * the whole reason the spec exists. This nudges them to flip the setting.
  */
@@ -128,18 +128,18 @@ add_action( 'admin_notices', function () {
 		return; // pretty permalinks already set
 	}
 	// Dismissable per-user.
-	if ( get_user_meta( get_current_user_id(), 'quoted_permalink_notice_dismissed', true ) ) {
+	if ( get_user_meta( get_current_user_id(), 'quotedeasy_ai_readiness_permalink_notice_dismissed', true ) ) {
 		return;
 	}
 	?>
-	<div class="notice notice-warning is-dismissible" data-quoted-notice="permalink">
+	<div class="notice notice-warning is-dismissible" data-quotedeasy-ai-readiness-notice="permalink">
 		<p>
-			<strong><?php esc_html_e( 'Quoted needs pretty permalinks', 'quoted' ); ?></strong> —
+			<strong><?php esc_html_e( 'QuotedEasy AI Readiness needs pretty permalinks', 'quotedeasy-ai-readiness' ); ?></strong> —
 			<?php
 			printf(
 				/* translators: %s: link to Settings → Permalinks */
-				esc_html__( 'your site is currently using "Plain" permalinks (e.g. ?p=123), so the AI sitemap at /llms.txt will 404. %s and pick any option other than "Plain".', 'quoted' ),
-				'<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">' . esc_html__( 'Go to Settings → Permalinks', 'quoted' ) . '</a>'
+				esc_html__( 'your site is currently using "Plain" permalinks (e.g. ?p=123), so the AI sitemap at /llms.txt will 404. %s and pick any option other than "Plain".', 'quotedeasy-ai-readiness' ),
+				'<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">' . esc_html__( 'Go to Settings → Permalinks', 'quotedeasy-ai-readiness' ) . '</a>'
 			);
 			?>
 		</p>

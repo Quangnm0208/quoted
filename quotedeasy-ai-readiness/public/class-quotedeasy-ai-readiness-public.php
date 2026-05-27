@@ -2,14 +2,14 @@
 /**
  * Public-facing hooks: bot detection on frontend, llms.txt route, credit badge.
  *
- * @package Quoted
+ * @package QuotedEasy_AI_Readiness
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Quoted_Public {
+class QuotedEasy_AI_Readiness_Public {
 
 	/**
 	 * Hook on `init` priority 1: catch bot visits before WP does anything heavy.
@@ -23,12 +23,12 @@ class Quoted_Public {
 	 */
 	public function detect_bot_visit() {
 		// Skip when logging disabled.
-		if ( get_option( 'quoted_disable_logging', false ) ) {
+		if ( get_option( 'quotedeasy_ai_readiness_disable_logging', false ) ) {
 			return;
 		}
 
 		// Only on frontend GET requests. Skip REST and XML-RPC too — a bot
-		// hitting /wp-json/quoted/v1/llm/foo otherwise triggers the
+		// hitting /wp-json/quotedeasy-ai-readiness/v1/llm/foo otherwise triggers the
 		// detector twice (once on init, once on the REST request).
 		if ( is_admin() || wp_doing_ajax() || wp_doing_cron()
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
@@ -54,7 +54,7 @@ class Quoted_Public {
 			return;
 		}
 
-		$detector = new Quoted_Bot_Detector();
+		$detector = new QuotedEasy_AI_Readiness_Bot_Detector();
 		$bot_name = $detector->identify( $ua );
 
 		if ( $bot_name === null ) {
@@ -73,9 +73,9 @@ class Quoted_Public {
 
 		// Then enforce the allowlist. Blocked bots get 403 + exit before the
 		// page builds — saves CPU, makes the block clearly visible to the bot.
-		if ( ! Quoted_Bot_Detector::is_allowed( $bot_name ) ) {
+		if ( ! QuotedEasy_AI_Readiness_Bot_Detector::is_allowed( $bot_name ) ) {
 			status_header( 403 );
-			header( 'X-Quoted-Block: ' . $bot_name );
+			header( 'X-QuotedEasy-Block: ' . $bot_name );
 			header( 'Content-Type: text/plain; charset=utf-8' );
 			header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0' );
 			echo "Access disallowed for AI crawler " . esc_html( $bot_name ) . " by the site operator. See /robots.txt.\n";
@@ -84,7 +84,7 @@ class Quoted_Public {
 	}
 
 	/**
-	 * Render "AI-readable via Quoted" credit in footer.
+	 * Render "AI-ready via QuotedEasy" credit in footer.
 	 *
 	 * This callback is only registered on `wp_footer` when the admin has
 	 * explicitly enabled the credit (Settings → Display → "Show credit in
@@ -92,8 +92,8 @@ class Quoted_Public {
 	 */
 	public function render_powered_by_badge() {
 		echo '<div style="text-align:center;padding:10px;font-size:11px;color:#999;">';
-		echo 'AI-readable via ';
-		echo '<a href="https://github.com/muahangngayvn" target="_blank" rel="noopener" style="color:#666;">Quoted</a>';
+		echo 'AI-ready via ';
+		echo '<a href="https://github.com/muahangngayvn/quotedeasy-ai-readiness" target="_blank" rel="noopener" style="color:#666;">QuotedEasy</a>';
 		echo '</div>';
 	}
 
@@ -105,18 +105,18 @@ class Quoted_Public {
 		// adds a trailing slash whenever permalink_structure ends in one.
 		add_rewrite_rule(
 			'^llms\.txt/?$',
-			'index.php?quoted_route=llms_txt',
+			'index.php?quotedeasy_ai_readiness_route=llms_txt',
 			'top'
 		);
 	}
 
 	public function add_query_vars( $vars ) {
-		$vars[] = 'quoted_route';
+		$vars[] = 'quotedeasy_ai_readiness_route';
 		return $vars;
 	}
 
 	/**
-	 * Append Quoted's AI crawler block directives to the dynamic robots.txt.
+	 * Append QuotedEasy AI Readiness's AI crawler block directives to the dynamic robots.txt.
 	 *
 	 * WordPress emits a virtual robots.txt at /robots.txt when no static file
 	 * exists. This filter runs after WP's defaults — we just concatenate our
@@ -133,7 +133,7 @@ class Quoted_Public {
 			// blanket Disallow; don't add anything that could confuse parsers.
 			return $output;
 		}
-		return $output . Quoted_Bot_Detector::robots_txt_block_rules();
+		return $output . QuotedEasy_AI_Readiness_Bot_Detector::robots_txt_block_rules();
 	}
 
 	/**
@@ -143,12 +143,12 @@ class Quoted_Public {
 	 * with the correct Content-Type.
 	 */
 	public function maybe_serve_llms_txt() {
-		$route = get_query_var( 'quoted_route' );
+		$route = get_query_var( 'quotedeasy_ai_readiness_route' );
 		if ( $route !== 'llms_txt' ) {
 			return;
 		}
 
-		$llms = new Quoted_Llms_Txt();
+		$llms = new QuotedEasy_AI_Readiness_Llms_Txt();
 		$content = $llms->get_content();
 
 		status_header( 200 );
@@ -156,7 +156,7 @@ class Quoted_Public {
 		// Short browser cache + must-revalidate, no edge cache. Avoids
 		// CDN/page-cache plugins holding stale llms.txt after post edits.
 		header( 'Cache-Control: public, max-age=300, must-revalidate' );
-		header( 'X-Quoted-Version: ' . QUOTED_VERSION );
+		header( 'X-QuotedEasy-Version: ' . QUOTEDEASY_AI_READINESS_VERSION );
 
 		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — markdown body
 		exit;
@@ -166,7 +166,7 @@ class Quoted_Public {
 	 * Best-effort client IP detection.
 	 *
 	 * Forwarded-for / Cloudflare headers are only honored when the operator
-	 * explicitly opts in via `quoted_trust_proxy`. On a non-proxied install
+	 * explicitly opts in via `quotedeasy_ai_readiness_trust_proxy`. On a non-proxied install
 	 * those headers are attacker-controlled and would let bot traffic spoof
 	 * IPs to drown out dedup. REMOTE_ADDR is always consulted last.
 	 *
@@ -174,7 +174,7 @@ class Quoted_Public {
 	 */
 	private function get_client_ip() {
 		$keys = array( 'REMOTE_ADDR' );
-		if ( get_option( 'quoted_trust_proxy', false ) ) {
+		if ( get_option( 'quotedeasy_ai_readiness_trust_proxy', false ) ) {
 			$keys = array( 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' );
 		}
 		foreach ( $keys as $key ) {

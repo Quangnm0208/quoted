@@ -1,11 +1,11 @@
 /**
- * Quoted Admin Styles
+ * QuotedEasy AI Readiness Admin Styles
  *
  * Lean and dependency-free. Follows WP admin design language.
  */
 
 /* ─── Header ─────────────────────────────────────────────── */
-.quoted-header {
+.quotedeasy-ai-readiness-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -13,42 +13,42 @@
 	padding-bottom: 20px;
 	border-bottom: 1px solid #e0e0e0;
 }
-.quoted-header h1 {
+.quotedeasy-ai-readiness-header h1 {
 	margin: 0;
 	font-size: 28px;
 }
-.quoted-header .subtitle {
+.quotedeasy-ai-readiness-header .subtitle {
 	margin: 8px 0 0;
 	color: #50575e;
 	font-size: 16px;
 }
 
 /* ─── Plan badge ─────────────────────────────────────────── */
-.quoted-plan-badge {
+.quotedeasy-ai-readiness-plan-badge {
 	padding: 6px 14px;
 	border-radius: 4px;
 	font-weight: 600;
 	font-size: 11px;
 	letter-spacing: 0.5px;
 }
-.quoted-plan-badge.plan-free {
+.quotedeasy-ai-readiness-plan-badge.plan-free {
 	background: #f0f0f1;
 	color: #50575e;
 }
-.quoted-plan-badge.plan-pro {
+.quotedeasy-ai-readiness-plan-badge.plan-pro {
 	background: #2271b1;
 	color: #fff;
 }
-.quoted-plan-badge.plan-agency {
+.quotedeasy-ai-readiness-plan-badge.plan-agency {
 	background: #674ea7;
 	color: #fff;
 }
 
 /* ─── Onboarding progress ────────────────────────────────── */
-.quoted-progress {
+.quotedeasy-ai-readiness-progress {
 	margin: 30px 0;
 }
-.quoted-progress ol {
+.quotedeasy-ai-readiness-progress ol {
 	display: flex;
 	list-style: none;
 	padding: 0;
@@ -56,7 +56,7 @@
 	gap: 0;
 	counter-reset: step;
 }
-.quoted-progress li {
+.quotedeasy-ai-readiness-progress li {
 	flex: 1;
 	padding: 12px 16px;
 	background: #f0f0f1;
@@ -66,36 +66,36 @@
 	position: relative;
 	counter-increment: step;
 }
-.quoted-progress li::before {
+.quotedeasy-ai-readiness-progress li::before {
 	content: counter(step) ". ";
 }
-.quoted-progress li.active {
+.quotedeasy-ai-readiness-progress li.active {
 	background: #2271b1;
 	color: #fff;
 }
-.quoted-progress li.done {
+.quotedeasy-ai-readiness-progress li.done {
 	background: #00a32a;
 	color: #fff;
 }
 
 /* ─── Onboarding steps ───────────────────────────────────── */
-.quoted-step {
+.quotedeasy-ai-readiness-step {
 	background: #fff;
 	padding: 30px;
 	border: 1px solid #c3c4c7;
 	border-radius: 4px;
 	max-width: 720px;
 }
-.quoted-step h2 {
+.quotedeasy-ai-readiness-step h2 {
 	margin-top: 0;
 	font-size: 22px;
 }
-.quoted-step .description {
+.quotedeasy-ai-readiness-step .description {
 	color: #50575e;
 	font-size: 14px;
 	margin-bottom: 20px;
 }
-.quoted-step .submit {
+.quotedeasy-ai-readiness-step .submit {
 	margin-top: 20px;
 }
 .button-hero {
@@ -104,33 +104,33 @@
 	height: auto !important;
 }
 
-.quoted-status {
+.quotedeasy-ai-readiness-status {
 	margin-left: 12px;
 	color: #50575e;
 	font-style: italic;
 }
-.quoted-status.error {
+.quotedeasy-ai-readiness-status.error {
 	color: #d63638;
 	font-style: normal;
 	font-weight: 500;
 }
 
-.quoted-help {
+.quotedeasy-ai-readiness-help {
 	margin-top: 30px;
 	padding-top: 20px;
 	border-top: 1px solid #e0e0e0;
 	color: #50575e;
 }
 
-.quoted-scan-box,
-.quoted-test-box,
-.quoted-done-box {
+.quotedeasy-ai-readiness-scan-box,
+.quotedeasy-ai-readiness-test-box,
+.quotedeasy-ai-readiness-done-box {
 	text-align: center;
 	padding: 40px 0;
 }
 
-.quoted-scan-result,
-.quoted-test-result {
+.quotedeasy-ai-readiness-scan-result,
+.quotedeasy-ai-readiness-test-result {
 	margin-top: 20px;
 	padding: 20px;
 	background: #f6f7f7;
@@ -138,62 +138,62 @@
 	text-align: left;
 }
 
-.quoted-test-placeholder {
+.quotedeasy-ai-readiness-test-placeholder {
 	color: #50575e;
 }
 
-.quoted-next-tips {
+.quotedeasy-ai-readiness-next-tips {
 	margin-top: 30px;
 	padding: 20px;
 	background: #f0f6fc;
 	border-left: 4px solid #2271b1;
 	border-radius: 0 4px 4px 0;
 }
-.quoted-next-tips h3 {
+.quotedeasy-ai-readiness-next-tips h3 {
 	margin-top: 0;
 }
-.quoted-next-tips ul {
+.quotedeasy-ai-readiness-next-tips ul {
 	margin: 0;
 	padding-left: 20px;
 }
 
 /* ─── Dashboard grid ─────────────────────────────────────── */
-.quoted-dashboard-grid {
+.quotedeasy-ai-readiness-dashboard-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 	gap: 20px;
 	margin: 20px 0;
 }
 
-.quoted-card {
+.quotedeasy-ai-readiness-card {
 	background: #fff;
 	border: 1px solid #c3c4c7;
 	border-radius: 4px;
 	padding: 24px;
 }
-.quoted-card h2 {
+.quotedeasy-ai-readiness-card h2 {
 	margin: 0 0 16px;
 	font-size: 16px;
 	font-weight: 600;
 	color: #1d2327;
 }
-.quoted-card .quoted-period {
+.quotedeasy-ai-readiness-card .quotedeasy-ai-readiness-period {
 	font-size: 12px;
 	color: #8c8f94;
 	font-weight: 400;
 }
 
 /* Score gauge */
-.quoted-score-card {
+.quotedeasy-ai-readiness-score-card {
 	text-align: center;
 }
-.quoted-score-gauge {
+.quotedeasy-ai-readiness-score-gauge {
 	position: relative;
 	width: 240px;
 	height: 240px;
 	margin: 0 auto;
 }
-.quoted-score-number {
+.quotedeasy-ai-readiness-score-number {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -202,25 +202,25 @@
 	font-weight: 700;
 	color: #1d2327;
 }
-.quoted-score-delta {
+.quotedeasy-ai-readiness-score-delta {
 	margin: 10px 0 0;
 	color: #50575e;
 	font-size: 14px;
 }
-.quoted-score-delta.positive {
+.quotedeasy-ai-readiness-score-delta.positive {
 	color: #00a32a;
 }
-.quoted-score-delta.negative {
+.quotedeasy-ai-readiness-score-delta.negative {
 	color: #d63638;
 }
-.quoted-score-explainer {
+.quotedeasy-ai-readiness-score-explainer {
 	margin: 10px 0 0;
 	color: #8c8f94;
 	font-size: 12px;
 }
 
 /* Bot feed */
-.quoted-bot-event {
+.quotedeasy-ai-readiness-bot-event {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -228,15 +228,15 @@
 	border-bottom: 1px solid #f0f0f1;
 	gap: 10px;
 }
-.quoted-bot-event:last-child {
+.quotedeasy-ai-readiness-bot-event:last-child {
 	border-bottom: none;
 }
-.quoted-bot-event .bot-name {
+.quotedeasy-ai-readiness-bot-event .bot-name {
 	font-weight: 600;
 	color: #2271b1;
 	white-space: nowrap;
 }
-.quoted-bot-event .bot-url {
+.quotedeasy-ai-readiness-bot-event .bot-url {
 	flex: 1;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -244,19 +244,19 @@
 	color: #50575e;
 	font-size: 13px;
 }
-.quoted-bot-event .bot-time {
+.quotedeasy-ai-readiness-bot-event .bot-time {
 	color: #8c8f94;
 	font-size: 12px;
 	white-space: nowrap;
 }
 
 /* Top bots list */
-.quoted-top-bot-row {
+.quotedeasy-ai-readiness-top-bot-row {
 	display: flex;
 	justify-content: space-between;
 	padding: 6px 0;
 }
-.quoted-top-bot-row .bar {
+.quotedeasy-ai-readiness-top-bot-row .bar {
 	flex: 1;
 	height: 8px;
 	background: #f0f0f1;
@@ -264,49 +264,49 @@
 	margin: 6px 12px;
 	overflow: hidden;
 }
-.quoted-top-bot-row .bar-fill {
+.quotedeasy-ai-readiness-top-bot-row .bar-fill {
 	height: 100%;
 	background: #2271b1;
 	border-radius: 4px;
 }
 
 /* Published content card */
-.quoted-quota-bar {
+.quotedeasy-ai-readiness-quota-bar {
 	height: 12px;
 	background: #f0f0f1;
 	border-radius: 6px;
 	overflow: hidden;
 	margin: 10px 0;
 }
-.quoted-quota-fill {
+.quotedeasy-ai-readiness-quota-fill {
 	height: 100%;
 	background: #2271b1;
 	transition: width 0.3s;
 }
-.quoted-quota-fill.warn {
+.quotedeasy-ai-readiness-quota-fill.warn {
 	background: #dba617;
 }
-.quoted-quota-fill.full {
+.quotedeasy-ai-readiness-quota-fill.full {
 	background: #d63638;
 }
 
 /* Next action card */
-.quoted-next-action-item {
+.quotedeasy-ai-readiness-next-action-item {
 	padding: 16px;
 	background: #f0f6fc;
 	border-left: 4px solid #2271b1;
 	border-radius: 0 4px 4px 0;
 }
-.quoted-next-action-item h3 {
+.quotedeasy-ai-readiness-next-action-item h3 {
 	margin-top: 0;
 	font-size: 14px;
 }
-.quoted-next-action-item a.button {
+.quotedeasy-ai-readiness-next-action-item a.button {
 	margin-top: 10px;
 }
 
 /* Footer */
-.quoted-footer {
+.quotedeasy-ai-readiness-footer {
 	margin-top: 30px;
 	padding-top: 20px;
 	border-top: 1px solid #e0e0e0;
@@ -315,22 +315,22 @@
 }
 
 /* Loading state */
-.quoted-loading {
+.quotedeasy-ai-readiness-loading {
 	color: #8c8f94;
 	font-style: italic;
 }
 
 /* Empty state */
-.quoted-empty {
+.quotedeasy-ai-readiness-empty {
 	color: #8c8f94;
 	text-align: center;
 	padding: 30px 0;
 }
-.quoted-empty p {
+.quotedeasy-ai-readiness-empty p {
 	margin: 0;
 }
 
 /* Settings */
-.quoted-settings .form-table th {
+.quotedeasy-ai-readiness-settings .form-table th {
 	width: 220px;
 }
