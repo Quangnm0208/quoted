@@ -2,9 +2,9 @@
 Contributors: muahangngayvn
 Tags: ai, llms-txt, schema, ai-crawlers, seo
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.5.1
+Stable tag: 0.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -120,6 +120,10 @@ No outbound HTTP requests are made by the plugin under any configuration. There 
 
 == Changelog ==
 
+= 0.5.2 =
+* Removed `Network: false` and `Update URI: false` plugin headers (not permitted on WordPress.org-hosted plugins).
+* Updated "Tested up to" to the current WordPress version.
+
 = 0.5.1 =
 * Renamed from Quoted to QuotedEasy AI Readiness for WP.org directory naming compliance.
 * Plugin slug changed to `quotedeasy-ai-readiness`. Text domain updated to match.
@@ -155,6 +159,9 @@ No outbound HTTP requests are made by the plugin under any configuration. There 
 * Initial development release.
 
 == Upgrade Notice ==
+
+= 0.5.2 =
+Removes plugin headers not allowed on WordPress.org. No behavior changes.
 
 = 0.5.1 =
 Plugin renamed to QuotedEasy AI Readiness for WordPress.org naming compliance. No behavior changes.

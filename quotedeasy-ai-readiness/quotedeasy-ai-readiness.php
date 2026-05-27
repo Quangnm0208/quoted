@@ -3,9 +3,9 @@
  * Plugin Name:       QuotedEasy AI Readiness
  * Plugin URI:        https://github.com/muahangngayvn/quotedeasy-ai-readiness
  * Description:       AI readiness layer for WordPress sites: generates llms.txt, serves clean Markdown content signals, detects AI crawlers, provides crawler allow/block controls, and outputs schema signals while respecting existing SEO plugins.
- * Version:           0.5.1
+ * Version:           0.5.2
  * Requires at least: 6.0
- * Tested up to:      6.8
+ * Tested up to:      7.0
  * Requires PHP:      7.4
  * Author:            Quang Nguyen
  * Author URI:        https://github.com/muahangngayvn
@@ -13,8 +13,6 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       quotedeasy-ai-readiness
  * Domain Path:       /languages
- * Network:           false
- * Update URI:        false
  *
  * @package QuotedEasy_AI_Readiness
  * @copyright 2026 Quang Nguyen
@@ -36,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'QUOTEDEASY_AI_READINESS_VERSION', '0.5.1' );
+define( 'QUOTEDEASY_AI_READINESS_VERSION', '0.5.2' );
 define( 'QUOTEDEASY_AI_READINESS_PLUGIN_FILE', __FILE__ );
 define( 'QUOTEDEASY_AI_READINESS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QUOTEDEASY_AI_READINESS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
