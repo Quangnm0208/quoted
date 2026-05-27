@@ -1,10 +1,6 @@
 <?php
 /**
- * Onboarding wizard — 3-step Free welcome.
- *
- * Step 1: Welcome / Free intro
- * Step 2: Generate llms.txt (refresh local cache + show post count)
- * Step 3: Done — link to dashboard + show /llms.txt URL
+ * Onboarding wizard.
  *
  * @package QuotedEasy_AI_Readiness
  */
@@ -28,21 +24,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</ol>
 	</div>
 
-	<!-- Step 1: Welcome -->
 	<section class="quotedeasy-ai-readiness-step quotedeasy-ai-readiness-step-1 active">
 		<h2><?php esc_html_e( 'Welcome', 'quotedeasy-ai-readiness' ); ?></h2>
 		<p class="description">
-			<?php esc_html_e( "Your site is about to become AI-readable. QuotedEasy AI Readiness ships everything you need: llms.txt at /llms.txt, clean Markdown endpoints, AI bot detection, allowlist, and schema markup. Nothing leaves your server.", 'quotedeasy-ai-readiness' ); ?>
+			<?php esc_html_e( 'Your site is about to become AI-readable. This plugin ships everything you need: llms.txt at /llms.txt, clean Markdown endpoints, AI bot detection, allowlist, and schema markup. Nothing leaves your server.', 'quotedeasy-ai-readiness' ); ?>
 		</p>
 		<p class="submit">
-			<a href="#" class="button button-primary button-hero" id="quotedeasy-ai-readiness-start-btn"><?php esc_html_e( "Let's go →", 'quotedeasy-ai-readiness' ); ?></a>
+			<a href="#" class="button button-primary button-hero" id="quotedeasy-ai-readiness-start-btn"><?php esc_html_e( 'Let\'s go', 'quotedeasy-ai-readiness' ); ?></a>
 		</p>
 	</section>
 
-	<!-- Step 2: Generate llms.txt -->
 	<section class="quotedeasy-ai-readiness-step quotedeasy-ai-readiness-step-2" style="display:none;">
 		<h2><?php esc_html_e( 'Generate your AI sitemap', 'quotedeasy-ai-readiness' ); ?></h2>
-		<p class="description"><?php esc_html_e( "We'll build your llms.txt right now from your published posts. Takes about a second.", 'quotedeasy-ai-readiness' ); ?></p>
+		<p class="description"><?php esc_html_e( 'We will build your llms.txt right now from your published posts.', 'quotedeasy-ai-readiness' ); ?></p>
 
 		<div class="quotedeasy-ai-readiness-scan-box">
 			<button type="button" class="button button-primary button-hero" id="quotedeasy-ai-readiness-scan-btn">
@@ -52,10 +46,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</section>
 
-	<!-- Step 3: Done -->
 	<section class="quotedeasy-ai-readiness-step quotedeasy-ai-readiness-step-3" style="display:none;">
-		<h2><?php esc_html_e( "You're all set", 'quotedeasy-ai-readiness' ); ?></h2>
-		<p class="description"><?php esc_html_e( 'QuotedEasy AI Readiness is now monitoring your site. Check your dashboard daily to see AI bot visits.', 'quotedeasy-ai-readiness' ); ?></p>
+		<h2><?php esc_html_e( 'You\'re all set', 'quotedeasy-ai-readiness' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'The plugin is now monitoring your site. Check your dashboard to see AI bot visits.', 'quotedeasy-ai-readiness' ); ?></p>
 
 		<div class="quotedeasy-ai-readiness-done-box">
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=quotedeasy-ai-readiness' ) ); ?>" class="button button-primary button-hero">
@@ -64,7 +57,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 
 		<div class="quotedeasy-ai-readiness-next-tips">
-			<h3><?php esc_html_e( "What's next:", 'quotedeasy-ai-readiness' ); ?></h3>
+			<h3><?php esc_html_e( 'What is next:', 'quotedeasy-ai-readiness' ); ?></h3>
 			<ul>
 				<li><?php
 					$llms_url = esc_url( home_url( '/llms.txt' ) );

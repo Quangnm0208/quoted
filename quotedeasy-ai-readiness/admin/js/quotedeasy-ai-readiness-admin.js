@@ -1,7 +1,5 @@
 /**
- * QuotedEasy AI Readiness Admin — onboarding state machine + dashboard renderer.
- *
- * Vanilla JS + jQuery (WP admin convention). No build step.
+ * QuotedEasy AI Readiness admin scripts.
  */
 (function ($) {
 	'use strict';
@@ -18,17 +16,13 @@
 			initDashboard();
 		}
 
-		// ─── Onboarding flow ─────────────────────────────────────────────
-
 		function initOnboarding() {
 
-			// Step 1: Welcome → move to step 2
 			$('#quotedeasy-ai-readiness-start-btn').on('click', function (e) {
 				e.preventDefault();
 				goToStep(2);
 			});
 
-			// Step 2: Generate llms.txt
 			$('#quotedeasy-ai-readiness-scan-btn').on('click', function () {
 				var $btn = $(this);
 				var $result = $('#quotedeasy-ai-readiness-scan-result');
@@ -43,7 +37,7 @@
 					if (resp.success) {
 						var count = (resp.data && resp.data.synced) || 0;
 						$result.html(
-							'<p><strong>✓ Found ' + escapeHtml(String(count)) + ' published posts.</strong></p>' +
+							'<p><strong>Found ' + escapeHtml(String(count)) + ' published posts.</strong></p>' +
 							'<p>Your AI sitemap is now live at <code>' + escapeHtml(QuotedEasyAIReadinessAdmin.site_url) + '/llms.txt</code></p>'
 						).show();
 						setTimeout(function () { goToStep(3); }, 1500);
@@ -73,11 +67,8 @@
 			}
 		}
 
-		// ─── Dashboard ───────────────────────────────────────────────────
-
 		function initDashboard() {
 			loadDashboard();
-			// Refresh every 60s for "alive" feeling.
 			setInterval(loadDashboard, 60000);
 		}
 
@@ -97,24 +88,21 @@
 		}
 
 		function renderDashboard(d) {
-			// AI Distribution Score
 			var score = d.ai_distribution_score || 0;
 			$('#quotedeasy-ai-readiness-score-number').text(score);
 			drawScoreGauge(score);
 
-			// Delta
 			var delta = d.score_delta_7d || 0;
 			var $delta = $('#quotedeasy-ai-readiness-score-delta');
 			$delta.removeClass('positive negative');
 			if (delta > 0) {
-				$delta.addClass('positive').text('▲ +' + delta + ' vs last week');
+				$delta.addClass('positive').text('+' + delta + ' vs last week');
 			} else if (delta < 0) {
-				$delta.addClass('negative').text('▼ ' + delta + ' vs last week');
+				$delta.addClass('negative').text(delta + ' vs last week');
 			} else {
 				$delta.text('No change vs last week');
 			}
 
-			// Next action
 			if (d.next_action) {
 				var actionUrl = safeUrl(d.next_action.action_url);
 				$('#quotedeasy-ai-readiness-next-action').html(
@@ -130,7 +118,6 @@
 				$('#quotedeasy-ai-readiness-next-action').html('<p class="quotedeasy-ai-readiness-empty">All clear. Check back tomorrow.</p>');
 			}
 
-			// Bot activity
 			var activity = d.bot_activity || {};
 			var recent = activity.recent_crawls || [];
 			if (recent.length > 0) {
@@ -153,7 +140,6 @@
 				);
 			}
 
-			// Top bots
 			var topBots = activity.top_bots || [];
 			if (topBots.length > 0) {
 				var maxCount = topBots[0].count;
@@ -172,7 +158,6 @@
 				$('#quotedeasy-ai-readiness-top-bots').html('<p class="quotedeasy-ai-readiness-empty">No data yet.</p>');
 			}
 
-			// Published content count (no quota gating)
 			var posts = d.posts || {};
 			var published = posts.published || 0;
 			$('#quotedeasy-ai-readiness-quota').html(
@@ -194,13 +179,13 @@
 			var canvas = document.getElementById('quotedeasy-ai-readiness-score-canvas');
 			if (!canvas || typeof Chart === 'undefined') return;
 
-			if (canvas._quotedEasyChart) {
-				canvas._quotedEasyChart.destroy();
+			if (canvas._qearChart) {
+				canvas._qearChart.destroy();
 			}
 
 			var color = score >= 70 ? '#00a32a' : (score >= 40 ? '#dba617' : '#d63638');
 
-			canvas._quotedEasyChart = new Chart(canvas, {
+			canvas._qearChart = new Chart(canvas, {
 				type: 'doughnut',
 				data: {
 					datasets: [{
@@ -219,8 +204,6 @@
 			});
 		}
 
-		// ─── Utilities ───────────────────────────────────────────────────
-
 		function escapeHtml(str) {
 			if (str === null || str === undefined) return '';
 			return String(str)
@@ -231,9 +214,6 @@
 				.replace(/'/g, '&#039;');
 		}
 
-		// Only allow http(s) URLs. Backend-sourced URLs are trusted, but a
-		// javascript: scheme would slip past escapeHtml() and execute on
-		// click, so we hard-validate here.
 		function safeUrl(u) {
 			if (!u) return '';
 			try {

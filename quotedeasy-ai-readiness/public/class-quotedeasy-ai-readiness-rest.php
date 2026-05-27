@@ -1,10 +1,6 @@
 <?php
 /**
- * REST API routes — namespace quotedeasy-ai-readiness/v1.
- *
- * Endpoints:
- *  GET /wp-json/quotedeasy-ai-readiness/v1/llms.txt         → sitemap markdown
- *  GET /wp-json/quotedeasy-ai-readiness/v1/llm/(?P<slug>...) → single post markdown
+ * REST API routes under the quotedeasy-ai-readiness/v1 namespace.
  *
  * @package QuotedEasy_AI_Readiness
  */
@@ -44,7 +40,6 @@ class QuotedEasy_AI_Readiness_Rest {
 
 	public function serve_post_markdown( $request ) {
 		$slug = $request->get_param( 'slug' );
-
 		$post = $this->find_post_by_slug( $slug );
 
 		if ( ! $post ) {
@@ -65,31 +60,15 @@ class QuotedEasy_AI_Readiness_Rest {
 		$md = ( new QuotedEasy_AI_Readiness_Markdown() )->serialize( $post );
 
 		set_transient( $cache_key, $md, HOUR_IN_SECONDS );
-		// Remember the current key so save_post can delete it later, even
-		// after post_modified_gmt has changed and we can no longer derive it.
 		update_post_meta( $post->ID, '_quotedeasy_ai_readiness_md_cache_key', $cache_key );
 
 		$this->send_raw_markdown( $md, false );
 	}
 
-	/**
-	 * Per-post markdown cache key. Tied to post_modified_gmt so a fresh edit
-	 * always misses, but old keys would orphan in wp_options without an
-	 * explicit save_post invalidation — see invalidate_post_cache().
-	 */
 	public static function cache_key_for_post( $post ) {
 		return 'quotedeasy_ai_readiness_md_' . md5( $post->ID . '|' . $post->post_modified_gmt );
 	}
 
-	/**
-	 * Delete the previously-cached markdown transient for a post.
-	 *
-	 * Hooked on save_post and before_delete_post by QuotedEasy_AI_Readiness_Core. Without
-	 * this, every edit creates a new transient row and the old one lives
-	 * in wp_options until manually cleaned.
-	 *
-	 * @param int $post_id
-	 */
 	public static function invalidate_post_cache( $post_id ) {
 		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return;
@@ -99,43 +78,23 @@ class QuotedEasy_AI_Readiness_Rest {
 			delete_transient( $prev_key );
 			delete_post_meta( $post_id, '_quotedeasy_ai_readiness_md_cache_key' );
 		}
-		// Also flush the llms.txt sitemap so newly-published posts appear.
 		if ( class_exists( 'QuotedEasy_AI_Readiness_Llms_Txt' ) ) {
 			QuotedEasy_AI_Readiness_Llms_Txt::flush_cache();
 		}
 	}
 
-	/**
-	 * Bypass WP_REST_Server's JSON serialization and emit raw markdown.
-	 *
-	 * WP_REST_Response with a Content-Type header is overridden by the REST
-	 * server, which always serializes the body as JSON and sets
-	 * Content-Type: application/json. The only way to emit raw text from a
-	 * REST callback is to send headers + body ourselves and exit before the
-	 * dispatcher runs its serializer.
-	 *
-	 * @param string    $content   Raw markdown body.
-	 * @param bool|null $cache_hit True = HIT header, false = MISS, null = no header.
-	 */
 	private function send_raw_markdown( $content, $cache_hit ) {
 		status_header( 200 );
 		header( 'Content-Type: text/markdown; charset=utf-8' );
-		// Short browser cache, no edge cache. Cloudflare / W3 Total Cache /
-		// WP Rocket otherwise hold a stale /llms.txt for up to 24h after
-		// the operator publishes new posts. 5 min is the sweet spot —
-		// AI bots see fresh content fast, hosts don't get hammered.
 		header( 'Cache-Control: public, max-age=300, must-revalidate' );
 		header( 'X-QuotedEasy-Version: ' . QUOTEDEASY_AI_READINESS_VERSION );
 		if ( $cache_hit !== null ) {
 			header( 'X-QuotedEasy-Cache: ' . ( $cache_hit ? 'HIT' : 'MISS' ) );
 		}
-		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — raw markdown body
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		exit;
 	}
 
-	/**
-	 * Find published post or page by slug.
-	 */
 	private function find_post_by_slug( $slug ) {
 		$post = get_page_by_path( $slug, OBJECT, 'post' );
 		if ( $post && $post->post_status === 'publish' ) {

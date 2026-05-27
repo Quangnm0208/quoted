@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook loader — batches add_action / add_filter for cleanliness.
+ * Hook loader.
  *
  * @package QuotedEasy_AI_Readiness
  */

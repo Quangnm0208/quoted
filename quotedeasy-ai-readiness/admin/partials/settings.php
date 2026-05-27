@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings page — Privacy, AI Crawler Allowlist, Schema, Display.
+ * Settings page.
  *
  * @package QuotedEasy_AI_Readiness
  */
@@ -70,7 +70,7 @@ settings_errors( 'quotedeasy-ai-readiness' );
 
 		<h2><?php esc_html_e( 'AI crawler allowlist', 'quotedeasy-ai-readiness' ); ?></h2>
 		<p class="description" style="margin-bottom:1em">
-			<?php esc_html_e( 'Decide which AI bots are allowed to use your content. Allowed = bot gets the full page. Blocked = bot gets HTTP 403 and a Disallow rule in /robots.txt. Bots that respect robots.txt will stop crawling on their own; the 403 covers the ones that don\'t.', 'quotedeasy-ai-readiness' ); ?>
+			<?php esc_html_e( 'Decide which AI bots are allowed to use your content. Allowed = bot gets the full page. Blocked = bot gets HTTP 403 and a Disallow rule in /robots.txt.', 'quotedeasy-ai-readiness' ); ?>
 		</p>
 		<table class="form-table">
 			<?php foreach ( $bot_meta as $bot_id => $meta ) :
@@ -99,7 +99,7 @@ settings_errors( 'quotedeasy-ai-readiness' );
 
 		<h2><?php esc_html_e( 'Schema markup', 'quotedeasy-ai-readiness' ); ?></h2>
 		<p class="description" style="margin-bottom:1em">
-			<?php esc_html_e( 'QuotedEasy AI Readiness ships Article and FAQPage JSON-LD on single posts and pages. AI engines use schema to identify what each page is and which sections are quote-worthy.', 'quotedeasy-ai-readiness' ); ?>
+			<?php esc_html_e( 'Outputs Article and FAQPage JSON-LD on single posts and pages.', 'quotedeasy-ai-readiness' ); ?>
 		</p>
 		<table class="form-table">
 			<tr>
@@ -119,25 +119,25 @@ settings_errors( 'quotedeasy-ai-readiness' );
 							<input type="radio" name="quotedeasy_ai_readiness_schema_mode" value="auto" <?php checked( $schema_mode, 'auto' ); ?> />
 							<strong><?php esc_html_e( 'Auto (recommended)', 'quotedeasy-ai-readiness' ); ?></strong>
 							<?php if ( $conflicting_seo ) : ?>
-								<br><small style="color:#996600">⚠
+								<br><small style="color:#996600">
 									<?php
 									/* translators: %s: name of the active SEO plugin */
-									printf( esc_html__( 'Detected %s — Article schema will be skipped to avoid duplicates. FAQ schema still emitted.', 'quotedeasy-ai-readiness' ), '<strong>' . esc_html( $conflicting_seo ) . '</strong>' );
+									printf( esc_html__( 'Detected %s - Article schema will be skipped to avoid duplicates. FAQ schema still emitted.', 'quotedeasy-ai-readiness' ), '<strong>' . esc_html( $conflicting_seo ) . '</strong>' );
 									?>
 								</small>
 							<?php else : ?>
-								<br><small><?php esc_html_e( 'No conflicting SEO plugin detected — both Article and FAQ schemas will be output.', 'quotedeasy-ai-readiness' ); ?></small>
+								<br><small><?php esc_html_e( 'No conflicting SEO plugin detected - both Article and FAQ schemas will be output.', 'quotedeasy-ai-readiness' ); ?></small>
 							<?php endif; ?>
 						</label>
 						<label style="display:block;margin-bottom:6px">
 							<input type="radio" name="quotedeasy_ai_readiness_schema_mode" value="always" <?php checked( $schema_mode, 'always' ); ?> />
 							<strong><?php esc_html_e( 'Always', 'quotedeasy-ai-readiness' ); ?></strong>
-							<br><small><?php esc_html_e( 'Output our schema even if Yoast / Rank Math / SEOPress are active. May produce duplicate JSON-LD; verify with Google Rich Results test.', 'quotedeasy-ai-readiness' ); ?></small>
+							<br><small><?php esc_html_e( 'Output schema even if Yoast / Rank Math / SEOPress are active. May produce duplicate JSON-LD.', 'quotedeasy-ai-readiness' ); ?></small>
 						</label>
 						<label style="display:block">
 							<input type="radio" name="quotedeasy_ai_readiness_schema_mode" value="never" <?php checked( $schema_mode, 'never' ); ?> />
 							<strong><?php esc_html_e( 'Never', 'quotedeasy-ai-readiness' ); ?></strong>
-							<br><small><?php esc_html_e( 'Suppress Article schema entirely. FAQ schema is still emitted from [faq] shortcodes and question-shaped headings — disable the master toggle above to suppress everything.', 'quotedeasy-ai-readiness' ); ?></small>
+							<br><small><?php esc_html_e( 'Suppress Article schema entirely. FAQ schema is still emitted from [faq_item] shortcodes and question-shaped headings.', 'quotedeasy-ai-readiness' ); ?></small>
 						</label>
 					</fieldset>
 				</td>

@@ -1,10 +1,6 @@
 <?php
 /**
- * Admin orchestrator — menu, assets, AJAX handlers.
- *
- * This is the v0.5.0 free-only build: no license code, no backend client,
- * no Upgrade page. All Pro/license surfaces were removed for WordPress.org
- * Plugin Directory submission (Guideline 5 — no trialware).
+ * Admin orchestrator: menu, assets, AJAX handlers, settings.
  *
  * @package QuotedEasy_AI_Readiness
  */
@@ -57,7 +53,6 @@ class QuotedEasy_AI_Readiness_Admin {
 			QUOTEDEASY_AI_READINESS_VERSION
 		);
 
-		// Chart.js bundled locally (no CDN dependency in admin).
 		wp_enqueue_script(
 			'quotedeasy-ai-readiness-chartjs',
 			QUOTEDEASY_AI_READINESS_PLUGIN_URL . 'admin/js/chart.umd.min.js',
@@ -75,11 +70,11 @@ class QuotedEasy_AI_Readiness_Admin {
 		);
 
 		wp_localize_script( 'quotedeasy-ai-readiness-admin', 'QuotedEasyAIReadinessAdmin', array(
-			'ajax_url'    => admin_url( 'admin-ajax.php' ),
-			'nonce'       => wp_create_nonce( 'quotedeasy_ai_readiness_admin_nonce' ),
-			'plugin_url'  => QUOTEDEASY_AI_READINESS_PLUGIN_URL,
-			'site_url'    => home_url(),
-			'i18n'        => array(
+			'ajax_url'   => admin_url( 'admin-ajax.php' ),
+			'nonce'      => wp_create_nonce( 'quotedeasy_ai_readiness_admin_nonce' ),
+			'plugin_url' => QUOTEDEASY_AI_READINESS_PLUGIN_URL,
+			'site_url'   => home_url(),
+			'i18n'       => array(
 				'connecting'    => __( 'Working...', 'quotedeasy-ai-readiness' ),
 				'error_generic' => __( 'Something went wrong. Please try again.', 'quotedeasy-ai-readiness' ),
 				'success'       => __( 'Done!', 'quotedeasy-ai-readiness' ),
@@ -93,9 +88,7 @@ class QuotedEasy_AI_Readiness_Admin {
 		}
 		delete_transient( 'quotedeasy_ai_readiness_activation_redirect' );
 
-		// Skip the redirect on any kind of bulk activation — single-site
-		// ("activate-selected" from /plugins.php), network ("activate-multi"),
-		// or anything that produced an activation notice we'd interrupt.
+		// Skip on bulk activations so we don't interrupt admin notices.
 		$bulk_keys = array( 'activate-multi', 'activate-selected' );
 		foreach ( $bulk_keys as $k ) {
 			if ( isset( $_GET[ $k ] ) ) {
@@ -124,9 +117,6 @@ class QuotedEasy_AI_Readiness_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'quotedeasy-ai-readiness' ) );
 		}
 
-		// Gate the save on an explicit submit marker so a stray POST (e.g.
-		// from another plugin's form on the same screen) doesn't trigger
-		// check_admin_referer() and the "link expired" interstitial.
 		if ( isset( $_POST['quotedeasy_ai_readiness_settings_submit'] ) ) {
 			check_admin_referer( 'quotedeasy_ai_readiness_settings_save' );
 			$this->save_settings();
@@ -136,15 +126,12 @@ class QuotedEasy_AI_Readiness_Admin {
 	}
 
 	private function save_settings() {
-		// Boolean toggles. isset() is the boolean — unchecked checkboxes are
-		// absent from $_POST, so isset() === false handles the "uncheck" case.
 		update_option( 'quotedeasy_ai_readiness_hash_ips',        isset( $_POST['quotedeasy_ai_readiness_hash_ips'] ) );
 		update_option( 'quotedeasy_ai_readiness_show_badge',      isset( $_POST['quotedeasy_ai_readiness_show_badge'] ) );
 		update_option( 'quotedeasy_ai_readiness_disable_logging', isset( $_POST['quotedeasy_ai_readiness_disable_logging'] ) );
 		update_option( 'quotedeasy_ai_readiness_trust_proxy',     isset( $_POST['quotedeasy_ai_readiness_trust_proxy'] ) );
 		update_option( 'quotedeasy_ai_readiness_schema_enabled',  isset( $_POST['quotedeasy_ai_readiness_schema_enabled'] ) );
 
-		// Schema mode — whitelist 'auto', 'always', 'never'.
 		if ( isset( $_POST['quotedeasy_ai_readiness_schema_mode'] ) ) {
 			$mode = sanitize_key( wp_unslash( $_POST['quotedeasy_ai_readiness_schema_mode'] ) );
 			if ( ! in_array( $mode, array( 'auto', 'always', 'never' ), true ) ) {
@@ -153,14 +140,10 @@ class QuotedEasy_AI_Readiness_Admin {
 			update_option( 'quotedeasy_ai_readiness_schema_mode', $mode );
 		}
 
-		// AI Crawler Allowlist — only accept bot IDs we know about, and only
-		// 'allow' / 'block' as values. Anything else is silently ignored.
 		if ( isset( $_POST['quotedeasy_ai_readiness_bot_allowlist'] ) && is_array( $_POST['quotedeasy_ai_readiness_bot_allowlist'] ) ) {
 			$known   = array_keys( QuotedEasy_AI_Readiness_Bot_Detector::bot_metadata() );
 			$cleaned = array();
-			// Unslash + sanitize the entire array up front so each key/value is
-			// safe before we iterate.
-			$raw = wp_unslash( $_POST['quotedeasy_ai_readiness_bot_allowlist'] );
+			$raw     = wp_unslash( $_POST['quotedeasy_ai_readiness_bot_allowlist'] );
 			foreach ( $raw as $bot => $state ) {
 				$bot = sanitize_key( (string) $bot );
 				if ( ! in_array( $bot, $known, true ) ) {
@@ -191,23 +174,18 @@ class QuotedEasy_AI_Readiness_Admin {
 		return array_merge( $custom, $links );
 	}
 
-	// ─── AJAX handlers ────────────────────────────────────────────────
-
 	public function ajax_sync_posts() {
 		check_ajax_referer( 'quotedeasy_ai_readiness_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quotedeasy-ai-readiness' ) ), 403 );
-			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
+			return;
 		}
 
-		// "Generate now" in the wizard refreshes the local llms.txt cache so
-		// it picks up any new posts. Nothing leaves the server.
 		QuotedEasy_AI_Readiness_Llms_Txt::flush_cache();
 
 		$count = (int) wp_count_posts( 'post' )->publish + (int) wp_count_posts( 'page' )->publish;
 
-		// Mark onboarded after the refresh.
 		update_option( 'quotedeasy_ai_readiness_onboarded', true );
 
 		wp_send_json_success( array(
@@ -227,26 +205,22 @@ class QuotedEasy_AI_Readiness_Admin {
 		global $wpdb;
 		$table = $wpdb->prefix . 'quotedeasy_ai_readiness_bot_log';
 
-		// Single 7-day window. The plugin is fully functional with no tier
-		// distinction — every install reads the same window from its own log.
 		$window_days  = 7;
 		$window_start = gmdate( 'Y-m-d H:i:s', time() - ( $window_days * DAY_IN_SECONDS ) );
 		$prev_start   = gmdate( 'Y-m-d H:i:s', time() - ( 2 * $window_days * DAY_IN_SECONDS ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
 		$total_this = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM {$table} WHERE crawled_at >= %s",
 			$window_start
 		) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
 		$total_prev = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM {$table} WHERE crawled_at >= %s AND crawled_at < %s",
 			$prev_start, $window_start
 		) );
 
-		// AI Distribution Score = local heuristic: count of distinct bots seen
-		// in the window × 10, capped at 100.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
 		$distinct_bots = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(DISTINCT bot_name) FROM {$table} WHERE crawled_at >= %s",
 			$window_start
@@ -254,7 +228,7 @@ class QuotedEasy_AI_Readiness_Admin {
 		$score      = min( 100, $distinct_bots * 10 );
 		$prev_score = 0;
 		if ( $total_prev > 0 ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
 			$prev_distinct = (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(DISTINCT bot_name) FROM {$table} WHERE crawled_at >= %s AND crawled_at < %s",
 				$prev_start, $window_start
@@ -262,8 +236,7 @@ class QuotedEasy_AI_Readiness_Admin {
 			$prev_score = min( 100, $prev_distinct * 10 );
 		}
 
-		// Recent crawls feed (latest 10).
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
 		$recent = $wpdb->get_results(
 			"SELECT bot_name, url_path, crawled_at FROM {$table} ORDER BY id DESC LIMIT 10"
 		);
@@ -277,8 +250,7 @@ class QuotedEasy_AI_Readiness_Admin {
 			);
 		}
 
-		// Top bots in window.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- $table from $wpdb->prefix.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
 		$top = $wpdb->get_results( $wpdb->prepare(
 			"SELECT bot_name, COUNT(*) AS c FROM {$table} WHERE crawled_at >= %s GROUP BY bot_name ORDER BY c DESC LIMIT 8",
 			$window_start
@@ -293,15 +265,14 @@ class QuotedEasy_AI_Readiness_Admin {
 
 		$published = (int) wp_count_posts( 'post' )->publish + (int) wp_count_posts( 'page' )->publish;
 
-		// Next action — simple empty-state guidance. No upgrade prompts.
 		$next_action  = null;
 		$installed_at = (int) get_option( 'quotedeasy_ai_readiness_installed_at', time() );
 		$days_since   = max( 0, (int) floor( ( time() - $installed_at ) / DAY_IN_SECONDS ) );
 
 		if ( $total_this === 0 && $days_since >= 7 ) {
 			$next_action = array(
-				'title'       => __( 'No AI bot visits in 7+ days — check your firewall', 'quotedeasy-ai-readiness' ),
-				'description' => __( "ClaudeBot and GPTBot should have discovered /llms.txt by now. If you run Wordfence, Sucuri, or iThemes Security, their default WAF rules often block AI bot user-agents. Whitelist ClaudeBot, GPTBot, PerplexityBot, Google-Extended in your security plugin, or ask your host to allow them at the server level.", 'quotedeasy-ai-readiness' ),
+				'title'       => __( 'No AI bot visits in 7+ days - check your firewall', 'quotedeasy-ai-readiness' ),
+				'description' => __( 'ClaudeBot and GPTBot should have discovered /llms.txt by now. If you run Wordfence, Sucuri, or iThemes Security, their default WAF rules often block AI bot user-agents. Whitelist ClaudeBot, GPTBot, PerplexityBot, Google-Extended in your security plugin, or ask your host to allow them at the server level.', 'quotedeasy-ai-readiness' ),
 				'action_url'  => '',
 			);
 		} elseif ( $total_this === 0 ) {

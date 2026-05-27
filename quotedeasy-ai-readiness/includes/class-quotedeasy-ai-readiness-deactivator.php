@@ -2,9 +2,6 @@
 /**
  * Deactivation handler.
  *
- * Flushes rewrite rules.
- * Does NOT delete data — see uninstall.php for that.
- *
  * @package QuotedEasy_AI_Readiness
  */
 
@@ -15,10 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class QuotedEasy_AI_Readiness_Deactivator {
 
 	public static function deactivate() {
-		// Clear any legacy cron hooks. wp_clear_scheduled_hook is a no-op
-		// when the hook isn't scheduled, so it's safe to call on a clean
-		// install. These are kept for forward-compat with older versions
-		// that may have scheduled them.
 		wp_clear_scheduled_hook( 'quotedeasy_ai_readiness_cron_license_revalidate' );
 		wp_clear_scheduled_hook( 'quotedeasy_ai_readiness_cron_sync_crawls' );
 		wp_clear_scheduled_hook( 'quotedeasy_ai_readiness_cron_sync_posts' );

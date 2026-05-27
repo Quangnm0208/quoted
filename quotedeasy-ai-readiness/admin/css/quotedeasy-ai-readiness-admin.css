@@ -1,10 +1,8 @@
 /**
- * QuotedEasy AI Readiness Admin Styles
- *
- * Lean and dependency-free. Follows WP admin design language.
+ * QuotedEasy AI Readiness admin styles.
  */
 
-/* ─── Header ─────────────────────────────────────────────── */
+/* Header */
 .quotedeasy-ai-readiness-header {
 	display: flex;
 	align-items: center;
@@ -23,28 +21,7 @@
 	font-size: 16px;
 }
 
-/* ─── Plan badge ─────────────────────────────────────────── */
-.quotedeasy-ai-readiness-plan-badge {
-	padding: 6px 14px;
-	border-radius: 4px;
-	font-weight: 600;
-	font-size: 11px;
-	letter-spacing: 0.5px;
-}
-.quotedeasy-ai-readiness-plan-badge.plan-free {
-	background: #f0f0f1;
-	color: #50575e;
-}
-.quotedeasy-ai-readiness-plan-badge.plan-pro {
-	background: #2271b1;
-	color: #fff;
-}
-.quotedeasy-ai-readiness-plan-badge.plan-agency {
-	background: #674ea7;
-	color: #fff;
-}
-
-/* ─── Onboarding progress ────────────────────────────────── */
+/* Onboarding progress */
 .quotedeasy-ai-readiness-progress {
 	margin: 30px 0;
 }
@@ -78,7 +55,7 @@
 	color: #fff;
 }
 
-/* ─── Onboarding steps ───────────────────────────────────── */
+/* Onboarding steps */
 .quotedeasy-ai-readiness-step {
 	background: #fff;
 	padding: 30px;
@@ -104,42 +81,18 @@
 	height: auto !important;
 }
 
-.quotedeasy-ai-readiness-status {
-	margin-left: 12px;
-	color: #50575e;
-	font-style: italic;
-}
-.quotedeasy-ai-readiness-status.error {
-	color: #d63638;
-	font-style: normal;
-	font-weight: 500;
-}
-
-.quotedeasy-ai-readiness-help {
-	margin-top: 30px;
-	padding-top: 20px;
-	border-top: 1px solid #e0e0e0;
-	color: #50575e;
-}
-
 .quotedeasy-ai-readiness-scan-box,
-.quotedeasy-ai-readiness-test-box,
 .quotedeasy-ai-readiness-done-box {
 	text-align: center;
 	padding: 40px 0;
 }
 
-.quotedeasy-ai-readiness-scan-result,
-.quotedeasy-ai-readiness-test-result {
+.quotedeasy-ai-readiness-scan-result {
 	margin-top: 20px;
 	padding: 20px;
 	background: #f6f7f7;
 	border-radius: 4px;
 	text-align: left;
-}
-
-.quotedeasy-ai-readiness-test-placeholder {
-	color: #50575e;
 }
 
 .quotedeasy-ai-readiness-next-tips {
@@ -157,7 +110,7 @@
 	padding-left: 20px;
 }
 
-/* ─── Dashboard grid ─────────────────────────────────────── */
+/* Dashboard grid */
 .quotedeasy-ai-readiness-dashboard-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -250,7 +203,7 @@
 	white-space: nowrap;
 }
 
-/* Top bots list */
+/* Top bots */
 .quotedeasy-ai-readiness-top-bot-row {
 	display: flex;
 	justify-content: space-between;
@@ -268,26 +221,6 @@
 	height: 100%;
 	background: #2271b1;
 	border-radius: 4px;
-}
-
-/* Published content card */
-.quotedeasy-ai-readiness-quota-bar {
-	height: 12px;
-	background: #f0f0f1;
-	border-radius: 6px;
-	overflow: hidden;
-	margin: 10px 0;
-}
-.quotedeasy-ai-readiness-quota-fill {
-	height: 100%;
-	background: #2271b1;
-	transition: width 0.3s;
-}
-.quotedeasy-ai-readiness-quota-fill.warn {
-	background: #dba617;
-}
-.quotedeasy-ai-readiness-quota-fill.full {
-	background: #d63638;
 }
 
 /* Next action card */
@@ -314,13 +247,11 @@
 	font-size: 13px;
 }
 
-/* Loading state */
+/* Loading + empty states */
 .quotedeasy-ai-readiness-loading {
 	color: #8c8f94;
 	font-style: italic;
 }
-
-/* Empty state */
 .quotedeasy-ai-readiness-empty {
 	color: #8c8f94;
 	text-align: center;

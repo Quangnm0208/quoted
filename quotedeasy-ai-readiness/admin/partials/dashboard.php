@@ -1,8 +1,6 @@
 <?php
 /**
- * Dashboard view — main screen after onboarding.
- *
- * Renders shell. Data is loaded async via AJAX in quotedeasy-ai-readiness-admin.js.
+ * Dashboard view.
  *
  * @package QuotedEasy_AI_Readiness
  */
@@ -19,12 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div class="quotedeasy-ai-readiness-dashboard-grid">
 
-		<!-- AI Distribution Score -->
 		<div class="quotedeasy-ai-readiness-card quotedeasy-ai-readiness-score-card">
 			<h2><?php esc_html_e( 'AI Distribution Score', 'quotedeasy-ai-readiness' ); ?></h2>
 			<div class="quotedeasy-ai-readiness-score-gauge">
 				<canvas id="quotedeasy-ai-readiness-score-canvas" width="240" height="240"></canvas>
-				<div class="quotedeasy-ai-readiness-score-number" id="quotedeasy-ai-readiness-score-number">—</div>
+				<div class="quotedeasy-ai-readiness-score-number" id="quotedeasy-ai-readiness-score-number">&mdash;</div>
 			</div>
 			<p class="quotedeasy-ai-readiness-score-delta" id="quotedeasy-ai-readiness-score-delta"></p>
 			<p class="quotedeasy-ai-readiness-score-explainer">
@@ -32,7 +29,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</p>
 		</div>
 
-		<!-- Next action -->
 		<div class="quotedeasy-ai-readiness-card quotedeasy-ai-readiness-next-card">
 			<h2><?php esc_html_e( 'Next action', 'quotedeasy-ai-readiness' ); ?></h2>
 			<div id="quotedeasy-ai-readiness-next-action">
@@ -40,7 +36,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		</div>
 
-		<!-- Bot activity feed -->
 		<div class="quotedeasy-ai-readiness-card quotedeasy-ai-readiness-feed-card">
 			<h2>
 				<?php esc_html_e( 'Recent AI bot visits', 'quotedeasy-ai-readiness' ); ?>
@@ -51,7 +46,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		</div>
 
-		<!-- Top bots -->
 		<div class="quotedeasy-ai-readiness-card quotedeasy-ai-readiness-top-bots-card">
 			<h2><?php esc_html_e( 'Top AI bots this week', 'quotedeasy-ai-readiness' ); ?></h2>
 			<div id="quotedeasy-ai-readiness-top-bots">
@@ -59,7 +53,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		</div>
 
-		<!-- Published content -->
 		<div class="quotedeasy-ai-readiness-card quotedeasy-ai-readiness-quota-card">
 			<h2><?php esc_html_e( 'Published content', 'quotedeasy-ai-readiness' ); ?></h2>
 			<div id="quotedeasy-ai-readiness-quota">
@@ -79,7 +72,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$llms_url
 			);
 			?>
-			·
+			&middot;
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=quotedeasy-ai-readiness-settings' ) ); ?>">
 				<?php esc_html_e( 'Settings', 'quotedeasy-ai-readiness' ); ?>
 			</a>

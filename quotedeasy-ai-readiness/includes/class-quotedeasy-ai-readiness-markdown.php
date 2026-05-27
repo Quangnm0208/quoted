@@ -1,12 +1,9 @@
 <?php
 /**
- * Markdown serializer — converts WP post HTML to clean markdown.
+ * Markdown serializer.
  *
- * Strategy: minimal DOM walk. No external library to keep plugin lean.
- * Handles common WP/Gutenberg patterns.
- *
- * Strips: script, style, iframe, nav, footer, aside, form.
- * Preserves: headings, paragraphs, lists, links, images, code, blockquote.
+ * Converts WordPress post HTML into clean Markdown using a minimal DOM walk.
+ * Strips script, style, iframe, nav, footer, aside, form, noscript, svg.
  *
  * @package QuotedEasy_AI_Readiness
  */
@@ -17,37 +14,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class QuotedEasy_AI_Readiness_Markdown {
 
-	/**
-	 * Convert a post object to markdown.
-	 *
-	 * @param WP_Post $post
-	 * @return string
-	 */
 	public function serialize( $post ) {
-		$out  = "# " . $this->escape( $post->post_title ) . "\n\n";
+		$out  = '# ' . $this->escape( $post->post_title ) . "\n\n";
 
-		// Frontmatter-ish metadata.
-		$out .= "Author: " . get_the_author_meta( 'display_name', $post->post_author ) . "\n";
-		$out .= "Published: " . get_the_date( 'Y-m-d', $post ) . "\n";
+		$out .= 'Author: ' . get_the_author_meta( 'display_name', $post->post_author ) . "\n";
+		$out .= 'Published: ' . get_the_date( 'Y-m-d', $post ) . "\n";
 		$modified = get_the_modified_date( 'Y-m-d', $post );
 		if ( $modified !== get_the_date( 'Y-m-d', $post ) ) {
-			$out .= "Updated: " . $modified . "\n";
+			$out .= 'Updated: ' . $modified . "\n";
 		}
-		$out .= "Canonical: " . get_permalink( $post ) . "\n";
+		$out .= 'Canonical: ' . get_permalink( $post ) . "\n";
 
 		$categories = wp_get_post_categories( $post->ID, array( 'fields' => 'names' ) );
 		if ( ! empty( $categories ) ) {
-			$out .= "Categories: " . implode( ', ', array_map( array( $this, 'escape' ), $categories ) ) . "\n";
+			$out .= 'Categories: ' . implode( ', ', array_map( array( $this, 'escape' ), $categories ) ) . "\n";
 		}
 
 		$out .= "\n---\n\n";
 
-		// Content body. Avoid apply_filters('the_content', ...) — that fires
-		// every third-party content filter (Jetpack, Yoast, embed handlers,
-		// oEmbed remote fetches, arbitrary shortcodes hitting external APIs),
-		// any of which can be slow or output script tags that survive the
-		// DOMDocument parser. Expand Gutenberg blocks + paragraphs + entities
-		// directly, then strip shortcodes whose output we cannot vouch for.
+		// Render blocks and core formatters without running the_content filter,
+		// which can trigger third-party shortcodes and remote fetches.
 		$content = $post->post_content;
 		if ( function_exists( 'do_blocks' ) ) {
 			$content = do_blocks( $content );
@@ -62,26 +48,18 @@ class QuotedEasy_AI_Readiness_Markdown {
 		return $out;
 	}
 
-	/**
-	 * Convert HTML to markdown.
-	 *
-	 * Uses DOMDocument for parsing. Not perfect on malformed HTML but acceptable.
-	 */
 	public function html_to_markdown( $html ) {
 		if ( empty( trim( $html ) ) ) {
 			return '';
 		}
 
-		// Wrap in body for stable parsing.
 		$wrapped = '<!DOCTYPE html><html><body>' . $html . '</body></html>';
 
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument( '1.0', 'UTF-8' );
-		// Force UTF-8 interpretation.
 		$dom->loadHTML( '<?xml encoding="UTF-8">' . $wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 		libxml_clear_errors();
 
-		// Remove tags we never want.
 		$strip_tags = array( 'script', 'style', 'iframe', 'nav', 'footer', 'aside', 'form', 'noscript', 'svg' );
 		foreach ( $strip_tags as $tag ) {
 			$nodes = $dom->getElementsByTagName( $tag );
@@ -99,18 +77,11 @@ class QuotedEasy_AI_Readiness_Markdown {
 		}
 
 		$md = $this->walk( $body );
-
-		// Collapse triple newlines.
 		$md = preg_replace( "/\n{3,}/", "\n\n", $md );
+
 		return trim( $md ) . "\n";
 	}
 
-	/**
-	 * Recursive node walker.
-	 *
-	 * @param DOMNode $node
-	 * @return string
-	 */
 	private function walk( $node ) {
 		if ( $node->nodeType === XML_TEXT_NODE ) {
 			return $this->escape_text( $node->nodeValue );
@@ -120,15 +91,15 @@ class QuotedEasy_AI_Readiness_Markdown {
 			return '';
 		}
 
-		$tag = strtolower( $node->nodeName );
+		$tag   = strtolower( $node->nodeName );
 		$inner = $this->walk_children( $node );
 
 		switch ( $tag ) {
-			case 'h1': return "\n# " . trim( $inner ) . "\n\n";
-			case 'h2': return "\n## " . trim( $inner ) . "\n\n";
-			case 'h3': return "\n### " . trim( $inner ) . "\n\n";
-			case 'h4': return "\n#### " . trim( $inner ) . "\n\n";
-			case 'h5': return "\n##### " . trim( $inner ) . "\n\n";
+			case 'h1': return "\n# "      . trim( $inner ) . "\n\n";
+			case 'h2': return "\n## "     . trim( $inner ) . "\n\n";
+			case 'h3': return "\n### "    . trim( $inner ) . "\n\n";
+			case 'h4': return "\n#### "   . trim( $inner ) . "\n\n";
+			case 'h5': return "\n##### "  . trim( $inner ) . "\n\n";
 			case 'h6': return "\n###### " . trim( $inner ) . "\n\n";
 
 			case 'p':
@@ -146,7 +117,6 @@ class QuotedEasy_AI_Readiness_Markdown {
 				return '*' . $inner . '*';
 
 			case 'code':
-				// Inline code only (block-level <pre><code> handled below).
 				return '`' . $inner . '`';
 
 			case 'pre':
@@ -193,7 +163,6 @@ class QuotedEasy_AI_Readiness_Markdown {
 			case 'table':
 				return $this->walk_table( $node );
 
-			// Pass-through containers.
 			case 'div':
 			case 'section':
 			case 'article':
@@ -220,14 +189,13 @@ class QuotedEasy_AI_Readiness_Markdown {
 
 	private function walk_list( $node, $ordered ) {
 		$lines = array();
-		$idx = 1;
+		$idx   = 1;
 		foreach ( $node->childNodes as $li ) {
 			if ( $li->nodeType !== XML_ELEMENT_NODE || strtolower( $li->nodeName ) !== 'li' ) {
 				continue;
 			}
-			$prefix = $ordered ? ( $idx++ . '. ' ) : '- ';
+			$prefix  = $ordered ? ( $idx++ . '. ' ) : '- ';
 			$item_md = trim( $this->walk_children( $li ) );
-			// Indent multi-line items by 2 spaces (markdown list continuation).
 			$item_md = preg_replace( "/\n/", "\n  ", $item_md );
 			$lines[] = $prefix . $item_md;
 		}
@@ -235,32 +203,40 @@ class QuotedEasy_AI_Readiness_Markdown {
 	}
 
 	private function walk_table( $node ) {
-		$rows = array();
+		$rows        = array();
 		$header_done = false;
 
 		foreach ( $node->getElementsByTagName( 'tr' ) as $tr ) {
-			$cells = array();
+			$cells     = array();
 			$is_header = false;
 
 			foreach ( $tr->childNodes as $cell ) {
-				if ( $cell->nodeType !== XML_ELEMENT_NODE ) continue;
+				if ( $cell->nodeType !== XML_ELEMENT_NODE ) {
+					continue;
+				}
 				$tag = strtolower( $cell->nodeName );
-				if ( $tag === 'th' ) $is_header = true;
+				if ( $tag === 'th' ) {
+					$is_header = true;
+				}
 				if ( $tag === 'th' || $tag === 'td' ) {
 					$cells[] = trim( preg_replace( "/\s+/", ' ', $this->walk_children( $cell ) ) );
 				}
 			}
 
-			if ( empty( $cells ) ) continue;
+			if ( empty( $cells ) ) {
+				continue;
+			}
 			$rows[] = '| ' . implode( ' | ', $cells ) . ' |';
 
 			if ( $is_header && ! $header_done ) {
-				$rows[] = '|' . str_repeat( ' --- |', count( $cells ) );
+				$rows[]      = '|' . str_repeat( ' --- |', count( $cells ) );
 				$header_done = true;
 			}
 		}
 
-		if ( empty( $rows ) ) return '';
+		if ( empty( $rows ) ) {
+			return '';
+		}
 		return "\n" . implode( "\n", $rows ) . "\n\n";
 	}
 
@@ -279,8 +255,6 @@ class QuotedEasy_AI_Readiness_Markdown {
 	}
 
 	private function escape_text( $str ) {
-		// In text nodes, only escape characters that would form markdown syntax accidentally.
-		// We don't escape * and _ in text — too aggressive.
 		return $str;
 	}
 }
