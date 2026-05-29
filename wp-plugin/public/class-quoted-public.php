@@ -93,7 +93,7 @@ class Quoted_Public {
 	public function render_powered_by_badge() {
 		echo '<div style="text-align:center;padding:10px;font-size:11px;color:#999;">';
 		echo 'AI-readable via ';
-		echo '<a href="https://github.com/muahangngayvn" target="_blank" rel="noopener" style="color:#666;">Quoted</a>';
+		echo '<a href="https://github.com/Quangnm0208" target="_blank" rel="noopener" style="color:#666;">Quoted</a>';
 		echo '</div>';
 	}
 

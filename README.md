@@ -39,14 +39,14 @@ quoted/
 **From a release zip**
 
 1. Download the latest `quoted-v*.zip` from
-   [Releases](https://github.com/muahangngayvn/quoted/releases).
+   [Releases](https://github.com/Quangnm0208/quoted/releases).
 2. WordPress admin → **Plugins → Add New → Upload Plugin**.
 3. Activate. The setup wizard opens automatically.
 
 **From source**
 
 ```bash
-git clone https://github.com/muahangngayvn/quoted.git
+git clone https://github.com/Quangnm0208/quoted.git
 cd quoted
 zip -r quoted.zip wp-plugin/ -x "*.DS_Store"
 # Upload quoted.zip via WP Admin → Plugins → Add New → Upload

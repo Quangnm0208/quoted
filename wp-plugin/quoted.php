@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name:       Quoted — Make your site AI-readable
- * Plugin URI:        https://github.com/muahangngayvn/quoted
+ * Plugin URI:        https://github.com/Quangnm0208/quoted
  * Description:       AI-readability layer for WordPress: auto-generates llms.txt, serves clean Markdown per post, detects 60+ AI bots (ChatGPT, Claude, Perplexity, Gemini), and lets you allow or block each one. Adds Article + FAQPage JSON-LD that defers to Yoast / Rank Math / AIOSEO when they are active.
  * Version:           0.5.0
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      7.4
  * Author:            Quang Nguyen
- * Author URI:        https://github.com/muahangngayvn
+ * Author URI:        https://github.com/Quangnm0208
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       quoted
