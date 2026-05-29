@@ -1,4 +1,4 @@
-=== Quoted — Make your site AI-readable ===
+=== QuotedEasy AI Readiness ===
 Contributors: muahangngayvn
 Tags: ai, llms-txt, schema, ai-crawlers, seo
 Requires at least: 6.0

@@ -43,7 +43,7 @@ class Quoted_Core {
 
 	public function load_plugin_textdomain() {
 		load_plugin_textdomain(
-			'quoted',
+			'quotedeasy-ai-readiness',
 			false,
 			dirname( QUOTED_PLUGIN_BASENAME ) . '/languages/'
 		);

@@ -17,8 +17,8 @@ class Quoted_Admin {
 
 	public function add_menu_pages() {
 		add_menu_page(
-			__( 'Quoted', 'quoted' ),
-			__( 'Quoted', 'quoted' ),
+			__( 'Quoted', 'quotedeasy-ai-readiness' ),
+			__( 'Quoted', 'quotedeasy-ai-readiness' ),
 			'manage_options',
 			'quoted',
 			array( $this, 'render_dashboard_or_onboarding' ),
@@ -28,8 +28,8 @@ class Quoted_Admin {
 
 		add_submenu_page(
 			'quoted',
-			__( 'Dashboard', 'quoted' ),
-			__( 'Dashboard', 'quoted' ),
+			__( 'Dashboard', 'quotedeasy-ai-readiness' ),
+			__( 'Dashboard', 'quotedeasy-ai-readiness' ),
 			'manage_options',
 			'quoted',
 			array( $this, 'render_dashboard_or_onboarding' )
@@ -37,8 +37,8 @@ class Quoted_Admin {
 
 		add_submenu_page(
 			'quoted',
-			__( 'Settings', 'quoted' ),
-			__( 'Settings', 'quoted' ),
+			__( 'Settings', 'quotedeasy-ai-readiness' ),
+			__( 'Settings', 'quotedeasy-ai-readiness' ),
 			'manage_options',
 			'quoted-settings',
 			array( $this, 'render_settings' )
@@ -80,9 +80,9 @@ class Quoted_Admin {
 			'plugin_url'  => QUOTED_PLUGIN_URL,
 			'site_url'    => home_url(),
 			'i18n'        => array(
-				'connecting'    => __( 'Working...', 'quoted' ),
-				'error_generic' => __( 'Something went wrong. Please try again.', 'quoted' ),
-				'success'       => __( 'Done!', 'quoted' ),
+				'connecting'    => __( 'Working...', 'quotedeasy-ai-readiness' ),
+				'error_generic' => __( 'Something went wrong. Please try again.', 'quotedeasy-ai-readiness' ),
+				'success'       => __( 'Done!', 'quotedeasy-ai-readiness' ),
 			),
 		) );
 	}
@@ -109,7 +109,7 @@ class Quoted_Admin {
 
 	public function render_dashboard_or_onboarding() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'quoted' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'quotedeasy-ai-readiness' ) );
 		}
 
 		if ( ! get_option( 'quoted_onboarded', false ) ) {
@@ -121,7 +121,7 @@ class Quoted_Admin {
 
 	public function render_settings() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'quoted' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'quotedeasy-ai-readiness' ) );
 		}
 
 		// Gate the save on an explicit submit marker so a stray POST (e.g.
@@ -178,15 +178,15 @@ class Quoted_Admin {
 		add_settings_error(
 			'quoted',
 			'quoted_saved',
-			__( 'Settings saved.', 'quoted' ),
+			__( 'Settings saved.', 'quotedeasy-ai-readiness' ),
 			'updated'
 		);
 	}
 
 	public function plugin_action_links( $links ) {
 		$custom = array(
-			'<a href="' . esc_url( admin_url( 'admin.php?page=quoted' ) ) . '">' . esc_html__( 'Dashboard', 'quoted' ) . '</a>',
-			'<a href="' . esc_url( admin_url( 'admin.php?page=quoted-settings' ) ) . '">' . esc_html__( 'Settings', 'quoted' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'admin.php?page=quoted' ) ) . '">' . esc_html__( 'Dashboard', 'quotedeasy-ai-readiness' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'admin.php?page=quoted-settings' ) ) . '">' . esc_html__( 'Settings', 'quotedeasy-ai-readiness' ) . '</a>',
 		);
 		return array_merge( $custom, $links );
 	}
@@ -197,7 +197,7 @@ class Quoted_Admin {
 		check_ajax_referer( 'quoted_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quotedeasy-ai-readiness' ) ), 403 );
 			return; // Defensive — wp_send_json_error calls wp_die(), but a custom wp_die handler could resume execution.
 		}
 
@@ -220,7 +220,7 @@ class Quoted_Admin {
 		check_ajax_referer( 'quoted_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quoted' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'quotedeasy-ai-readiness' ) ), 403 );
 			return;
 		}
 
@@ -300,14 +300,14 @@ class Quoted_Admin {
 
 		if ( $total_this === 0 && $days_since >= 7 ) {
 			$next_action = array(
-				'title'       => __( 'No AI bot visits in 7+ days — check your firewall', 'quoted' ),
-				'description' => __( "ClaudeBot and GPTBot should have discovered /llms.txt by now. If you run Wordfence, Sucuri, or iThemes Security, their default WAF rules often block AI bot user-agents. Whitelist ClaudeBot, GPTBot, PerplexityBot, Google-Extended in your security plugin, or ask your host to allow them at the server level.", 'quoted' ),
+				'title'       => __( 'No AI bot visits in 7+ days — check your firewall', 'quotedeasy-ai-readiness' ),
+				'description' => __( "ClaudeBot and GPTBot should have discovered /llms.txt by now. If you run Wordfence, Sucuri, or iThemes Security, their default WAF rules often block AI bot user-agents. Whitelist ClaudeBot, GPTBot, PerplexityBot, Google-Extended in your security plugin, or ask your host to allow them at the server level.", 'quotedeasy-ai-readiness' ),
 				'action_url'  => '',
 			);
 		} elseif ( $total_this === 0 ) {
 			$next_action = array(
-				'title'       => __( 'Waiting for AI bots', 'quoted' ),
-				'description' => __( 'No crawls yet. ClaudeBot and GPTBot usually discover new /llms.txt files within 24 hours. Share your llms.txt URL to speed things up.', 'quoted' ),
+				'title'       => __( 'Waiting for AI bots', 'quotedeasy-ai-readiness' ),
+				'description' => __( 'No crawls yet. ClaudeBot and GPTBot usually discover new /llms.txt files within 24 hours. Share your llms.txt URL to speed things up.', 'quotedeasy-ai-readiness' ),
 				'action_url'  => home_url( '/llms.txt' ),
 			);
 		}

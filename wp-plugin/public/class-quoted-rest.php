@@ -50,7 +50,7 @@ class Quoted_Rest {
 		if ( ! $post ) {
 			return new WP_Error(
 				'not_found',
-				__( 'Post not found.', 'quoted' ),
+				__( 'Post not found.', 'quotedeasy-ai-readiness' ),
 				array( 'status' => 404 )
 			);
 		}

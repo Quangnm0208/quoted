@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Quoted — Make your site AI-readable
+ * Plugin Name:       QuotedEasy AI Readiness
  * Plugin URI:        https://github.com/Quangnm0208/quoted
  * Description:       AI-readability layer for WordPress: auto-generates llms.txt, serves clean Markdown per post, detects 60+ AI bots (ChatGPT, Claude, Perplexity, Gemini), and lets you allow or block each one. Adds Article + FAQPage JSON-LD that defers to Yoast / Rank Math / AIOSEO when they are active.
  * Version:           0.5.0
@@ -11,7 +11,7 @@
  * Author URI:        https://github.com/Quangnm0208
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       quoted
+ * Text Domain:       quotedeasy-ai-readiness
  * Domain Path:       /languages
  * Network:           false
  * Update URI:        false
@@ -46,7 +46,7 @@ define( 'QUOTED_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	add_action( 'admin_notices', function () {
 		echo '<div class="notice notice-error"><p>';
-		echo esc_html__( 'Quoted requires PHP 7.4 or higher. Please upgrade your PHP version.', 'quoted' );
+		echo esc_html__( 'Quoted requires PHP 7.4 or higher. Please upgrade your PHP version.', 'quotedeasy-ai-readiness' );
 		echo '</p></div>';
 	} );
 	return;
@@ -55,7 +55,7 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 if ( version_compare( get_bloginfo( 'version' ), '6.0', '<' ) ) {
 	add_action( 'admin_notices', function () {
 		echo '<div class="notice notice-error"><p>';
-		echo esc_html__( 'Quoted requires WordPress 6.0 or higher. Please update WordPress.', 'quoted' );
+		echo esc_html__( 'Quoted requires WordPress 6.0 or higher. Please update WordPress.', 'quotedeasy-ai-readiness' );
 		echo '</p></div>';
 	} );
 	return;
@@ -134,12 +134,12 @@ add_action( 'admin_notices', function () {
 	?>
 	<div class="notice notice-warning is-dismissible" data-quoted-notice="permalink">
 		<p>
-			<strong><?php esc_html_e( 'Quoted needs pretty permalinks', 'quoted' ); ?></strong> —
+			<strong><?php esc_html_e( 'Quoted needs pretty permalinks', 'quotedeasy-ai-readiness' ); ?></strong> —
 			<?php
 			printf(
 				/* translators: %s: link to Settings → Permalinks */
-				esc_html__( 'your site is currently using "Plain" permalinks (e.g. ?p=123), so the AI sitemap at /llms.txt will 404. %s and pick any option other than "Plain".', 'quoted' ),
-				'<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">' . esc_html__( 'Go to Settings → Permalinks', 'quoted' ) . '</a>'
+				esc_html__( 'your site is currently using "Plain" permalinks (e.g. ?p=123), so the AI sitemap at /llms.txt will 404. %s and pick any option other than "Plain".', 'quotedeasy-ai-readiness' ),
+				'<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">' . esc_html__( 'Go to Settings → Permalinks', 'quotedeasy-ai-readiness' ) . '</a>'
 			);
 			?>
 		</p>

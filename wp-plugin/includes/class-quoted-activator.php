@@ -20,8 +20,8 @@ class Quoted_Activator {
 		if ( $network_wide && function_exists( 'is_multisite' ) && is_multisite() ) {
 			deactivate_plugins( plugin_basename( QUOTED_PLUGIN_FILE ) );
 			wp_die(
-				esc_html__( 'Quoted does not support multisite network activation. Activate it per-site instead. The plugin stores per-site bot crawl data.', 'quoted' ),
-				esc_html__( 'Quoted — multisite network activation not supported', 'quoted' ),
+				esc_html__( 'Quoted does not support multisite network activation. Activate it per-site instead. The plugin stores per-site bot crawl data.', 'quotedeasy-ai-readiness' ),
+				esc_html__( 'Quoted — multisite network activation not supported', 'quotedeasy-ai-readiness' ),
 				array( 'back_link' => true )
 			);
 		}
@@ -31,8 +31,8 @@ class Quoted_Activator {
 		if ( ! class_exists( 'DOMDocument' ) ) {
 			deactivate_plugins( plugin_basename( QUOTED_PLUGIN_FILE ) );
 			wp_die(
-				esc_html__( 'Quoted requires the PHP libxml extension (the DOMDocument class). Your server is missing it. Ask your host to enable libxml-dom or install the php-xml package.', 'quoted' ),
-				esc_html__( 'Quoted — missing PHP extension', 'quoted' ),
+				esc_html__( 'Quoted requires the PHP libxml extension (the DOMDocument class). Your server is missing it. Ask your host to enable libxml-dom or install the php-xml package.', 'quotedeasy-ai-readiness' ),
+				esc_html__( 'Quoted — missing PHP extension', 'quotedeasy-ai-readiness' ),
 				array( 'back_link' => true )
 			);
 		}
