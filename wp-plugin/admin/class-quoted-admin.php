@@ -62,7 +62,7 @@ class Quoted_Admin {
 			'quoted-chartjs',
 			QUOTED_PLUGIN_URL . 'admin/js/chart.umd.min.js',
 			array(),
-			'4.4.0',
+			'4.5.1',
 			true
 		);
 
