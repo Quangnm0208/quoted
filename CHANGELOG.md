@@ -4,6 +4,21 @@ All notable changes to Quoted are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.1] — 2026-05-29
+
+### Fixed
+
+- Plugin URI now points to a valid public URL (previously returned HTTP 404).
+- Bundled Chart.js updated from 4.4.0 to 4.5.1 (latest stable).
+
+### Changed
+
+- Text domain renamed to `quotedeasy-ai-readiness` to match the plugin slug,
+  so translations load correctly. Internal option keys and class prefixes are
+  unchanged, so existing installs keep their data.
+- Main plugin file renamed to `quotedeasy-ai-readiness.php` and display name
+  set to "QuotedEasy AI Readiness".
+
 ## [0.5.0] — 2026-05-25
 
 ### Free-only WordPress.org build

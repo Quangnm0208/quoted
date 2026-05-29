@@ -3,7 +3,7 @@
  * Plugin Name:       QuotedEasy AI Readiness
  * Plugin URI:        https://github.com/Quangnm0208/quoted
  * Description:       AI-readability layer for WordPress: auto-generates llms.txt, serves clean Markdown per post, detects 60+ AI bots (ChatGPT, Claude, Perplexity, Gemini), and lets you allow or block each one. Adds Article + FAQPage JSON-LD that defers to Yoast / Rank Math / AIOSEO when they are active.
- * Version:           0.5.0
+ * Version:           0.5.1
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      7.4
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'QUOTED_VERSION', '0.5.0' );
+define( 'QUOTED_VERSION', '0.5.1' );
 define( 'QUOTED_PLUGIN_FILE', __FILE__ );
 define( 'QUOTED_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QUOTED_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

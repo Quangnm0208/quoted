@@ -4,7 +4,7 @@ Tags: ai, llms-txt, schema, ai-crawlers, seo
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.5.0
+Stable tag: 0.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -120,6 +120,11 @@ No outbound HTTP requests are made by the plugin under any configuration. There 
 
 == Changelog ==
 
+= 0.5.1 =
+* Fixed the Plugin URI so it resolves to a public page (was returning HTTP 404).
+* Updated the bundled Chart.js library from 4.4.0 to 4.5.1 (latest stable).
+* Text domain aligned with the plugin slug for correct translation loading.
+
 = 0.5.0 =
 * **Free-only WordPress.org build.** The plugin is now fully functional with no caps, no license check, no upgrade prompts. Every feature listed above is available to every install.
 * **No external services.** All previously planned commercial integrations have been removed from this directory release. Nothing leaves your server.
@@ -149,6 +154,9 @@ No outbound HTTP requests are made by the plugin under any configuration. There 
 * Initial development release.
 
 == Upgrade Notice ==
+
+= 0.5.1 =
+Maintenance release: valid Plugin URI, Chart.js updated to 4.5.1, and text domain aligned with the plugin slug. Safe drop-in upgrade.
 
 = 0.5.0 =
 Removes the previous post-cap limitation — every install can now use llms.txt without restrictions. The footer credit is opt-in (off by default). Security: `$_SERVER` inputs sanitized. Safe drop-in upgrade.
